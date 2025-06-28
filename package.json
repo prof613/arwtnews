@@ -1,41 +1,30 @@
 {
-  "name": "back",
-  "version": "0.1.0",
+  "name": "rwtnews",
+  "version": "1.0.0",
   "private": true,
-  "description": "A Strapi application",
   "scripts": {
-    "build": "strapi build",
-    "console": "strapi console",
-    "deploy": "strapi deploy",
-    "dev": "strapi develop",
-    "develop": "strapi develop",
-    "start": "strapi start",
-    "strapi": "strapi",
-    "upgrade": "npx @strapi/upgrade latest",
-    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "start-all": "concurrently \"npm run dev\" \"cd strapi && npm run develop\""
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.16.1",
-    "@strapi/plugin-users-permissions": "5.16.1",
-    "@strapi/strapi": "5.16.1",
-    "better-sqlite3": "11.3.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
-    "styled-components": "^6.0.0"
+    "@sendgrid/mail": "^8.1.3",
+    "axios": "^1.6.8",
+    "marked": "^12.0.2",
+    "next": "^14.2.15",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-google-recaptcha": "^3.1.0",
+    "tailwindcss": "^3.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5"
-  },
-  "engines": {
-    "node": ">=18.0.0 <=22.x.x",
-    "npm": ">=6.0.0"
-  },
-  "strapi": {
-    "uuid": "a67efd1e-1faf-4828-85ee-b4e8142ff8a8",
-    "installId": "54be7976ded6530cef1d3618d14e1891950b366eb24f81628407b5f99257ba82"
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.3",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.38"
   }
 }

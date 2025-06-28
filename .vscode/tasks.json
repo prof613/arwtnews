@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Strapi",
+      "type": "shell",
+      "command": "npm run develop",
+      "cwd": "${workspaceFolder}/strapi",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Next.js",
+      "type": "shell",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Both",
+      "type": "shell",
+      "command": "npm run start-all",
+      "cwd": "${workspaceFolder}",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

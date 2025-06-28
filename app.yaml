@@ -1,0 +1,23 @@
+name: rwtnews
+services:
+  - name: web
+    github:
+      repo: <your-username>/red-white-true-news
+      branch: main
+    run_command: npm run start
+    environment_slug: node-js
+    build_command: npm run build
+    http_port: 3000
+  - name: favicon
+    favicon:
+      path: favicon.ico
+      favicon.ico: favicon.ico
+  - name: strapi
+    github:
+      repo: <your-username>/red-white-true-news
+      branch: main
+    run_command: npm run start
+    environment_slug: node-js
+    build_command: npm run build
+    http_port: 1337
+    source_dir: strapi

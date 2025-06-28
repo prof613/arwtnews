@@ -1,0 +1,16 @@
+{
+  "name": "rwtnews-strapi",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build"
+  },
+  "dependencies": {
+    "@strapi/strapi": "^4.24.0",
+    "@strapi/plugin-users-permissions": "^4.24.0",
+    "@strapi/plugin-i18n": "^4.24.0",
+    "pg": "^8.11.5"
+  }
+}

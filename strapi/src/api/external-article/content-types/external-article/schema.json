@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "external_articles",
+  "info": {
+    "singularName": "external-article",
+    "pluralName": "external-articles",
+    "displayName": "External Article",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "author": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "link": {
+      "type": "string",
+      "required": true
+    },
+    "source": {
+      "type": "string",
+      "required": true
+    },
+    "source_url": {
+      "type": "string",
+      "required": true
+    },
+    "quote": {
+      "type": "text"
+    },
+    "slug": {
+      "type": "string",
+      "unique": true
+    }
+  }
+}

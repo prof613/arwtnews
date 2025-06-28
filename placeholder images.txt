@@ -1,0 +1,37 @@
+Core Images (/rwtnews/public/images/core):
+rwtn_favicon.jpg: 32x32 pixels (favicon, displayed in browser tab)
+
+facebook-icon-square.png: 48x48 pixels (social media icon, sidebar/footer)
+
+x-icon-square.png: 48x48 pixels (social media icon, sidebar/footer)
+
+youtube-icon-square.png: 48x48 pixels (social media icon, sidebar/footer)
+
+email-icon.png: 48x48 pixels (social media icon, sidebar/footer)
+
+store-icon.png: 24x24 pixels (shop link icon, sidebar)
+
+stoptdslogo1.png: 140x40 pixels (StopTDS button, sidebar, width matches other buttons)
+
+mainbanner.jpg: 1200x300 pixels (main banner, full-width at top of pages)
+
+american-flag.jpg: 1920x1080 pixels (background image, full-page, fixed)
+
+Author Image (/rwtnews/public/images/staff/authors):
+placeholder-author.jpg: 300x300 pixels (author thumbnail, displayed at 50x50 pixels)
+
+Sample Content Images (/rwtnews/rwtnews-sample-content.zip/images/content/2025/June/20):
+economy-growth.jpg: 800x400 pixels (article main image)
+
+chart.jpg: 600x300 pixels (embedded in article body)
+
+politics-update.jpg: 800x400 pixels (article main image)
+
+opinion-piece.jpg: 800x400 pixels (article main image)
+
+freedom.jpg: 600x300 pixels (embedded in article body)
+
+meme1.jpg: 600x400 pixels (meme image)
+
+meme2.jpg: 600x400 pixels (meme image)
+

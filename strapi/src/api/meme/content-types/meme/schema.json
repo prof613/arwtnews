@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "memes",
+  "info": {
+    "singularName": "meme",
+    "pluralName": "memes",
+    "displayName": "Meme",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "artist": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "category": {
+      "type": "string",
+      "default": "Meme/Cartoons",
+      "required": true
+    },
+    "date": {
+      "type": "datetime"
+    },
+    "image_path": {
+      "type": "string"
+    },
+    "keep_image_in_assets": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
