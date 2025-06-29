@@ -5,7 +5,8 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
-    "build": "strapi build"
+    "build": "strapi build",
+    "strapi": "strapi"
   },
   "dependencies": {
     "@strapi/strapi": "^4.24.0",
