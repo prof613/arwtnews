@@ -1,10 +1,15 @@
-module.exports = ({ env }) => ({
-  connection: {
-    client: 'postgres',
+module.exports = ({ env }) => {
+  console.log('NODE_ENV:', env('NODE_ENV'));
+  console.log('SSL config will be:', env('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false);
+  
+  return {
     connection: {
-      connectionString: env('DATABASE_URL'),
-      ssl: env('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+      client: 'postgres',
+      connection: {
+        connectionString: env('DATABASE_URL'),
+        ssl: env('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+      },
+      debug: false,
     },
-    debug: false,
-  },
-});
+  };
+};
