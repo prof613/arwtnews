@@ -20,7 +20,7 @@ module.exports = ({ env }) => ({
         endpoint: env('DO_SPACE_ENDPOINT'),
         space: env('DO_SPACE_BUCKET'),
         directory: 'uploads',
-        cdn: `https://${env('DO_SPACE_BUCKET')}.${env('DO_SPACE_REGION')}.cdn.digitaloceanspaces.com`,
+        cdn: `https://rwtnews-media.nyc3.cdn.digitaloceanspaces.com`,
       },
     },
   },
