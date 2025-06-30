@@ -21,6 +21,15 @@ upload: {
       bucket: env('DO_SPACE_BUCKET'),
       endpoint: env('DO_SPACE_ENDPOINT'),
       s3ForcePathStyle: true,
+      params: {
+        ACL: 'public-read',
+        Bucket: env('DO_SPACE_BUCKET'),
+      },
+    },
+    actionOptions: {
+      upload: {},
+      uploadStream: {},
+      delete: {},
     },
   },
 },
