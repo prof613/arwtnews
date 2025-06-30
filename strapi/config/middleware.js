@@ -18,22 +18,8 @@ module.exports = [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'connect-src': ["'self'", 'https:'],
-          'img-src': [
-            "'self'",
-            'data:',
-            'blob:',
-            'https://market-assets.strapi.io',
-            'https://rwtnews-media.nyc3.digitaloceanspaces.com',
-            'https://rwtnews-media.nyc3.cdn.digitaloceanspaces.com',
-          ],
-          'media-src': [
-            "'self'",
-            'data:',
-            'blob:',
-            'https://rwtnews-media.nyc3.digitaloceanspaces.com',
-            'https://rwtnews-media.nyc3.cdn.digitaloceanspaces.com',
-          ],
+          'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+          'media-src': ["'self'", 'data:', 'blob:', 'https:'],
           upgradeInsecureRequests: null,
         },
       },
