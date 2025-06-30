@@ -11,19 +11,19 @@ module.exports = ({ env }) => ({
     enabled: true,
   },
 
-  upload: {
-    config: {
-      provider: 'strapi-provider-upload-do',
-      providerOptions: {
-        key: env('DO_SPACE_ACCESS_KEY_ID'),
-        secret: env('DO_SPACE_SECRET_ACCESS_KEY'),
-        endpoint: env('DO_SPACE_ENDPOINT'),
-        space: env('DO_SPACE_BUCKET'),
-        directory: 'uploads',
-        cdn: `https://rwtnews-media.nyc3.cdn.digitaloceanspaces.com`,
-      },
+upload: {
+  config: {
+    provider: 'aws-s3',
+    providerOptions: {
+      accessKeyId: env('DO_SPACE_ACCESS_KEY_ID'),
+      secretAccessKey: env('DO_SPACE_SECRET_ACCESS_KEY'),
+      region: env('DO_SPACE_REGION'),
+      bucket: env('DO_SPACE_BUCKET'),
+      endpoint: env('DO_SPACE_ENDPOINT'),
+      s3ForcePathStyle: true,
     },
   },
+},
 
   // email: {
   //   enabled: true,
