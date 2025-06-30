@@ -15,8 +15,8 @@ upload: {
   config: {
     provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: env('DO_SPACE_ACCESS_KEY_ID'),
-      secretAccessKey: env('DO_SPACE_SECRET_ACCESS_KEY'),
+      accessKeyId: env('AWS_ACCESS_KEY_ID'),
+      secretAccessKey: env('AWS_SECRET_ACCESS_KEY'),
       region: env('DO_SPACE_REGION'),
       bucket: env('DO_SPACE_BUCKET'),
       endpoint: env('DO_SPACE_ENDPOINT'),
