@@ -20,7 +20,9 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "category": {
       "type": "string",
@@ -36,6 +38,23 @@
     "keep_image_in_assets": {
       "type": "boolean",
       "default": false
+    },
+    "newsletter_inclusion": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "both"
+      ]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "artist"
+    },
+    "enable_share_buttons": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

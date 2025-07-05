@@ -93,6 +93,9 @@ export default function Header() {
               <Link href="/support" className="block px-4 py-3 hover:bg-[#B22234] border-b border-white/10">
                 Our Mission
               </Link>
+              <Link href="/contact" className="block px-4 py-3 hover:bg-[#B22234] border-b border-white/10">
+                Contact
+              </Link>
               <Link href="/terms" className="block px-4 py-3 hover:bg-[#B22234] border-b border-white/10">
                 Terms of Use
               </Link>
@@ -110,7 +113,7 @@ export default function Header() {
           </Link>
 
           <a
-            href="https://redwhiteandtruegear.com/"
+            href="https://ourconservativestore.com/?sld=95"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 h-full flex items-center justify-center text-lg font-medium border-r border-white/20 hover:bg-[#B22234] transition-colors duration-200"
@@ -180,6 +183,9 @@ export default function Header() {
                 <Link href="/support" className="block px-6 py-3 hover:bg-[#B22234] text-sm">
                   Our Mission
                 </Link>
+                <Link href="/contact" className="block px-6 py-3 hover:bg-[#B22234] text-sm">
+                  Contact
+                </Link>
                 <Link href="/terms" className="block px-6 py-3 hover:bg-[#B22234] text-sm">
                   Terms of Use
                 </Link>
@@ -194,7 +200,7 @@ export default function Header() {
             OUR MISSION
           </Link>
           <a
-            href="https://redwhiteandtruegear.com/"
+            href="https://ourconservativestore.com/?sld=95"
             target="_blank"
             rel="noopener noreferrer"
             className="block px-6 py-4 hover:bg-[#B22234] border-b border-white/20"

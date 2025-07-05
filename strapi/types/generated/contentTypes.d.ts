@@ -381,11 +381,6 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       'manyToOne',
       'api::category.category'
     >;
-    comments: Attribute.Relation<
-      'api::article.article',
-      'oneToMany',
-      'api::comment.comment'
-    >;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::article.article',
@@ -394,16 +389,19 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     > &
       Attribute.Private;
     date: Attribute.DateTime;
+    enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
+    homepage_status: Attribute.Enumeration<['active', 'archived']> &
+      Attribute.Required &
+      Attribute.DefaultTo<'active'>;
     image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
     is_featured: Attribute.Boolean & Attribute.DefaultTo<false>;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
-    likes: Attribute.Relation<
-      'api::article.article',
-      'oneToMany',
-      'api::like.like'
-    >;
     link: Attribute.String;
+    newsletter_inclusion: Attribute.Enumeration<
+      ['none', 'daily', 'weekly', 'both']
+    > &
+      Attribute.DefaultTo<'none'>;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text & Attribute.Required;
     rich_body: Attribute.Blocks;
@@ -471,45 +469,6 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
   };
 }
 
-export interface ApiCommentComment extends Schema.CollectionType {
-  collectionName: 'comments';
-  info: {
-    description: '';
-    displayName: 'Comment';
-    pluralName: 'comments';
-    singularName: 'comment';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    article: Attribute.Relation<
-      'api::comment.comment',
-      'manyToOne',
-      'api::opinion.opinion'
-    >;
-    comment: Attribute.Text & Attribute.Required;
-    createdAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<
-      'api::comment.comment',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-    name: Attribute.String & Attribute.Required;
-    status: Attribute.Enumeration<['pending', 'approved', 'rejected']> &
-      Attribute.Required &
-      Attribute.DefaultTo<'pending'>;
-    updatedAt: Attribute.DateTime;
-    updatedBy: Attribute.Relation<
-      'api::comment.comment',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-  };
-}
-
 export interface ApiExternalArticleExternalArticle
   extends Schema.CollectionType {
   collectionName: 'external_articles';
@@ -532,8 +491,12 @@ export interface ApiExternalArticleExternalArticle
       'admin::user'
     > &
       Attribute.Private;
-    date: Attribute.Date & Attribute.Required;
+    date: Attribute.Date;
     link: Attribute.String & Attribute.Required;
+    newsletter_inclusion: Attribute.Enumeration<
+      ['none', 'daily', 'weekly', 'both']
+    > &
+      Attribute.DefaultTo<'none'>;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text;
     slug: Attribute.String & Attribute.Unique;
@@ -546,33 +509,6 @@ export interface ApiExternalArticleExternalArticle
       'oneToOne',
       'admin::user'
     > &
-      Attribute.Private;
-  };
-}
-
-export interface ApiLikeLike extends Schema.CollectionType {
-  collectionName: 'likes';
-  info: {
-    description: '';
-    displayName: 'Like';
-    pluralName: 'likes';
-    singularName: 'like';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    article: Attribute.Relation<
-      'api::like.like',
-      'manyToOne',
-      'api::opinion.opinion'
-    >;
-    createdAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::user'> &
-      Attribute.Private;
-    like_count: Attribute.Integer & Attribute.Required & Attribute.DefaultTo<0>;
-    updatedAt: Attribute.DateTime;
-    updatedBy: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::user'> &
       Attribute.Private;
   };
 }
@@ -597,10 +533,15 @@ export interface ApiMemeMeme extends Schema.CollectionType {
     createdBy: Attribute.Relation<'api::meme.meme', 'oneToOne', 'admin::user'> &
       Attribute.Private;
     date: Attribute.DateTime;
+    enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
     image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
+    newsletter_inclusion: Attribute.Enumeration<
+      ['none', 'daily', 'weekly', 'both']
+    >;
     publishedAt: Attribute.DateTime;
+    slug: Attribute.UID<'api::meme.meme', 'artist'>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<'api::meme.meme', 'oneToOne', 'admin::user'> &
       Attribute.Private;
@@ -621,11 +562,6 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
   attributes: {
     author: Attribute.String & Attribute.DefaultTo<'Editorial Team'>;
     author_image: Attribute.Media<'images'>;
-    comments: Attribute.Relation<
-      'api::opinion.opinion',
-      'oneToMany',
-      'api::comment.comment'
-    >;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::opinion.opinion',
@@ -634,13 +570,12 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     > &
       Attribute.Private;
     date: Attribute.DateTime;
+    enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
     featured_image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
-    likes: Attribute.Relation<
-      'api::opinion.opinion',
-      'oneToMany',
-      'api::like.like'
+    newsletter_inclusion: Attribute.Enumeration<
+      ['none', 'daily', 'weekly', 'both']
     >;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text;
@@ -655,36 +590,6 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       'api::opinion.opinion',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-  };
-}
-
-export interface ApiSubscriptionSubscription extends Schema.CollectionType {
-  collectionName: 'subscriptions';
-  info: {
-    description: '';
-    displayName: 'Subscription';
-    pluralName: 'subscriptions';
-    singularName: 'subscription';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    createdAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<
-      'api::subscription.subscription',
-      'oneToOne',
-      'admin::user'
-    > &
-      Attribute.Private;
-    email: Attribute.Email & Attribute.Required & Attribute.Unique;
-    updatedAt: Attribute.DateTime;
-    updatedBy: Attribute.Relation<
-      'api::subscription.subscription',
       'oneToOne',
       'admin::user'
     > &
@@ -1130,12 +1035,9 @@ declare module '@strapi/types' {
       'admin::user': AdminUser;
       'api::article.article': ApiArticleArticle;
       'api::category.category': ApiCategoryCategory;
-      'api::comment.comment': ApiCommentComment;
       'api::external-article.external-article': ApiExternalArticleExternalArticle;
-      'api::like.like': ApiLikeLike;
       'api::meme.meme': ApiMemeMeme;
       'api::opinion.opinion': ApiOpinionOpinion;
-      'api::subscription.subscription': ApiSubscriptionSubscription;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

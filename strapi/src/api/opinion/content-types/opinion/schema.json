@@ -57,23 +57,24 @@
       "type": "boolean",
       "default": false
     },
-    "comments": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::comment.comment",
-      "mappedBy": "article"
-    },
-    "likes": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::like.like",
-      "mappedBy": "article"
-    },
     "date": {
       "type": "datetime"
     },
     "image_path": {
       "type": "string"
+    },
+    "newsletter_inclusion": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "both"
+      ]
+    },
+    "enable_share_buttons": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

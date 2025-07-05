@@ -23,6 +23,20 @@ const formatDate = (dateString) => {
   })
 }
 
+// Clean video titles - remove HTML entities and hashtags
+const cleanTitle = (title) => {
+  if (!title) return "Video Unavailable"
+
+  return title
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .split("#")[0] // Remove everything after first hashtag
+    .trim()
+}
+
 export default function Home() {
   const [featuredArticle, setFeaturedArticle] = useState(null)
   const [articles, setArticles] = useState([])
@@ -33,17 +47,10 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const channelIds = [
-          "UUXIJgqnII2ZOINSWNOGFThA",
-          "UUHqC-yWZ1kri4YzwRSt6RGQ",
-          "UUDiPds0v60wueil5B8w3fPQ",
-          "UUx6h-dWzJ5NpAlja1YsApdg",
-        ]
-
-        // Handle articles separately
+        // Handle articles separately - ONLY ACTIVE articles for homepage
         try {
           const articleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
           )
           const featuredArticles = articleRes.data.data.filter((a) => a.attributes.is_featured)
           const regularArticles = articleRes.data.data.filter((a) => !a.attributes.is_featured)
@@ -59,7 +66,6 @@ export default function Home() {
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*&sort[0]=createdAt:desc`,
           )
 
-          // Filter articles within 1 year and sort by manual date (newest first)
           const oneYearAgo = new Date()
           oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
 
@@ -71,9 +77,9 @@ export default function Home() {
             .sort((a, b) => {
               const dateA = new Date(a.attributes.date)
               const dateB = new Date(b.attributes.date)
-              return dateB - dateA // Newest first
+              return dateB - dateA
             })
-            .slice(0, 10) // Limit to 10 articles
+            .slice(0, 10)
 
           setExternalLinks(filteredAndSorted)
         } catch (error) {
@@ -81,24 +87,15 @@ export default function Home() {
           setExternalLinks([])
         }
 
-        // Handle videos separately
+        // Handle videos - now using server-side API
         try {
-          const videoRes = await axios.get(
-            `https://www.googleapis.com/youtube/v3/search?key=${
-              process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
-            }&channelId=${channelIds.join(",")}&part=snippet&order=date&maxResults=6`,
-          )
-          setVideos(videoRes.data.items || [])
+          console.log("Fetching videos from server API...")
+          const videoRes = await axios.get("/api/videos")
+          setVideos(videoRes.data.videos || [])
+          console.log(`Loaded ${videoRes.data.videos?.length || 0} videos (cached: ${videoRes.data.cached})`)
         } catch (error) {
           console.error("Error fetching videos:", error)
-          setVideos(
-            new Array(6).fill({
-              snippet: {
-                title: "Video Unavailable",
-                thumbnails: { medium: { url: "/images/core/placeholder.jpg" } },
-              },
-            }),
-          )
+          setVideos([])
         }
       } catch (error) {
         console.error("Error in fetchData:", error)
@@ -109,6 +106,20 @@ export default function Home() {
 
   const openVideoModal = (videoUrl) => setModalVideo(videoUrl)
   const closeVideoModal = () => setModalVideo(null)
+
+  // Fullscreen functionality
+  const toggleFullscreen = () => {
+    const iframe = document.querySelector("#video-modal-iframe")
+    if (iframe) {
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen()
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen()
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen()
+      }
+    }
+  }
 
   return (
     <>
@@ -125,17 +136,20 @@ export default function Home() {
             {featuredArticle ? (
               <Link href={`/articles/${featuredArticle.slug}`}>
                 <div className="bg-gray-100 p-4 rounded">
-                  <img
-                    src={
-                      featuredArticle.image_path
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image_path}`
-                        : featuredArticle.image?.data?.attributes?.url
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image.data.attributes.url}`
-                          : "/images/core/placeholder.jpg"
-                    }
-                    alt={featuredArticle.title}
-                    className="w-full aspect-video object-cover rounded mb-2"
-                  />
+                  {/* Updated image container with 80% width and centered */}
+                  <div className="flex justify-center mb-4">
+                    <img
+                      src={
+                        featuredArticle.image_path
+                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image_path}`
+                          : featuredArticle.image?.data?.attributes?.url
+                            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image.data.attributes.url}`
+                            : "/images/core/placeholder.jpg"
+                      }
+                      alt={featuredArticle.title}
+                      className="w-full md:w-4/5 h-auto object-contain rounded max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem]"
+                    />
+                  </div>
                   <h3 className="text-2xl font-bold text-[#3C3B6E]">{featuredArticle.title}</h3>
                   <p className="text-sm text-gray-600">
                     {new Date(featuredArticle.date).toLocaleDateString("en-US", {
@@ -160,15 +174,12 @@ export default function Home() {
                     <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
                       <p className="line-clamp-2">
                         {featuredArticle.quote}...{" "}
-                        <Link href={`/articles/${featuredArticle.slug}`}>
-                          <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
-                        </Link>
+                        <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                       </p>
                     </div>
                   )}
                   <p className="text-sm text-gray-500 line-clamp-7">
                     {(() => {
-                      // Generate excerpt from rich_body content
                       if (Array.isArray(featuredArticle.rich_body)) {
                         let excerpt = ""
                         let lineCount = 0
@@ -185,10 +196,7 @@ export default function Home() {
                         return excerpt.substring(0, 300).trim()
                       }
                       return ""
-                    })()}...{" "}
-                    <Link href={`/articles/${featuredArticle.slug}`}>
-                      <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
-                    </Link>
+                    })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
                   </p>
                 </div>
               </Link>
@@ -201,7 +209,6 @@ export default function Home() {
             {articles.map((article) => (
               <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
                 <div className="border-l-4 border-[#B22234] p-4">
-                  <hr className="border-[#3C3B6E] border-opacity-50 mb-2" />
                   <img
                     src={
                       article.attributes.image_path
@@ -211,7 +218,7 @@ export default function Home() {
                           : "/images/core/placeholder.jpg"
                     }
                     alt={article.attributes.title}
-                    className="w-full aspect-video object-cover rounded mb-2"
+                    className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
                   />
                   <p className="text-sm text-gray-600">
                     {(() => {
@@ -234,14 +241,11 @@ export default function Home() {
                   {article.attributes.quote && (
                     <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2">
                       {article.attributes.quote}...{" "}
-                      <Link href={`/articles/${article.attributes.slug}`}>
-                        <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
-                      </Link>
+                      <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                     </p>
                   )}
                   <p className="text-sm text-gray-500 line-clamp-5">
                     {(() => {
-                      // Generate excerpt from rich_body content
                       if (Array.isArray(article.attributes.rich_body)) {
                         let excerpt = ""
                         let lineCount = 0
@@ -258,11 +262,9 @@ export default function Home() {
                         return excerpt.substring(0, 200).trim()
                       }
                       return ""
-                    })()}...{" "}
-                    <Link href={`/articles/${article.attributes.slug}`}>
-                      <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
-                    </Link>
+                    })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
                   </p>
+                  <hr className="border-[#3C3B6E] border-opacity-50 mt-4" />
                 </div>
               </Link>
             ))}
@@ -301,50 +303,98 @@ export default function Home() {
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {videos.map((video, index) => (
-              <div key={index} className="p-2">
-                <img
-                  src={
-                    video.snippet?.thumbnails?.medium?.url ||
-                    "/images/core/placeholder.jpg" ||
-                    "/placeholder.svg" ||
-                    "/placeholder.svg"
-                  }
-                  alt={video.snippet?.title}
-                  className="w-full h-24 object-cover rounded mb-2"
-                />
-                <h3 className="text-md text-[#3C3B6E]">{video.snippet?.title || "Video Unavailable"}</h3>
-                <p className="text-sm text-gray-600">
-                  {new Date(video.snippet?.publishedAt).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                    timeZone: "America/Los_Angeles",
-                  })}
-                </p>
-                <p className="text-sm text-gray-500">{video.snippet?.description?.substring(0, 100)}...</p>
-                <button
+            {videos.length > 0 ? (
+              videos.map((video, index) => (
+                <div
+                  key={index}
+                  className="p-2 cursor-pointer hover:bg-gray-50 rounded transition-colors"
                   onClick={() => openVideoModal(`https://www.youtube.com/embed/${video.id?.videoId}`)}
-                  className="text-[#B22234] font-bold"
                 >
-                  Watch Now
-                </button>
+                  <img
+                    src={video.snippet?.thumbnails?.medium?.url || "/images/core/placeholder.jpg"}
+                    alt={cleanTitle(video.snippet?.title)}
+                    className="w-full aspect-video object-cover rounded mb-2" // Standard 16:9 video ratio
+                  />
+                  <h3 className="text-md font-semibold text-[#3C3B6E] mb-1 line-clamp-2">
+                    {cleanTitle(video.snippet?.title)}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {video.channelName} •{" "}
+                    {new Date(video.snippet?.publishedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-2">
+                    {video.snippet?.description?.substring(0, 100)}...
+                  </p>
+                  <button className="text-[#B22234] font-bold text-sm hover:underline">Watch Now</button>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500 py-8">
+                <p>Loading videos...</p>
               </div>
-            ))}
+            )}
           </div>
         </section>
         <Sidebar />
       </main>
+
+      {/* ENHANCED VIDEO MODAL WITH FULLSCREEN */}
       {modalVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white w-3/4 max-w-4xl rounded p-4">
-            <button onClick={closeVideoModal} className="text-[#3C3B6E] text-2xl float-right">
-              ×
-            </button>
-            <iframe src={modalVideo} className="w-full h-96 rounded" frameBorder="0" allowFullScreen></iframe>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4"
+          onClick={closeVideoModal}
+        >
+          <div
+            className="bg-white rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-[#3C3B6E]">Video Player</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={toggleFullscreen}
+                  className="text-gray-500 hover:text-[#B22234] text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Fullscreen"
+                  title="Fullscreen"
+                >
+                  ⛶
+                </button>
+                <button
+                  onClick={closeVideoModal}
+                  className="text-gray-500 hover:text-[#B22234] text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Close video"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Video Container */}
+            <div className="relative bg-black">
+              <iframe
+                id="video-modal-iframe"
+                src={`${modalVideo}?autoplay=1`}
+                className="w-full h-[60vh] md:h-[70vh]"
+                frameBorder="0"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title="Video Player"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-gray-50 text-center">
+              <p className="text-sm text-gray-600">Click outside the video, press × to close, or ⛶ for fullscreen</p>
+            </div>
           </div>
         </div>
       )}
+
       <Footer />
     </>
   )

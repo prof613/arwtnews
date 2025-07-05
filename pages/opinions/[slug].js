@@ -8,40 +8,7 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
-
-// Function to render rich text content
-function renderRichText(content) {
-  if (!content) return "No content available"
-
-  if (typeof content === "string") return content
-
-  if (Array.isArray(content)) {
-    return content.map((block, index) => {
-      if (block.type === "paragraph") {
-        return (
-          <p key={index} className="mb-4">
-            {block.children?.map((child, childIndex) => (
-              <span key={childIndex}>{child.text}</span>
-            ))}
-          </p>
-        )
-      }
-      if (block.type === "heading") {
-        const HeadingTag = `h${block.level || 2}`
-        return (
-          <HeadingTag key={index} className="font-bold mb-2">
-            {block.children?.map((child, childIndex) => (
-              <span key={childIndex}>{child.text}</span>
-            ))}
-          </HeadingTag>
-        )
-      }
-      return null
-    })
-  }
-
-  return "Content format not supported"
-}
+import ShareButtons from "../../components/ShareButtons"
 
 export default function Opinion() {
   const router = useRouter()
@@ -56,12 +23,6 @@ export default function Opinion() {
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate=*&publicationState=live`,
           )
           const opinionData = opinionRes.data.data[0]
-
-          console.log("Slug:", slug)
-          console.log("Individual Opinion API Response:", opinionRes.data)
-          console.log("Opinion Data:", opinionData)
-          console.log("Opinion Attributes:", opinionData?.attributes)
-
           setOpinion(opinionData?.attributes || null)
         } catch (error) {
           console.error("Error fetching opinion:", error)
@@ -79,13 +40,20 @@ export default function Opinion() {
       ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.featured_image.data.attributes.url}`
       : null
 
+  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+
   return (
     <>
       <Head>
         <title>{opinion.title} | Red, White and True News</title>
+        <meta property="og:title" content={opinion.title} />
+        <meta property="og:description" content={opinion.quote || ""} />
+        {imageUrl && <meta property="og:image" content={imageUrl} />}
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="article" />
       </Head>
       <Header />
-      <main className="max-w-7xl mx-auto p-4 flex gap-4 bg-white">
+      <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
           <MainBanner />
           <article className="my-8">
@@ -93,7 +61,7 @@ export default function Opinion() {
               <img
                 src={imageUrl || "/placeholder.svg"}
                 alt={opinion.title}
-                className="w-full aspect-video object-cover rounded mb-4"
+                className="w-full max-h-[500px] object-contain rounded mb-4 bg-gray-100"
               />
             ) : (
               <div className="w-full h-48 bg-gray-200 rounded mb-4 flex items-center justify-center">
@@ -137,20 +105,21 @@ export default function Opinion() {
                     })}{" "}
                     -{" "}
                   </span>
-                  {/* Extract first paragraph from rich_body and display inline */}
                   {(() => {
                     if (typeof opinion.rich_body === "string") {
-                      // For richtext field, take first sentence/paragraph
                       const firstParagraph = opinion.rich_body.split("\n")[0] || opinion.rich_body.substring(0, 200)
                       return firstParagraph
                     }
                     return "Content continues..."
                   })()}
                 </p>
-                {/* Render remaining content */}
                 <div dangerouslySetInnerHTML={{ __html: opinion.rich_body }} />
               </div>
             </div>
+
+            {opinion.enable_share_buttons && (
+              <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
+            )}
           </article>
         </section>
         <Sidebar />

@@ -69,23 +69,34 @@
       "type": "boolean",
       "default": false
     },
+    "homepage_status": {
+      "type": "enumeration",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active",
+      "required": true
+    },
     "link": {
       "type": "string"
     },
-    "comments": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::comment.comment",
-      "mappedBy": "article"
-    },
-    "likes": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::like.like",
-      "mappedBy": "article"
-    },
     "image_path": {
       "type": "string"
+    },
+    "newsletter_inclusion": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "both"
+      ],
+      "default": "none"
+    },
+    "enable_share_buttons": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

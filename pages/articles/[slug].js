@@ -8,43 +8,7 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
-
-// Function to render rich text content
-function renderRichText(content) {
-  if (!content) return "No content available"
-
-  // If it's already a string, return it
-  if (typeof content === "string") return content
-
-  // If it's an array of blocks
-  if (Array.isArray(content)) {
-    return content.map((block, index) => {
-      if (block.type === "paragraph") {
-        return (
-          <p key={index} className="mb-4">
-            {block.children?.map((child, childIndex) => (
-              <span key={childIndex}>{child.text}</span>
-            ))}
-          </p>
-        )
-      }
-      if (block.type === "heading") {
-        const HeadingTag = `h${block.level || 2}`
-        return (
-          <HeadingTag key={index} className="font-bold mb-2">
-            {block.children?.map((child, childIndex) => (
-              <span key={childIndex}>{child.text}</span>
-            ))}
-          </HeadingTag>
-        )
-      }
-      return null
-    })
-  }
-
-  // Fallback for unexpected formats
-  return "Content format not supported"
-}
+import ShareButtons from "../../components/ShareButtons"
 
 export default function Article() {
   const router = useRouter()
@@ -56,16 +20,9 @@ export default function Article() {
       async function fetchArticle() {
         try {
           const articleRes = await axios.get(
-  `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate=*`,
-)
-
-
-const articleData = articleRes.data.data[0]
-console.log('Full article data:', articleRes.data.data[0]);
-console.log('Article attributes:', articleRes.data.data[0]?.attributes);
-console.log('Image path value:', articleRes.data.data[0]?.attributes?.image_path);
-setArticle(articleData?.attributes || null)
-
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate=*`,
+          )
+          const articleData = articleRes.data.data[0]
           setArticle(articleData?.attributes || null)
         } catch (error) {
           console.error("Error fetching article:", error)
@@ -83,13 +40,20 @@ setArticle(articleData?.attributes || null)
       ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.image.data.attributes.url}`
       : null
 
+  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+
   return (
     <>
       <Head>
         <title>{article.title} | Red, White and True News</title>
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.quote || ""} />
+        {imageUrl && <meta property="og:image" content={imageUrl} />}
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="article" />
       </Head>
       <Header />
-      <main className="max-w-7xl mx-auto p-4 flex gap-4 bg-white">
+      <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
           <MainBanner />
           <article className="my-8">
@@ -97,7 +61,7 @@ setArticle(articleData?.attributes || null)
               <img
                 src={imageUrl || "/placeholder.svg"}
                 alt={article.title}
-                className="w-full aspect-video object-cover rounded mb-4"
+                className="w-full max-h-[500px] object-contain rounded mb-4 bg-gray-100"
               />
             ) : (
               <div className="w-full h-48 bg-gray-200 rounded mb-4 flex items-center justify-center">
@@ -139,7 +103,6 @@ setArticle(articleData?.attributes || null)
                     })}{" "}
                     -{" "}
                   </span>
-                  {/* Extract first paragraph from rich_body and display inline */}
                   {(() => {
                     if (Array.isArray(article.rich_body) && article.rich_body.length > 0) {
                       const firstBlock = article.rich_body[0]
@@ -150,7 +113,6 @@ setArticle(articleData?.attributes || null)
                     return "Content continues..."
                   })()}
                 </p>
-                {/* Render remaining content blocks */}
                 {Array.isArray(article.rich_body) &&
                   article.rich_body.slice(1).map((block, index) => {
                     if (block.type === "paragraph") {
@@ -176,6 +138,10 @@ setArticle(articleData?.attributes || null)
                   })}
               </div>
             </div>
+
+            {article.enable_share_buttons && (
+              <ShareButtons shareUrl={pageUrl} title={article.title} summary={article.quote} />
+            )}
           </article>
         </section>
         <Sidebar />

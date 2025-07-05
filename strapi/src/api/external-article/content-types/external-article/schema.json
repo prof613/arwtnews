@@ -24,7 +24,7 @@
     },
     "date": {
       "type": "date",
-      "required": true
+      "required": false
     },
     "link": {
       "type": "string",
@@ -44,6 +44,16 @@
     "slug": {
       "type": "string",
       "unique": true
+    },
+    "newsletter_inclusion": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "both"
+      ],
+      "default": "none"
     }
   }
 }

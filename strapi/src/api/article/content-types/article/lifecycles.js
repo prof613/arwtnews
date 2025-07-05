@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("fs")
+const path = require("path")
 
 // Helper function to generate slug
 function generateSlug(title) {
@@ -8,134 +8,118 @@ function generateSlug(title) {
     .replace(/[^a-z0-9 -]/g, "") // Remove special characters
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
-    .trim("-"); // Remove leading/trailing hyphens
+    .trim("-") // Remove leading/trailing hyphens
 }
 
-/*
-// Commented out custom image movement logic to restore Strapi default file management
-async function moveImageToContentFolder(data, id) {
-  if (!data.image || !data.image.id) {
-    return
-  }
-
+// Function to manage homepage limits
+async function manageHomepageLimits() {
   try {
-    // Get the image details
-    const imageId = data.image.id
-    const image = await strapi.entityService.findOne("plugin::upload.file", imageId)
+    // Get all active articles (excluding featured)
+    const activeRegularArticles = await global.strapi.entityService.findMany("api::article.article", {
+      filters: {
+        publishedAt: { $notNull: true },
+        homepage_status: "active",
+        is_featured: false,
+      },
+      sort: { date: "desc" },
+      pagination: { limit: -1 }, // Get all to count properly
+    })
 
-    if (!image) {
-      return
-    }
+    // If we have more than 6 regular articles, archive the oldest ones
+    if (activeRegularArticles.length > 6) {
+      const articlesToArchive = activeRegularArticles.slice(6) // Keep first 6, archive the rest
 
-    // Get current date for folder structure
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, "0")
-    const day = String(now.getDate()).padStart(2, "0")
-
-    // Create the directory structure with articles subfolder
-    const contentDir = path.join(process.cwd(), "public", "images", "content", "articles", String(year), month, day)
-
-    if (!fs.existsSync(contentDir)) {
-      fs.mkdirSync(contentDir, { recursive: true })
-    }
-
-    // Find the source file
-    const possiblePaths = [
-      path.join(process.cwd(), "public", "uploads", image.name),
-      path.join(process.cwd(), "uploads", image.name),
-      path.join(process.cwd(), "public", image.url),
-      path.join(process.cwd(), "public", "uploads", image.name),
-    ]
-
-    let currentPath = null
-    for (const possiblePath of possiblePaths) {
-      if (fs.existsSync(possiblePath)) {
-        currentPath = possiblePath
-        break
+      for (const article of articlesToArchive) {
+        await global.strapi.entityService.update("api::article.article", article.id, {
+          data: { homepage_status: "archived" },
+        })
+        console.log(`Archived article from homepage: ${article.title}`)
       }
     }
 
-    if (!currentPath || !fs.existsSync(currentPath)) {
-      return
-    }
-
-    // Generate new filename
-    const fileExtension = path.extname(image.name)
-    const newFileName = `${id}-1${fileExtension}`
-    const newFilePath = path.join(contentDir, newFileName)
-
-    // Copy the file
-    fs.copyFileSync(currentPath, newFilePath)
-
-    // Update the database with new path
-    const newImagePath = `/images/content/articles/${year}/${month}/${day}/${newFileName}`
-    await strapi.entityService.update("api::article.article", id, {
-      data: {
-        image_path: newImagePath,
+    // Handle featured article limit (only one featured at a time)
+    const featuredArticles = await global.strapi.entityService.findMany("api::article.article", {
+      filters: {
+        publishedAt: { $notNull: true },
+        is_featured: true,
       },
+      sort: { date: "desc" },
+      pagination: { limit: -1 },
     })
+
+    // If more than one featured article, unfeatured older ones and archive them
+    if (featuredArticles.length > 1) {
+      const articlesToUnfeatured = featuredArticles.slice(1) // Keep first (newest), unfeatured the rest
+
+      for (const article of articlesToUnfeatured) {
+        await global.strapi.entityService.update("api::article.article", article.id, {
+          data: {
+            is_featured: false,
+            homepage_status: "active", // Move to regular articles area
+          },
+        })
+        console.log(`Unfeatured and moved to regular articles: ${article.title}`)
+      }
+
+      // After moving ex-featured to regular, check if we exceed 6 regular articles
+      await manageHomepageLimits() // Recursive call to handle the new regular article
+    }
   } catch (error) {
-    console.error("Error moving article image:", error)
+    console.error("Error managing homepage limits:", error)
   }
 }
-*/
 
 module.exports = {
   async beforeCreate(event) {
-    const { data } = event.params;
+    const { data } = event.params
 
     // Auto-generate slug if not provided
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title);
+      data.slug = generateSlug(data.title)
     }
 
-    // If being published on creation, set the date
+    // If being published on creation, set the date and default to active
     if (data.publishedAt) {
-      data.date = new Date();
+      data.date = new Date()
+      data.homepage_status = "active" // New articles start on homepage
     }
   },
 
   async beforeUpdate(event) {
-    const { data, where } = event.params;
+    const { data, where } = event.params
 
     // Auto-generate slug if title changed but slug is empty
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title);
+      data.slug = generateSlug(data.title)
     }
 
-    // Only set date if we're publishing
+    // Only set date if we're publishing for the first time
     if (data.publishedAt) {
-      const existingEntry = await strapi.entityService.findOne("api::article.article", where.id);
+      const existingEntry = await global.strapi.entityService.findOne("api::article.article", where.id)
 
-      // If this entry wasn't published before, set the date
+      // If this entry wasn't published before, set the date and make active
       if (!existingEntry.publishedAt) {
-        data.date = new Date();
+        data.date = new Date()
+        data.homepage_status = "active"
       }
     }
   },
 
   async afterCreate(event) {
-    // Commented out to disable custom image movement
-    /*
-    const { result } = event;
+    const { result } = event
 
-    // Only process if being published, has image, and checkbox is unchecked
-    if (result.publishedAt && result.image && !result.keep_image_in_assets) {
-      await moveImageToContentFolder(result, result.id);
+    // Only manage limits if article was published
+    if (result.publishedAt) {
+      await manageHomepageLimits()
     }
-    */
   },
 
   async afterUpdate(event) {
-    // Commented out to disable custom image movement
-    /*
-    const { result, params } = event;
+    const { result, params } = event
 
-    // Only process if being published, has image, and checkbox is unchecked
-    if (params.data.publishedAt && result.image && !result.keep_image_in_assets) {
-      await moveImageToContentFolder(result, result.id);
+    // Only manage limits if article was published or featured status changed
+    if (params.data.publishedAt || params.data.hasOwnProperty("is_featured")) {
+      await manageHomepageLimits()
     }
-    */
   },
-};
+}
