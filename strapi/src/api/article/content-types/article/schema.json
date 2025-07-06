@@ -97,6 +97,105 @@
     "enable_share_buttons": {
       "type": "boolean",
       "default": true
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "seoKeywords": {
+      "type": "string"
+    },
+    "canonicalUrl": {
+      "type": "string"
+    },
+    "ogTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "text"
+    },
+    "ogDescription": {
+      "type": "text"
+    },
+    "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "searchTags": {
+      "type": "string"
+    },
+    "searchableContent": {
+      "type": "text",
+      "private": true
+    },
+    "searchPriority": {
+      "type": "integer",
+      "default": 5
+    },
+    "searchBoost": {
+      "type": "decimal",
+      "default": 1
+    },
+    "viewCount": {
+      "type": "integer",
+      "private": true,
+      "default": 0
+    },
+    "isSearchable": {
+      "type": "boolean",
+      "default": true
+    },
+    "sticky": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "trackingId": {
+      "type": "string",
+      "private": true
+    },
+    "analyticsData": {
+      "type": "json",
+      "private": true
+    },
+    "performanceMetrics": {
+      "type": "json",
+      "private": true
+    },
+    "pluginData": {
+      "type": "json",
+      "private": true
+    },
+    "seoConfig": {
+      "type": "json",
+      "private": true
+    },
+    "searchConfig": {
+      "type": "json",
+      "private": true
+    },
+    "customFields": {
+      "type": "json",
+      "private": true
+    },
+    "integrationData": {
+      "type": "json",
+      "private": true
+    },
+    "metadata": {
+      "type": "json",
+      "private": true
     }
   }
 }

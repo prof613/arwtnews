@@ -55,6 +55,28 @@
     "enable_share_buttons": {
       "type": "boolean",
       "default": true
+    },
+    "ogTitle": {
+      "type": "string"
+    },
+    "ogImage": {
+      "allowedTypes": [
+        "images"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "searchTags": {
+      "type": "string"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
     }
   }
 }

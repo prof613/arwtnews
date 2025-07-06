@@ -277,9 +277,22 @@ export default function Category() {
                   {(() => {
                     const primaryCat = item.attributes.category?.data?.attributes?.name
                     const secondaryCat = item.attributes.secondary_category?.data?.attributes?.name
+
                     if (item.type === "opinion") {
                       return secondaryCat ? `Opinion - ${secondaryCat}` : "Opinion"
                     }
+
+                    // NEW LOGIC: Check which category page we're viewing
+                    if (primaryCat && secondaryCat) {
+                      // If we're viewing the secondary category page, show secondary first
+                      if (category === secondaryCat) {
+                        return `${secondaryCat} - ${primaryCat}`
+                      }
+                      // Otherwise show primary first (default behavior)
+                      return `${primaryCat} - ${secondaryCat}`
+                    }
+
+                    // If only one category exists, show it
                     return primaryCat || secondaryCat || "None"
                   })()} / {item.attributes.author || "Unknown"} /{" "}
                   {new Date(item.attributes.date).toLocaleDateString("en-US", {

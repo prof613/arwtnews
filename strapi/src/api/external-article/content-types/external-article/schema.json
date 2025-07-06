@@ -54,6 +54,34 @@
         "both"
       ],
       "default": "none"
+    },
+    "searchTags": {
+      "type": "string"
+    },
+    "searchableContent": {
+      "type": "text",
+      "private": true
+    },
+    "isSearchable": {
+      "type": "boolean",
+      "default": true
+    },
+    "searchPriority": {
+      "type": "integer",
+      "default": 5
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "metadata": {
+      "type": "json",
+      "private": true
     }
   }
 }

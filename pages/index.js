@@ -172,7 +172,7 @@ export default function Home() {
                   </p>
                   {featuredArticle.quote && (
                     <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
-                      <p className="line-clamp-2">
+                      <p className="line-clamp-2 min-h-[2.5rem] leading-5">
                         {featuredArticle.quote}...{" "}
                         <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                       </p>
@@ -239,7 +239,7 @@ export default function Home() {
                   </p>
                   <h3 className="text-xl font-bold text-[#3C3B6E]">{article.attributes.title}</h3>
                   {article.attributes.quote && (
-                    <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2">
+                    <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2 min-h-[2.5rem] leading-5">
                       {article.attributes.quote}...{" "}
                       <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                     </p>
@@ -286,7 +286,7 @@ export default function Home() {
                 <div className="p-2">
                   <h3 className="text-xl font-bold text-[#3C3B6E]">{link.attributes.title}</h3>
                   {link.attributes.quote && (
-                    <p className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2">
+                    <p className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
                       {link.attributes.quote.substring(0, 100)}...
                     </p>
                   )}

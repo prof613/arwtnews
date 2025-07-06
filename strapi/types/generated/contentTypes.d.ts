@@ -374,8 +374,10 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
+    analyticsData: Attribute.JSON & Attribute.Private;
     author: Attribute.String;
     author_image: Attribute.Media<'images'>;
+    canonicalUrl: Attribute.String;
     category: Attribute.Relation<
       'api::article.article',
       'manyToOne',
@@ -388,6 +390,7 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    customFields: Attribute.JSON & Attribute.Private;
     date: Attribute.DateTime;
     enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
     homepage_status: Attribute.Enumeration<['active', 'archived']> &
@@ -395,23 +398,44 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       Attribute.DefaultTo<'active'>;
     image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
+    integrationData: Attribute.JSON & Attribute.Private;
     is_featured: Attribute.Boolean & Attribute.DefaultTo<false>;
+    isSearchable: Attribute.Boolean & Attribute.DefaultTo<true>;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
     link: Attribute.String;
+    metadata: Attribute.JSON & Attribute.Private;
+    metaDescription: Attribute.Text;
+    metaTitle: Attribute.String;
     newsletter_inclusion: Attribute.Enumeration<
       ['none', 'daily', 'weekly', 'both']
     > &
       Attribute.DefaultTo<'none'>;
+    ogDescription: Attribute.Text;
+    ogImage: Attribute.Media<'images'>;
+    ogTitle: Attribute.String;
+    performanceMetrics: Attribute.JSON & Attribute.Private;
+    pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text & Attribute.Required;
     rich_body: Attribute.Blocks;
+    searchableContent: Attribute.Text & Attribute.Private;
+    searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
+    searchConfig: Attribute.JSON & Attribute.Private;
+    searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
+    searchTags: Attribute.String;
     secondary_category: Attribute.Relation<
       'api::article.article',
       'manyToOne',
       'api::category.category'
     >;
+    seoConfig: Attribute.JSON & Attribute.Private;
+    seoKeywords: Attribute.String;
     slug: Attribute.UID<'api::article.article', 'title'> & Attribute.Required;
+    status: Attribute.Enumeration<['draft', 'published', 'archived']> &
+      Attribute.DefaultTo<'draft'>;
+    sticky: Attribute.Boolean & Attribute.DefaultTo<false>;
     title: Attribute.String & Attribute.Required;
+    trackingId: Attribute.String & Attribute.Private;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       'api::article.article',
@@ -419,6 +443,7 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    viewCount: Attribute.Integer & Attribute.Private & Attribute.DefaultTo<0>;
   };
 }
 
@@ -492,16 +517,23 @@ export interface ApiExternalArticleExternalArticle
     > &
       Attribute.Private;
     date: Attribute.Date;
+    isSearchable: Attribute.Boolean & Attribute.DefaultTo<true>;
     link: Attribute.String & Attribute.Required;
+    metadata: Attribute.JSON & Attribute.Private;
     newsletter_inclusion: Attribute.Enumeration<
       ['none', 'daily', 'weekly', 'both']
     > &
       Attribute.DefaultTo<'none'>;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text;
+    searchableContent: Attribute.Text & Attribute.Private;
+    searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
+    searchTags: Attribute.String;
     slug: Attribute.String & Attribute.Unique;
     source: Attribute.String & Attribute.Required;
     source_url: Attribute.String & Attribute.Required;
+    status: Attribute.Enumeration<['draft', 'published', 'archived']> &
+      Attribute.DefaultTo<'draft'>;
     title: Attribute.String & Attribute.Required;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -540,8 +572,13 @@ export interface ApiMemeMeme extends Schema.CollectionType {
     newsletter_inclusion: Attribute.Enumeration<
       ['none', 'daily', 'weekly', 'both']
     >;
+    ogImage: Attribute.Media<'images'>;
+    ogTitle: Attribute.String;
     publishedAt: Attribute.DateTime;
+    searchTags: Attribute.String;
     slug: Attribute.UID<'api::meme.meme', 'artist'>;
+    status: Attribute.Enumeration<['draft', 'published', 'archived']> &
+      Attribute.DefaultTo<'draft'>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<'api::meme.meme', 'oneToOne', 'admin::user'> &
       Attribute.Private;
@@ -560,8 +597,10 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
+    analyticsData: Attribute.JSON & Attribute.Private;
     author: Attribute.String & Attribute.DefaultTo<'Editorial Team'>;
     author_image: Attribute.Media<'images'>;
+    canonicalUrl: Attribute.String;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::opinion.opinion',
@@ -569,24 +608,46 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    customFields: Attribute.JSON & Attribute.Private;
     date: Attribute.DateTime;
     enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
     featured_image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
+    integrationData: Attribute.JSON & Attribute.Private;
+    isSearchable: Attribute.Boolean & Attribute.DefaultTo<true>;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
+    metadata: Attribute.JSON & Attribute.Private;
+    metaDescription: Attribute.Text;
+    metaTitle: Attribute.String;
     newsletter_inclusion: Attribute.Enumeration<
       ['none', 'daily', 'weekly', 'both']
     >;
+    ogDescription: Attribute.Text;
+    ogImage: Attribute.Media<'images'>;
+    ogTitle: Attribute.String;
+    performanceMetrics: Attribute.JSON & Attribute.Private;
+    pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text;
     rich_body: Attribute.RichText & Attribute.Required;
+    searchableContent: Attribute.Text & Attribute.Private;
+    searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
+    searchConfig: Attribute.JSON & Attribute.Private;
+    searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
+    searchTags: Attribute.String;
     secondary_category: Attribute.Relation<
       'api::opinion.opinion',
       'manyToOne',
       'api::category.category'
     >;
+    seoConfig: Attribute.JSON & Attribute.Private;
+    seoKeywords: Attribute.String;
     slug: Attribute.UID<'api::opinion.opinion', 'title'>;
+    status: Attribute.Enumeration<['draft', 'published', 'archived']> &
+      Attribute.DefaultTo<'draft'>;
+    sticky: Attribute.Boolean & Attribute.DefaultTo<false>;
     title: Attribute.String & Attribute.Required;
+    trackingId: Attribute.String & Attribute.Private;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       'api::opinion.opinion',
@@ -594,6 +655,7 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    viewCount: Attribute.Integer & Attribute.Private & Attribute.DefaultTo<0>;
   };
 }
 
