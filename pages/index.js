@@ -38,7 +38,7 @@ const cleanTitle = (title) => {
 }
 
 export default function Home() {
-  const [featuredArticle, setFeaturedArticle] = useState(null)
+  const [featuredArticles, setFeaturedArticles] = useState([])
   const [articles, setArticles] = useState([])
   const [externalLinks, setExternalLinks] = useState([])
   const [videos, setVideos] = useState([])
@@ -52,9 +52,11 @@ export default function Home() {
           const articleRes = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
           )
-          const featuredArticles = articleRes.data.data.filter((a) => a.attributes.is_featured)
+          const featuredArticlesList = articleRes.data.data.filter((a) => a.attributes.is_featured)
           const regularArticles = articleRes.data.data.filter((a) => !a.attributes.is_featured)
-          setFeaturedArticle(featuredArticles[0]?.attributes || null)
+
+          // Now we store up to 3 featured articles
+          setFeaturedArticles(featuredArticlesList.slice(0, 3))
           setArticles(regularArticles.slice(0, 6))
         } catch (error) {
           console.error("Error fetching articles:", error)
@@ -121,6 +123,89 @@ export default function Home() {
     }
   }
 
+  // Helper function to render individual featured article
+  const renderFeaturedArticle = (article, isHero = false) => {
+    const attrs = article.attributes
+    return (
+      <Link href={`/articles/${attrs.slug}`} key={article.id}>
+        <div className={`bg-gray-100 p-4 rounded ${isHero ? "" : "h-full"}`}>
+          {/* Featured Article Label */}
+          <h4 className="text-center text-sm font-semibold text-[#B22234] mb-2 uppercase tracking-wide">
+            Featured Article
+          </h4>
+          {/* Image container */}
+          <div className={`flex justify-center mb-4 ${isHero ? "" : "mb-2"}`}>
+            <img
+              src={
+                attrs.image_path
+                  ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${attrs.image_path}`
+                  : attrs.image?.data?.attributes?.url
+                    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${attrs.image.data.attributes.url}`
+                    : "/images/core/placeholder.jpg"
+              }
+              alt={attrs.title}
+              className={`w-full h-auto object-contain rounded ${
+                isHero ? "md:w-4/5 max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem]" : "max-h-48"
+              }`}
+            />
+          </div>
+          <h3
+            className={`font-bold text-[#3C3B6E] ${isHero ? "text-2xl min-h-[4rem]" : "text-xl min-h-[3.5rem]"} leading-tight`}
+          >
+            {attrs.title}
+          </h3>
+          <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
+            {new Date(attrs.date).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              timeZone: "America/Los_Angeles",
+            })}
+          </p>
+          <p className="text-sm text-gray-600 font-bold">
+            {(() => {
+              const primaryCat = attrs.category?.data?.attributes?.name
+              const secondaryCat = attrs.secondary_category?.data?.attributes?.name
+              if (primaryCat && secondaryCat) {
+                return `${primaryCat} - ${secondaryCat}`
+              } else {
+                return primaryCat || secondaryCat || "None"
+              }
+            })()} / {attrs.author || "Unknown"}
+          </p>
+          {attrs.quote && (
+            <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
+              <p className={`leading-5 ${isHero ? "line-clamp-2 min-h-[2.5rem]" : "line-clamp-2 min-h-[2.5rem]"}`}>
+                {attrs.quote}...{" "}
+                <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
+              </p>
+            </div>
+          )}
+          <p className={`text-sm text-gray-500 ${isHero ? "line-clamp-7" : "line-clamp-3"}`}>
+            {(() => {
+              if (Array.isArray(attrs.rich_body)) {
+                let excerpt = ""
+                let lineCount = 0
+
+                for (const block of attrs.rich_body) {
+                  if (block.type === "paragraph" && block.children) {
+                    const text = block.children.map((child) => child.text).join("")
+                    excerpt += text + " "
+                    lineCount++
+                    if (lineCount >= (isHero ? 5 : 3)) break
+                  }
+                }
+
+                return excerpt.substring(0, isHero ? 300 : 150).trim()
+              }
+              return ""
+            })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+          </p>
+        </div>
+      </Link>
+    )
+  }
+
   return (
     <>
       <Head>
@@ -131,79 +216,28 @@ export default function Home() {
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="w-full md:w-3/4">
           <MainBanner />
+
+          {/* Featured Articles Section */}
           <section className="my-8">
-            <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Article</h2>
-            {featuredArticle ? (
-              <Link href={`/articles/${featuredArticle.slug}`}>
-                <div className="bg-gray-100 p-4 rounded">
-                  {/* Updated image container with 80% width and centered */}
-                  <div className="flex justify-center mb-4">
-                    <img
-                      src={
-                        featuredArticle.image_path
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image_path}`
-                          : featuredArticle.image?.data?.attributes?.url
-                            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${featuredArticle.image.data.attributes.url}`
-                            : "/images/core/placeholder.jpg"
-                      }
-                      alt={featuredArticle.title}
-                      className="w-full md:w-4/5 h-auto object-contain rounded max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem]"
-                    />
+            <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Articles</h2>
+
+            {featuredArticles.length > 0 ? (
+              <div className="space-y-4">
+                {/* Hero Featured Article */}
+                {renderFeaturedArticle(featuredArticles[0], true)}
+
+                {/* Row of 2 Featured Articles (if we have 2 or 3 total) */}
+                {featuredArticles.length > 1 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {featuredArticles.slice(1, 3).map((article) => renderFeaturedArticle(article, false))}
                   </div>
-                  <h3 className="text-2xl font-bold text-[#3C3B6E]">{featuredArticle.title}</h3>
-                  <p className="text-sm text-gray-600">
-                    {new Date(featuredArticle.date).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "America/Los_Angeles",
-                    })}
-                  </p>
-                  <p className="text-sm text-gray-600 font-bold">
-                    {(() => {
-                      const primaryCat = featuredArticle.category?.data?.attributes?.name
-                      const secondaryCat = featuredArticle.secondary_category?.data?.attributes?.name
-                      if (primaryCat && secondaryCat) {
-                        return `${primaryCat} - ${secondaryCat}`
-                      } else {
-                        return primaryCat || secondaryCat || "None"
-                      }
-                    })()} / {featuredArticle.author || "Unknown"}
-                  </p>
-                  {featuredArticle.quote && (
-                    <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
-                      <p className="line-clamp-2 min-h-[2.5rem] leading-5">
-                        {featuredArticle.quote}...{" "}
-                        <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
-                      </p>
-                    </div>
-                  )}
-                  <p className="text-sm text-gray-500 line-clamp-7">
-                    {(() => {
-                      if (Array.isArray(featuredArticle.rich_body)) {
-                        let excerpt = ""
-                        let lineCount = 0
-
-                        for (const block of featuredArticle.rich_body) {
-                          if (block.type === "paragraph" && block.children) {
-                            const text = block.children.map((child) => child.text).join("")
-                            excerpt += text + " "
-                            lineCount++
-                            if (lineCount >= 5) break
-                          }
-                        }
-
-                        return excerpt.substring(0, 300).trim()
-                      }
-                      return ""
-                    })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
-                  </p>
-                </div>
-              </Link>
+                )}
+              </div>
             ) : (
-              <p>No featured article available.</p>
+              <p>No featured articles available.</p>
             )}
           </section>
+
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">The RIGHT News</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {articles.map((article) => (
@@ -220,7 +254,7 @@ export default function Home() {
                     alt={article.attributes.title}
                     className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
                   />
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
                     {(() => {
                       const primaryCat = article.attributes.category?.data?.attributes?.name
                       const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name
@@ -237,7 +271,9 @@ export default function Home() {
                       timeZone: "America/Los_Angeles",
                     })}
                   </p>
-                  <h3 className="text-xl font-bold text-[#3C3B6E]">{article.attributes.title}</h3>
+                  <h3 className="text-xl font-bold text-[#3C3B6E] min-h-[3.5rem] leading-tight">
+                    {article.attributes.title}
+                  </h3>
                   {article.attributes.quote && (
                     <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2 min-h-[2.5rem] leading-5">
                       {article.attributes.quote}...{" "}

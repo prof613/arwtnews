@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   const {
     query = "",
     page = 1,
-    pageSize = 15, // Changed from 10 to 15
+    pageSize = 15,
     sortBy = "date_desc",
-    searchType = "articles", // "articles" or "external"
+    searchType = "articles",
     dateFrom,
     dateTo,
     author,
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     const allResults = []
 
     if (searchType === "articles") {
-      // Search articles only (includes both regular and opinion articles)
+      // Search articles
       const articlesUrl = `${baseUrl}/api/articles?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][rich_body][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&filters[$or][4][category][name][$containsi]=${searchTerm}&filters[$or][5][secondary_category][name][$containsi]=${searchTerm}&populate=*`
 
       const articlesRes = await fetch(articlesUrl)
@@ -43,16 +43,44 @@ export default async function handler(req, res) {
         console.error("Articles API error:", articlesRes.status, articlesRes.statusText)
       }
 
-      // Process Articles (includes both regular and opinion articles)
+      // Process Articles
       if (articlesData?.data && Array.isArray(articlesData.data)) {
         articlesData.data.forEach((item) => {
           if (item?.attributes) {
             const searchScore = calculateSearchScore(item.attributes, query, "article")
-            // Determine if it's an opinion article based on category
             const isOpinion = item.attributes.category?.data?.attributes?.name?.toLowerCase() === "opinion"
             allResults.push({
               id: item.id,
               type: isOpinion ? "opinion" : "article",
+              attributes: item.attributes,
+              searchScore,
+            })
+          }
+        })
+      }
+
+      // Search opinions
+      const opinionsUrl = `${baseUrl}/api/opinions?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][rich_body][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&populate=*`
+      const opinionsRes = await fetch(opinionsUrl)
+      let opinionsData = { data: [] }
+      if (opinionsRes.ok) {
+        try {
+          opinionsData = await opinionsRes.json()
+        } catch (e) {
+          console.error("Opinions JSON parse error:", e)
+        }
+      } else {
+        console.error("Opinions API error:", opinionsRes.status, opinionsRes.statusText)
+      }
+
+      // Process Opinions
+      if (opinionsData?.data && Array.isArray(opinionsData.data)) {
+        opinionsData.data.forEach((item) => {
+          if (item?.attributes) {
+            const searchScore = calculateSearchScore(item.attributes, query, "article")
+            allResults.push({
+              id: item.id,
+              type: "opinion",
               attributes: item.attributes,
               searchScore,
             })
@@ -230,7 +258,6 @@ function sortResults(results, sortBy, searchType) {
         if (b.searchScore !== a.searchScore) {
           return b.searchScore - a.searchScore
         }
-        // Secondary sort by date
         const dateA = new Date(a.attributes.date || 0)
         const dateB = new Date(b.attributes.date || 0)
         return dateB - dateA
