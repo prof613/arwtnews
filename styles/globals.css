@@ -30,3 +30,69 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Enhanced Rich Blocks Styles */
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Float clearing for text that follows floated images */
+.prose p:has(+ img[class*="float-"]) {
+  overflow: hidden;
+}
+
+/* Responsive adjustments for floated images */
+@media (max-width: 768px) {
+  .prose img[class*="float-"] {
+    float: none !important;
+    margin: 1rem auto !important;
+    display: block;
+    max-width: 100% !important;
+  }
+}
+
+/* Two column layout responsive */
+@media (max-width: 768px) {
+  .prose [class*="columns-"] {
+    columns: 1 !important;
+  }
+}
+
+/* Enhanced text block styles */
+.prose .pullquote {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.prose .infobox::before {
+  content: "ℹ️ ";
+  font-weight: bold;
+}
+
+.prose .alert::before {
+  content: "⚠️ ";
+  font-weight: bold;
+}
+
+.prose .breaking::before {
+  content: "🚨 BREAKING: ";
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Additional float clearing utilities */
+.clear-floats::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Ensure proper spacing around floated images */
+.prose img.float-left {
+  shape-outside: margin-box;
+}
+
+.prose img.float-right {
+  shape-outside: margin-box;
+}

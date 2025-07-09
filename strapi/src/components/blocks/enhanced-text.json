@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_blocks_enhanced_texts",
+  "info": {
+    "displayName": "Enhanced Text",
+    "description": "Text with styling and layout options"
+  },
+  "attributes": {
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "style": {
+      "type": "enumeration",
+      "enum": ["normal", "pullquote", "infobox", "alert", "breaking"],
+      "default": "normal"
+    },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["single", "twocolumn"],
+      "default": "single"
+    }
+  }
+}

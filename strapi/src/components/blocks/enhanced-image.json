@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_blocks_enhanced_images",
+  "info": {
+    "displayName": "Enhanced Image",
+    "description": "Image with alignment and sizing options"
+  },
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "caption": {
+      "type": "string"
+    },
+    "alignment": {
+      "type": "enumeration",
+      "enum": ["left", "right", "center", "full"],
+      "default": "center"
+    },
+    "size": {
+      "type": "enumeration", 
+      "enum": ["small", "medium", "large", "full"],
+      "default": "medium"
+    }
+  }
+}

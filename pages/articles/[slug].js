@@ -36,6 +36,15 @@ export default function Article() {
 
   if (!article) return <div>Loading...</div>
 
+
+
+
+// Add this line right here:
+console.log("Article rich_body:", article.rich_body)
+
+
+
+
   const imageUrl = article.image_path
     ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.image_path}`
     : article.image?.data?.attributes?.url

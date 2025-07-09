@@ -6,11 +6,173 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
   }
 
   const renderBlock = (block, index) => {
+    switch (block.__component) {
+      case "blocks.enhanced-text":
+        return renderEnhancedText(block, index)
+      case "blocks.enhanced-image":
+        return renderEnhancedImage(block, index)
+      // Fallback for legacy blocks
+      default:
+        return renderLegacyBlock(block, index)
+    }
+  }
+
+  const renderEnhancedText = (block, index) => {
+    const { content, style = "normal", layout = "single" } = block
+
+    // Handle date prefix for first paragraph
+    const isFirstParagraph =
+      index === 0 ||
+      (index > 0 &&
+        blocks.slice(0, index).every((b) => b.__component !== "blocks.enhanced-text" || b.style !== "normal"))
+
+    const baseClasses = "mb-4"
+    let containerClasses = ""
+    let contentClasses = ""
+
+    // Style variations
+    switch (style) {
+      case "pullquote":
+        containerClasses =
+          "border-l-4 border-[#B22234] pl-6 pr-4 py-4 bg-gray-50 italic text-lg font-medium text-gray-700 my-6"
+        break
+      case "infobox":
+        containerClasses = "border border-blue-200 bg-blue-50 p-4 rounded-lg my-4"
+        contentClasses = "text-blue-800"
+        break
+      case "alert":
+        containerClasses = "border border-yellow-200 bg-yellow-50 p-4 rounded-lg my-4"
+        contentClasses = "text-yellow-800"
+        break
+      case "breaking":
+        containerClasses = "border border-red-200 bg-red-50 p-4 rounded-lg my-4"
+        contentClasses = "text-red-800 font-semibold"
+        break
+      default:
+        contentClasses = "text-gray-600"
+    }
+
+    // Layout variations
+    if (layout === "twocolumn") {
+      containerClasses += " md:columns-2 md:gap-6"
+    }
+
+    // Process markdown-style content to HTML
+    let processedContent = content
+      .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4 text-[#3C3B6E]">$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-3 text-[#3C3B6E]">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-2 text-[#3C3B6E]">$1</h3>')
+      .replace(/^#### (.*$)/gm, '<h4 class="text-lg font-bold mb-2 text-[#3C3B6E]">$1</h4>')
+      .replace(/^##### (.*$)/gm, '<h5 class="text-base font-bold mb-2 text-[#3C3B6E]">$1</h5>')
+      .replace(/^###### (.*$)/gm, '<h6 class="text-sm font-bold mb-2 text-[#3C3B6E]">$1</h6>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n\n+/g, '</p><p class="mb-4">')
+      .replace(/\n/g, '<br>')
+
+    // Wrap in paragraph tags if not already wrapped in headings
+    if (!processedContent.includes('<h') && !processedContent.includes('<p')) {
+      processedContent = `<p class="mb-4">${processedContent}</p>`
+    } else if (processedContent.includes('<h') && !processedContent.startsWith('<h')) {
+      // If there are headings but content doesn't start with one, wrap the beginning
+      const firstHeadingIndex = processedContent.search(/<h[1-6]/);
+      if (firstHeadingIndex > 0) {
+        const beforeHeading = processedContent.substring(0, firstHeadingIndex);
+        const afterHeading = processedContent.substring(firstHeadingIndex);
+        processedContent = `<p class="mb-4">${beforeHeading}</p>${afterHeading}`;
+      }
+    }
+
+    // Add date prefix to first paragraph if needed
+    if (isFirstParagraph && datePrefix && style === "normal") {
+      processedContent = processedContent.replace('<p class="mb-4">', `<p class="mb-4">${datePrefix}`)
+    }
+
+    return (
+      <div key={index} className={`${baseClasses} ${containerClasses}`}>
+        <div className={contentClasses} dangerouslySetInnerHTML={{ __html: processedContent }} />
+      </div>
+    )
+  }
+
+  const renderEnhancedImage = (block, index) => {
+    // DEBUG: Remove this after fixing
+    console.log("Enhanced Image Block:", block)
+    
+    const { image, caption, alignment = "center", size = "medium" } = block
+
+    // Build image URL
+    const buildImageUrl = (url) => {
+      if (!url) return null
+      if (url.startsWith("http")) return url
+      if (url.startsWith("/")) return `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`
+      return `${process.env.NEXT_PUBLIC_STRAPI_URL}/${url}`
+    }
+
+    let imageUrl = null
+    let altText = "Article image"
+
+    if (image?.data?.attributes?.url) {
+      imageUrl = buildImageUrl(image.data.attributes.url)
+      altText = image.data.attributes.alternativeText || altText
+    }
+
+    if (!imageUrl) {
+      return (
+        <div key={index} className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded">
+          <p className="text-gray-600">Image could not be loaded</p>
+        </div>
+      )
+    }
+
+    // Size classes
+    const sizeClasses = {
+      small: "max-w-xs",
+      medium: "max-w-md",
+      large: "max-w-2xl",
+      full: "w-full",
+    }
+
+    // Alignment classes
+    const alignmentClasses = {
+      left: "float-left mr-6 mb-4",
+      right: "float-right ml-6 mb-4",
+      center: "mx-auto block",
+      full: "w-full",
+    }
+
+    // Container classes for floating images
+    const containerClasses = alignment === "left" || alignment === "right" ? "mb-2" : "mb-6"
+
+    return (
+      <div key={index} className={containerClasses}>
+        <img
+          src={imageUrl || "/placeholder.svg"}
+          alt={altText}
+          className={`h-auto rounded-lg ${sizeClasses[size]} ${alignmentClasses[alignment]}`}
+          onError={(e) => {
+            console.error("Image failed to load:", imageUrl)
+            e.target.src = "/images/core/placeholder.jpg"
+          }}
+        />
+        {caption && (
+          <p
+            className={`text-sm text-gray-600 italic mt-2 ${
+              alignment === "center" || alignment === "full" ? "text-center" : ""
+            }`}
+          >
+            {caption}
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  // Legacy block renderer for backward compatibility
+  const renderLegacyBlock = (block, index) => {
     switch (block.type) {
       case "paragraph":
-        // If this is the first paragraph and we have a datePrefix, include it
         const isFirstParagraph = index === 0 || (index > 0 && blocks.slice(0, index).every((b) => b.type === "heading"))
-
         return (
           <p key={index} className="mb-4">
             {isFirstParagraph && datePrefix && datePrefix}
@@ -66,21 +228,11 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         )
 
       case "image":
-        // Helper function to build proper image URL
+        // Legacy image handling (keep existing logic)
         const buildImageUrl = (url) => {
           if (!url) return null
-
-          // If URL already starts with http, use as-is
-          if (url.startsWith("http")) {
-            return url
-          }
-
-          // If URL starts with /, prepend base URL
-          if (url.startsWith("/")) {
-            return `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`
-          }
-
-          // Otherwise, assume it needs /uploads/ prefix
+          if (url.startsWith("http")) return url
+          if (url.startsWith("/")) return `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`
           return `${process.env.NEXT_PUBLIC_STRAPI_URL}/${url}`
         }
 
@@ -88,26 +240,19 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         let altText = "Article image"
         let caption = null
 
-        // Structure 1: block.image.url
         if (block.image?.url) {
           imageUrl = buildImageUrl(block.image.url)
           altText = block.image.alternativeText || altText
           caption = block.image.caption
-        }
-        // Structure 2: block.image.data.attributes
-        else if (block.image?.data?.attributes?.url) {
+        } else if (block.image?.data?.attributes?.url) {
           imageUrl = buildImageUrl(block.image.data.attributes.url)
           altText = block.image.data.attributes.alternativeText || altText
           caption = block.image.data.attributes.caption
-        }
-        // Structure 3: Direct URL in block
-        else if (block.url) {
+        } else if (block.url) {
           imageUrl = buildImageUrl(block.url)
           altText = block.alternativeText || altText
           caption = block.caption
-        }
-        // Structure 4: File data
-        else if (block.file?.url) {
+        } else if (block.file?.url) {
           imageUrl = buildImageUrl(block.file.url)
           altText = block.file.alternativeText || altText
           caption = block.file.caption
@@ -137,7 +282,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         )
 
       default:
-        // Fallback for unknown block types
         console.warn("Unknown block type:", block.type)
         return (
           <div key={index} className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
@@ -154,7 +298,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
       if (child.type === "text") {
         let text = child.text || ""
 
-        // Apply formatting
         if (child.bold) text = <strong key={index}>{text}</strong>
         if (child.italic) text = <em key={index}>{text}</em>
         if (child.underline) text = <u key={index}>{text}</u>
@@ -187,5 +330,11 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     })
   }
 
-  return <div className="prose max-w-none">{blocks.map((block, index) => renderBlock(block, index))}</div>
+  return (
+    <div className="prose max-w-none">
+      {blocks.map((block, index) => renderBlock(block, index))}
+      {/* Clear floats after all blocks */}
+      <div className="clear-both"></div>
+    </div>
+  )
 }

@@ -33,7 +33,11 @@
       "required": true
     },
     "rich_body": {
-      "type": "blocks",
+      "type": "dynamiczone",
+      "components": [
+        "blocks.enhanced-text",
+        "blocks.enhanced-image"
+      ],
       "required": true
     },
     "author": {

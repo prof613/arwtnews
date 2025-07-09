@@ -138,30 +138,7 @@ export default function Sidebar() {
 
       {/* Ad Slot 1 - Top under search */}
       <div className="bg-gray-100 p-4 rounded mb-4">
-        <a
-          href="https://ourconservativestore.com/product/trump-fight-never-surrender-mug-iconic-patriotic-trump-coffee-mug/?sld=95"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block hover:opacity-80 transition-opacity"
-        >
-          <img
-            src="https://ourconservativestore.com/wp-content/uploads/2024/09/3598280471593076194_2048-300x300.jpeg"
-            alt="Trump Fight Never Surrender Mug"
-            className="w-full h-auto rounded"
-          />
-        </a>
-        <p className="text-sm text-gray-600 mt-2 text-center">
-          Get your "Fight!" mug at
-          <br />
-          <a
-            href="https://ourconservativestore.com/?sld=95"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#B22234] hover:underline font-medium"
-          >
-            Our Conservative Store
-          </a>
-        </p>
+
       </div>
 
       {/* Opinion Section - MOVED UP */}
@@ -255,30 +232,7 @@ export default function Sidebar() {
 
       {/* Ad Slot 2 - Below memes, above subscribe */}
       <div className="bg-gray-100 p-4 rounded mb-4">
-        <a
-          href="https://ourconservativestore.com/product/anti-liberal-mug-liberal-tears-white-ceramic-mug/?sld=95"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block hover:opacity-80 transition-opacity"
-        >
-          <img
-            src="https://ourconservativestore.com/wp-content/uploads/2024/08/2828935763882788651_2048-300x300.jpeg"
-            alt="Anti Liberal Mug - Liberal Tears"
-            className="w-full h-auto rounded"
-          />
-        </a>
-        <p className="text-sm text-gray-600 mt-2 text-center">
-          Get your "Liberal Tears" mug at
-          <br />
-          <a
-            href="https://ourconservativestore.com/?sld=95"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#B22234] hover:underline font-medium"
-          >
-            Our Conservative Store
-          </a>
-        </p>
+
       </div>
 
       {/* Newsletter Subscription - UNCHANGED */}
