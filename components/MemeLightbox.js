@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import ShareButtons from "./ShareButtons"
-import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Loader2, ExternalLink } from "lucide-react"
 
 export default function MemeLightbox({
   initialMemes,
@@ -98,6 +98,46 @@ export default function MemeLightbox({
   const hasMorePages = Math.max(...pagesLoaded) < totalPages
   const showNextButton = currentIndex < memes.length - 1 || (currentIndex === memes.length - 1 && hasMorePages)
 
+  const renderArtistLinks = () => {
+    const link1 = currentMeme.attributes.artist_link_1
+    const link1Label = currentMeme.attributes.artist_link_1_label || "Website"
+    const link2 = currentMeme.attributes.artist_link_2
+    const link2Label = currentMeme.attributes.artist_link_2_label || "Social Media"
+
+    // Only show if at least one link exists
+    if (!link1 && !link2) return null
+
+    return (
+      <div className="mt-4">
+        <p className="text-sm text-gray-600 mb-3">Visit this artist at the links below:</p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {link1 && (
+            <a
+              href={link1}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+            >
+              <ExternalLink size={14} />
+              {link1Label}
+            </a>
+          )}
+          {link2 && (
+            <a
+              href={link2}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+            >
+              <ExternalLink size={14} />
+              {link2Label}
+            </a>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-white rounded-lg p-4 md:p-6 max-w-3xl w-full relative" onClick={(e) => e.stopPropagation()}>
@@ -123,22 +163,28 @@ export default function MemeLightbox({
             />
           </div>
 
-          <div className="text-center mt-4 w-full">
-            <h3 className="text-xl font-bold text-[#3C3B6E]">{currentMeme.attributes.artist || "Unknown Artist"}</h3>
-            <p className="text-sm text-gray-600">
+          <div className="text-center mt-4 w-full max-w-lg">
+            <h3 className="text-2xl font-bold text-[#3C3B6E]">{currentMeme.attributes.artist || "Unknown Artist"}</h3>
+            <p className="text-base text-gray-600 mt-1">
               {new Date(currentMeme.attributes.date).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
               })}
             </p>
+            {currentMeme.attributes.description && (
+              <p className="text-base text-gray-700 italic mt-3 px-4">{currentMeme.attributes.description}</p>
+            )}
+            {renderArtistLinks()}
           </div>
 
           {currentMeme.attributes.enable_share_buttons && (
-            <ShareButtons
-              shareUrl={memePageUrl}
-              title={`Check out this meme by ${currentMeme.attributes.artist || "Unknown"}`}
-            />
+            <div className="mt-5">
+              <ShareButtons
+                shareUrl={memePageUrl}
+                title={`Check out this meme by ${currentMeme.attributes.artist || "Unknown"}`}
+              />
+            </div>
           )}
         </div>
       </div>

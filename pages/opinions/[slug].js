@@ -9,6 +9,8 @@ import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
+import BlockRenderer from "../../components/BlockRenderer"
+import { getFirstParagraphText } from "../../utils/blockHelpers"
 
 export default function Opinion() {
   const router = useRouter()
@@ -41,6 +43,9 @@ export default function Opinion() {
       : null
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+
+  // Get first paragraph text for date inline placement
+  const firstParagraphText = getFirstParagraphText(opinion.rich_body)
 
   return (
     <>
@@ -94,27 +99,37 @@ export default function Opinion() {
               </div>
             </div>
             <div className="text-gray-600 mb-4">
-              <div className="prose max-w-none">
-                <p className="mb-4">
-                  <span className="font-medium">
-                    {new Date(opinion.date).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "America/Los_Angeles",
-                    })}{" "}
-                    -{" "}
-                  </span>
-                  {(() => {
-                    if (typeof opinion.rich_body === "string") {
-                      const firstParagraph = opinion.rich_body.split("\n")[0] || opinion.rich_body.substring(0, 200)
-                      return firstParagraph
-                    }
-                    return "Content continues..."
-                  })()}
-                </p>
-                <div dangerouslySetInnerHTML={{ __html: opinion.rich_body }} />
-              </div>
+              {/* Only show date inline if there's a first paragraph, otherwise show it separately */}
+              {firstParagraphText ? (
+                <BlockRenderer
+                  blocks={opinion.rich_body}
+                  datePrefix={
+                    <span className="font-medium">
+                      {new Date(opinion.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "America/Los_Angeles",
+                      })}{" "}
+                      -{" "}
+                    </span>
+                  }
+                />
+              ) : (
+                <>
+                  <p className="mb-4">
+                    <span className="font-medium">
+                      {new Date(opinion.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "America/Los_Angeles",
+                      })}
+                    </span>
+                  </p>
+                  <BlockRenderer blocks={opinion.rich_body} />
+                </>
+              )}
             </div>
 
             {opinion.enable_share_buttons && (

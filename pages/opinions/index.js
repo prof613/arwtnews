@@ -10,6 +10,7 @@ import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import AdvancedPagination from "../../components/AdvancedPagination"
 import { getPageFromQuery } from "../../utils/paginationHelpers"
+import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
 
 export default function OpinionsArchive({ initialOpinions, initialPage, initialTotalPages }) {
@@ -109,16 +110,9 @@ export default function OpinionsArchive({ initialOpinions, initialPage, initialT
                           <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                         </p>
                       )}
-                      <p className="text-sm text-gray-500 line-clamp-5">
-                        {(() => {
-                          // Generate excerpt from rich_body content for opinions
-                          if (typeof opinion.attributes.rich_body === "string") {
-                            const cleanText = opinion.attributes.rich_body.replace(/<[^>]*>/g, "")
-                            const lines = cleanText.split("\n").filter((line) => line.trim().length > 0)
-                            return lines.slice(0, 5).join(" ").substring(0, 200)
-                          }
-                          return ""
-                        })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+                      <p className="text-sm text-gray-500 line-clamp-5 whitespace-pre-line">
+                        {extractTextFromBlocks(opinion.attributes.rich_body)}...{" "}
+                        <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
                       </p>
                     </div>
                   </div>

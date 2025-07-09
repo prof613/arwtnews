@@ -33,15 +33,18 @@
       "required": true
     },
     "rich_body": {
-      "type": "blocks"
+      "type": "blocks",
+      "required": true
     },
     "author": {
-      "type": "string"
+      "type": "string",
+      "required": true,
+      "default": "RWTNews Staff"
     },
     "author_image": {
       "type": "media",
       "multiple": false,
-      "required": false,
+      "required": true,
       "allowedTypes": [
         "images"
       ]

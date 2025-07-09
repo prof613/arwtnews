@@ -375,8 +375,10 @@ export interface ApiArticleArticle extends Schema.CollectionType {
   };
   attributes: {
     analyticsData: Attribute.JSON & Attribute.Private;
-    author: Attribute.String;
-    author_image: Attribute.Media<'images'>;
+    author: Attribute.String &
+      Attribute.Required &
+      Attribute.DefaultTo<'RWTNews Staff'>;
+    author_image: Attribute.Media<'images'> & Attribute.Required;
     canonicalUrl: Attribute.String;
     category: Attribute.Relation<
       'api::article.article',
@@ -417,7 +419,7 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text & Attribute.Required;
-    rich_body: Attribute.Blocks;
+    rich_body: Attribute.Blocks & Attribute.Required;
     searchableContent: Attribute.Text & Attribute.Private;
     searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
     searchConfig: Attribute.JSON & Attribute.Private;
@@ -558,6 +560,40 @@ export interface ApiMemeMeme extends Schema.CollectionType {
   };
   attributes: {
     artist: Attribute.String & Attribute.Required;
+    artist_link_1: Attribute.String;
+    artist_link_1_label: Attribute.Enumeration<
+      [
+        'Website',
+        'Facebook',
+        'Instagram',
+        'Twitter',
+        'Snapchat',
+        'YouTube',
+        'TikTok',
+        'LinkedIn',
+        'Portfolio',
+        'Shop/Store',
+        'Social Media'
+      ]
+    > &
+      Attribute.DefaultTo<'Website'>;
+    artist_link_2: Attribute.String;
+    artist_link_2_label: Attribute.Enumeration<
+      [
+        'Website',
+        'Facebook',
+        'Instagram',
+        'Twitter',
+        'Snapchat',
+        'YouTube',
+        'TikTok',
+        'LinkedIn',
+        'Portfolio',
+        'Shop/Store',
+        'Social Media'
+      ]
+    > &
+      Attribute.DefaultTo<'Social Media'>;
     category: Attribute.String &
       Attribute.Required &
       Attribute.DefaultTo<'Meme/Cartoons'>;
@@ -565,6 +601,7 @@ export interface ApiMemeMeme extends Schema.CollectionType {
     createdBy: Attribute.Relation<'api::meme.meme', 'oneToOne', 'admin::user'> &
       Attribute.Private;
     date: Attribute.DateTime;
+    description: Attribute.Text;
     enable_share_buttons: Attribute.Boolean & Attribute.DefaultTo<true>;
     image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
@@ -598,8 +635,10 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
   };
   attributes: {
     analyticsData: Attribute.JSON & Attribute.Private;
-    author: Attribute.String & Attribute.DefaultTo<'Editorial Team'>;
-    author_image: Attribute.Media<'images'>;
+    author: Attribute.String &
+      Attribute.Required &
+      Attribute.DefaultTo<'Editorial Team'>;
+    author_image: Attribute.Media<'images'> & Attribute.Required;
     canonicalUrl: Attribute.String;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -628,8 +667,8 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     performanceMetrics: Attribute.JSON & Attribute.Private;
     pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
-    quote: Attribute.Text;
-    rich_body: Attribute.RichText & Attribute.Required;
+    quote: Attribute.Text & Attribute.Required;
+    rich_body: Attribute.Blocks & Attribute.Required;
     searchableContent: Attribute.Text & Attribute.Private;
     searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
     searchConfig: Attribute.JSON & Attribute.Private;

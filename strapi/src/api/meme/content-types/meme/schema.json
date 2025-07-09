@@ -20,9 +20,7 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "category": {
       "type": "string",
@@ -31,6 +29,54 @@
     },
     "date": {
       "type": "datetime"
+    },
+    "description": {
+      "type": "text",
+      "required": false
+    },
+    "artist_link_1": {
+      "type": "string",
+      "required": false
+    },
+    "artist_link_1_label": {
+      "type": "enumeration",
+      "enum": [
+        "Website",
+        "Facebook",
+        "Instagram",
+        "Twitter",
+        "Snapchat",
+        "YouTube",
+        "TikTok",
+        "LinkedIn",
+        "Portfolio",
+        "Shop/Store",
+        "Social Media"
+      ],
+      "required": false,
+      "default": "Website"
+    },
+    "artist_link_2": {
+      "type": "string",
+      "required": false
+    },
+    "artist_link_2_label": {
+      "type": "enumeration",
+      "enum": [
+        "Website",
+        "Facebook",
+        "Instagram",
+        "Twitter",
+        "Snapchat",
+        "YouTube",
+        "TikTok",
+        "LinkedIn",
+        "Portfolio",
+        "Shop/Store",
+        "Social Media"
+      ],
+      "required": false,
+      "default": "Social Media"
     },
     "image_path": {
       "type": "string"
@@ -41,12 +87,7 @@
     },
     "newsletter_inclusion": {
       "type": "enumeration",
-      "enum": [
-        "none",
-        "daily",
-        "weekly",
-        "both"
-      ]
+      "enum": ["none", "daily", "weekly", "both"]
     },
     "slug": {
       "type": "uid",
@@ -60,9 +101,7 @@
       "type": "string"
     },
     "ogImage": {
-      "allowedTypes": [
-        "images"
-      ],
+      "allowedTypes": ["images"],
       "type": "media",
       "multiple": false
     },
@@ -71,11 +110,7 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": [
-        "draft",
-        "published",
-        "archived"
-      ],
+      "enum": ["draft", "published", "archived"],
       "default": "draft"
     }
   }

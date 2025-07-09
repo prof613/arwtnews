@@ -11,6 +11,7 @@ import MainBanner from "../components/MainBanner"
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import Footer from "../components/Footer"
+import { extractTextFromBlocks } from "../utils/blockHelpers"
 
 // Function to format date properly (fix timezone issue)
 const formatDate = (dateString) => {
@@ -28,11 +29,11 @@ const cleanTitle = (title) => {
   if (!title) return "Video Unavailable"
 
   return title
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/'/g, "'")
+    .replace(/"/g, '"')
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
     .split("#")[0] // Remove everything after first hashtag
     .trim()
 }
@@ -43,34 +44,41 @@ export default function Home() {
   const [externalLinks, setExternalLinks] = useState([])
   const [videos, setVideos] = useState([])
   const [modalVideo, setModalVideo] = useState(null)
+  const [articlesError, setArticlesError] = useState(null)
+  const [externalLinksError, setExternalLinksError] = useState(null)
+  const [videosError, setVideosError] = useState(null)
 
   useEffect(() => {
+    const controller = new AbortController()
     async function fetchData() {
       try {
         // Handle articles separately - ONLY ACTIVE articles for homepage
         try {
           const articleRes = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
+            { signal: controller.signal },
           )
           const featuredArticlesList = articleRes.data.data.filter((a) => a.attributes.is_featured)
           const regularArticles = articleRes.data.data.filter((a) => !a.attributes.is_featured)
-
-          // Now we store up to 3 featured articles
           setFeaturedArticles(featuredArticlesList.slice(0, 3))
           setArticles(regularArticles.slice(0, 6))
+          setArticlesError(null)
         } catch (error) {
-          console.error("Error fetching articles:", error)
+          if (error.name !== "AbortError") {
+            setArticlesError("Failed to load articles. Please try again later.")
+            setFeaturedArticles([])
+            setArticles([])
+          }
         }
 
         // Handle external articles separately with 1-year timeout and proper sorting
         try {
           const externalRes = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*&sort[0]=createdAt:desc`,
+            { signal: controller.signal },
           )
-
           const oneYearAgo = new Date()
           oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-
           const filteredAndSorted = externalRes.data.data
             .filter((article) => {
               const articleDate = new Date(article.attributes.date)
@@ -82,28 +90,36 @@ export default function Home() {
               return dateB - dateA
             })
             .slice(0, 10)
-
           setExternalLinks(filteredAndSorted)
+          setExternalLinksError(null)
         } catch (error) {
-          console.error("Error fetching external articles:", error)
-          setExternalLinks([])
+          if (error.name !== "AbortError") {
+            setExternalLinksError("Failed to load external articles. Please try again later.")
+            setExternalLinks([])
+          }
         }
 
         // Handle videos - now using server-side API
         try {
-          console.log("Fetching videos from server API...")
-          const videoRes = await axios.get("/api/videos")
+          const videoRes = await axios.get("/api/videos", { signal: controller.signal })
           setVideos(videoRes.data.videos || [])
-          console.log(`Loaded ${videoRes.data.videos?.length || 0} videos (cached: ${videoRes.data.cached})`)
+          setVideosError(null)
         } catch (error) {
-          console.error("Error fetching videos:", error)
-          setVideos([])
+          if (error.name !== "AbortError") {
+            setVideosError("Failed to load videos. Please try again later.")
+            setVideos([])
+          }
         }
       } catch (error) {
-        console.error("Error in fetchData:", error)
+        if (error.name !== "AbortError") {
+          setArticlesError("Failed to load articles. Please try again later.")
+          setExternalLinksError("Failed to load external articles. Please try again later.")
+          setVideosError("Failed to load videos. Please try again later.")
+        }
       }
     }
     fetchData()
+    return () => controller.abort() // Cleanup on unmount
   }, [])
 
   const openVideoModal = (videoUrl) => setModalVideo(videoUrl)
@@ -181,25 +197,9 @@ export default function Home() {
               </p>
             </div>
           )}
-          <p className={`text-sm text-gray-500 ${isHero ? "line-clamp-7" : "line-clamp-3"}`}>
-            {(() => {
-              if (Array.isArray(attrs.rich_body)) {
-                let excerpt = ""
-                let lineCount = 0
-
-                for (const block of attrs.rich_body) {
-                  if (block.type === "paragraph" && block.children) {
-                    const text = block.children.map((child) => child.text).join("")
-                    excerpt += text + " "
-                    lineCount++
-                    if (lineCount >= (isHero ? 5 : 3)) break
-                  }
-                }
-
-                return excerpt.substring(0, isHero ? 300 : 150).trim()
-              }
-              return ""
-            })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+          <p className={`text-sm text-gray-500 whitespace-pre-line ${isHero ? "line-clamp-7" : "line-clamp-3"}`}>
+            {extractTextFromBlocks(attrs.rich_body, isHero ? 300 : 150)}...{" "}
+            <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
           </p>
         </div>
       </Link>
@@ -221,7 +221,9 @@ export default function Home() {
           <section className="my-8">
             <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Articles</h2>
 
-            {featuredArticles.length > 0 ? (
+            {articlesError ? (
+              <p className="text-center text-gray-500 py-8">{articlesError}</p>
+            ) : featuredArticles.length > 0 ? (
               <div className="space-y-4">
                 {/* Hero Featured Article */}
                 {renderFeaturedArticle(featuredArticles[0], true)}
@@ -234,112 +236,106 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <p>No featured articles available.</p>
+              <p className="text-center text-gray-500 py-8">No featured articles available.</p>
             )}
           </section>
 
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">The RIGHT News</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {articles.map((article) => (
-              <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
-                <div className="border-l-4 border-[#B22234] p-4">
-                  <img
-                    src={
-                      article.attributes.image_path
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image_path}`
-                        : article.attributes.image?.data?.attributes?.url
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image.data.attributes.url}`
-                          : "/images/core/placeholder.jpg"
-                    }
-                    alt={article.attributes.title}
-                    className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
-                  />
-                  <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
-                    {(() => {
-                      const primaryCat = article.attributes.category?.data?.attributes?.name
-                      const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name
-                      if (primaryCat && secondaryCat) {
-                        return `${primaryCat} - ${secondaryCat}`
-                      } else {
-                        return primaryCat || secondaryCat || "None"
+            {articlesError ? (
+              <p className="text-center text-gray-500 py-8">{articlesError}</p>
+            ) : (
+              articles.map((article) => (
+                <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
+                  <div className="border-l-4 border-[#B22234] p-4">
+                    <img
+                      src={
+                        article.attributes.image_path
+                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image_path}`
+                          : article.attributes.image?.data?.attributes?.url
+                            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image.data.attributes.url}`
+                            : "/images/core/placeholder.jpg"
                       }
-                    })()} / {article.attributes.author || "Unknown"} /{" "}
-                    {new Date(article.attributes.date).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "America/Los_Angeles",
-                    })}
-                  </p>
-                  <h3 className="text-xl font-bold text-[#3C3B6E] min-h-[3.5rem] leading-tight">
-                    {article.attributes.title}
-                  </h3>
-                  {article.attributes.quote && (
-                    <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2 min-h-[2.5rem] leading-5">
-                      {article.attributes.quote}...{" "}
-                      <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
-                    </p>
-                  )}
-                  <p className="text-sm text-gray-500 line-clamp-5">
-                    {(() => {
-                      if (Array.isArray(article.attributes.rich_body)) {
-                        let excerpt = ""
-                        let lineCount = 0
-
-                        for (const block of article.attributes.rich_body) {
-                          if (block.type === "paragraph" && block.children) {
-                            const text = block.children.map((child) => child.text).join("")
-                            excerpt += text + " "
-                            lineCount++
-                            if (lineCount >= 5) break
-                          }
+                      alt={article.attributes.title}
+                      className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
+                    />
+                    <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
+                      {(() => {
+                        const primaryCat = article.attributes.category?.data?.attributes?.name
+                        const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name
+                        if (primaryCat && secondaryCat) {
+                          return `${primaryCat} - ${secondaryCat}`
+                        } else {
+                          return primaryCat || secondaryCat || "None"
                         }
-
-                        return excerpt.substring(0, 200).trim()
-                      }
-                      return ""
-                    })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
-                  </p>
-                  <hr className="border-[#3C3B6E] border-opacity-50 mt-4" />
-                </div>
-              </Link>
-            ))}
+                      })()} / {article.attributes.author || "Unknown"} /{" "}
+                      {new Date(article.attributes.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "America/Los_Angeles",
+                      })}
+                    </p>
+                    <h3 className="text-xl font-bold text-[#3C3B6E] min-h-[3.5rem] leading-tight">
+                      {article.attributes.title}
+                    </h3>
+                    {article.attributes.quote && (
+                      <p className="text-sm text-gray-500 italic mb-1 border-l-4 border-[#B22234] pl-2 line-clamp-2 min-h-[2.5rem] leading-5">
+                        {article.attributes.quote}...{" "}
+                        <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-500 line-clamp-5 whitespace-pre-line">
+                      {extractTextFromBlocks(article.attributes.rich_body, 200)}...{" "}
+                      <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+                    </p>
+                    <hr className="border-[#3C3B6E] border-opacity-50 mt-4" />
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">From the Web</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {externalLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.attributes.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm("You're about to visit an external site. Continue?"))
-                    window.open(link.attributes.link, "_blank")
-                }}
-              >
-                <div className="p-2">
-                  <h3 className="text-xl font-bold text-[#3C3B6E]">{link.attributes.title}</h3>
-                  {link.attributes.quote && (
-                    <p className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
-                      {link.attributes.quote.substring(0, 100)}...
+            {externalLinksError ? (
+              <p className="text-center text-gray-500 py-8">{externalLinksError}</p>
+            ) : (
+              externalLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.attributes.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    if (confirm("You're about to visit an external site. Continue?"))
+                      window.open(link.attributes.link, "_blank")
+                  }}
+                >
+                  <div className="p-2">
+                    <h3 className="text-xl font-bold text-[#3C3B6E]">{link.attributes.title}</h3>
+                    {link.attributes.quote && (
+                      <p className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
+                        {link.attributes.quote.substring(0, 100)}...
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-600">
+                      {link.attributes.category || "None"} / {link.attributes.author || "Unknown"} /{" "}
+                      {formatDate(link.attributes.date)}
                     </p>
-                  )}
-                  <p className="text-sm text-gray-600">
-                    {link.attributes.category || "None"} / {link.attributes.author || "Unknown"} /{" "}
-                    {formatDate(link.attributes.date)}
-                  </p>
-                  <p className="text-sm text-[#B22234]">
-                    Read full article at {new URL(link.attributes.link).hostname}
-                  </p>
-                </div>
-              </a>
-            ))}
+                    <p className="text-sm text-[#B22234]">
+                      Read full article at {new URL(link.attributes.link).hostname}
+                    </p>
+                  </div>
+                </a>
+              ))
+            )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {videos.length > 0 ? (
+            {videosError ? (
+              <p className="text-center text-gray-500 py-8">{videosError}</p>
+            ) : videos.length > 0 ? (
               videos.map((video, index) => (
                 <div
                   key={index}

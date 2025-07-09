@@ -10,8 +10,10 @@ import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import AdvancedPagination from "../../components/AdvancedPagination"
 import { getPageFromQuery } from "../../utils/paginationHelpers"
+import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
 import MemeLightbox from "../../components/MemeLightbox"
+import { ExternalLink } from "lucide-react"
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -156,6 +158,48 @@ export default function Category() {
     }
   }
 
+  const renderArtistLinks = (item) => {
+    const link1 = item.attributes.artist_link_1
+    const link1Label = item.attributes.artist_link_1_label || "Website"
+    const link2 = item.attributes.artist_link_2
+    const link2Label = item.attributes.artist_link_2_label || "Social Media"
+
+    // Only show if at least one link exists
+    if (!link1 && !link2) return null
+
+    return (
+      <div className="mt-3">
+        <p className="text-sm text-gray-600 mb-2">Visit this artist at the links below:</p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          {link1 && (
+            <a
+              href={link1}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink size={14} />
+              {link1Label}
+            </a>
+          )}
+          {link2 && (
+            <a
+              href={link2}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink size={14} />
+              {link2Label}
+            </a>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   const renderContent = () => {
     if (items.length === 0) return <p>No items available.</p>
 
@@ -175,14 +219,20 @@ export default function Category() {
                   className="w-full h-auto rounded mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </button>
-              <h3 className="text-lg font-bold text-[#3C3B6E] mt-2">{item.attributes.artist || "Unknown"}</h3>
-              <p className="text-sm text-gray-600">
-                {new Date(item.attributes.date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-[#3C3B6E]">{item.attributes.artist || "Unknown"}</h3>
+                <p className="text-base text-gray-600">
+                  {new Date(item.attributes.date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                {item.attributes.description && (
+                  <p className="text-base text-gray-700 italic max-w-md mx-auto">{item.attributes.description}</p>
+                )}
+                {renderArtistLinks(item)}
+              </div>
             </div>
           ))}
         </div>
@@ -204,8 +254,13 @@ export default function Category() {
                 </a>
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                {item.attributes.author || "Unknown"} / {item.attributes.category || "General"} /{" "}
-                {item.attributes.date ? formatDate(item.attributes.date) : "No date"}
+                {item.attributes.author || "Unknown"} /{" "}
+                {typeof item.attributes.category?.data?.attributes?.name === "string"
+                  ? item.attributes.category.data.attributes.name
+                  : typeof item.attributes.category?.name === "string"
+                    ? item.attributes.category.name
+                    : "General"}{" "}
+                / {item.attributes.date ? formatDate(item.attributes.date) : "No date"}
               </p>
               {item.attributes.quote && (
                 <p className="text-sm text-gray-500 mb-3 italic border-l-4 border-[#B22234] pl-2 line-clamp-2">
@@ -275,24 +330,30 @@ export default function Category() {
               <div className="flex-1">
                 <p className="text-sm text-gray-600">
                   {(() => {
-                    const primaryCat = item.attributes.category?.data?.attributes?.name
-                    const secondaryCat = item.attributes.secondary_category?.data?.attributes?.name
+                    const primaryCat =
+                      typeof item.attributes.category?.data?.attributes?.name === "string"
+                        ? item.attributes.category.data.attributes.name
+                        : typeof item.attributes.category?.name === "string"
+                          ? item.attributes.category.name
+                          : ""
+                    const secondaryCat =
+                      typeof item.attributes.secondary_category?.data?.attributes?.name === "string"
+                        ? item.attributes.secondary_category.data.attributes.name
+                        : typeof item.attributes.secondary_category?.name === "string"
+                          ? item.attributes.secondary_category.name
+                          : ""
 
                     if (item.type === "opinion") {
                       return secondaryCat ? `Opinion - ${secondaryCat}` : "Opinion"
                     }
 
-                    // NEW LOGIC: Check which category page we're viewing
                     if (primaryCat && secondaryCat) {
-                      // If we're viewing the secondary category page, show secondary first
                       if (category === secondaryCat) {
                         return `${secondaryCat} - ${primaryCat}`
                       }
-                      // Otherwise show primary first (default behavior)
                       return `${primaryCat} - ${secondaryCat}`
                     }
 
-                    // If only one category exists, show it
                     return primaryCat || secondaryCat || "None"
                   })()} / {item.attributes.author || "Unknown"} /{" "}
                   {new Date(item.attributes.date).toLocaleDateString("en-US", {
@@ -309,25 +370,9 @@ export default function Category() {
                     <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                   </p>
                 )}
-                <p className="text-sm text-gray-500 line-clamp-5">
-                  {(() => {
-                    if (item.type === "opinion") {
-                      if (typeof item.attributes.rich_body === "string") {
-                        const cleanText = item.attributes.rich_body.replace(/<[^>]*>/g, "")
-                        return cleanText.substring(0, 200)
-                      }
-                    } else if (Array.isArray(item.attributes.rich_body)) {
-                      let excerpt = ""
-                      for (const block of item.attributes.rich_body) {
-                        if (block.type === "paragraph" && block.children) {
-                          excerpt += block.children.map((child) => child.text).join("") + " "
-                          if (excerpt.length > 200) break
-                        }
-                      }
-                      return excerpt.substring(0, 200).trim()
-                    }
-                    return ""
-                  })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+                <p className="text-sm text-gray-500 line-clamp-5 whitespace-pre-line">
+                  {extractTextFromBlocks(item.attributes.rich_body, 200)}...{" "}
+                  <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
                 </p>
               </div>
             </div>
@@ -337,10 +382,23 @@ export default function Category() {
     )
   }
 
+  // Fix the title error by ensuring category is always a string
+  const getPageTitle = () => {
+    let categoryName = "Category"
+    if (category) {
+      if (Array.isArray(category)) {
+        categoryName = category[0] || "Category"
+      } else {
+        categoryName = String(category).split(",")[0]
+      }
+    }
+    return `${categoryName} | Red, White and True News`
+  }
+
   return (
     <>
       <Head>
-        <title>{String(category || "Category").split(",")[0]} | Red, White and True News</title>
+        <title>{getPageTitle()}</title>
         <link rel="icon" href="/images/core/rwtn_favicon.jpg" />
       </Head>
       <Header />

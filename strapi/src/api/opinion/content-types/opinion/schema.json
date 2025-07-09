@@ -20,12 +20,9 @@
       "type": "uid",
       "targetField": "title"
     },
-    "rich_body": {
-      "type": "richtext",
-      "required": true
-    },
     "quote": {
-      "type": "text"
+      "type": "text",
+      "required": true
     },
     "featured_image": {
       "type": "media",
@@ -37,12 +34,13 @@
     },
     "author": {
       "type": "string",
-      "default": "Editorial Team"
+      "default": "Editorial Team",
+      "required": true
     },
     "author_image": {
       "type": "media",
       "multiple": false,
-      "required": false,
+      "required": true,
       "allowedTypes": [
         "images"
       ]
@@ -95,11 +93,12 @@
       "type": "text"
     },
     "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
     },
     "searchTags": {
       "type": "string"
@@ -173,6 +172,10 @@
     "metadata": {
       "type": "json",
       "private": true
+    },
+    "rich_body": {
+      "type": "blocks",
+      "required": true
     }
   }
 }

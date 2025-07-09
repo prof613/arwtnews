@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import axios from "axios"
+import { extractTextFromBlocks } from "../utils/blockHelpers"
 
 export default function Sidebar() {
   const router = useRouter()
@@ -206,15 +207,9 @@ export default function Sidebar() {
                   <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                 </blockquote>
               )}
-              <p className="text-sm text-gray-500 line-clamp-5">
-                {(() => {
-                  if (typeof opinion.attributes.rich_body === "string") {
-                    const cleanText = opinion.attributes.rich_body.replace(/<[^>]*>/g, "")
-                    const lines = cleanText.split("\n").filter((line) => line.trim().length > 0)
-                    return lines.slice(0, 5).join(" ").substring(0, 100)
-                  }
-                  return ""
-                })()}... <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+              <p className="text-sm text-gray-500 line-clamp-5 whitespace-pre-line">
+                {extractTextFromBlocks(opinion.attributes.rich_body, 100)}...{" "}
+                <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
               </p>
             </Link>
           </div>
@@ -399,7 +394,7 @@ export default function Sidebar() {
           href="https://www.gofundme.com/f/support-red-white-and-true-news-mission"
           target="_blank"
           rel="noopener noreferrer"
-          className="block bg-[#B22234] text-white p-2 rounded mt-2 hover:bg-[#8B1A1A] text-center"
+          className="block bg-[#B22234] text-white p-2 rounded mt-2 hover:bg-[#8B1A2B] text-center"
         >
           Donate
         </a>

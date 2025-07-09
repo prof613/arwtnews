@@ -9,6 +9,8 @@ import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
+import BlockRenderer from "../../components/BlockRenderer"
+import { getFirstParagraphText } from "../../utils/blockHelpers"
 
 export default function Article() {
   const router = useRouter()
@@ -41,6 +43,9 @@ export default function Article() {
       : null
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+
+  // Get first paragraph text for date inline placement
+  const firstParagraphText = getFirstParagraphText(article.rich_body)
 
   return (
     <>
@@ -92,51 +97,37 @@ export default function Article() {
               </div>
             </div>
             <div className="text-gray-600 mb-4">
-              <div className="prose max-w-none">
-                <p className="mb-4">
-                  <span className="font-medium">
-                    {new Date(article.date).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "America/Los_Angeles",
-                    })}{" "}
-                    -{" "}
-                  </span>
-                  {(() => {
-                    if (Array.isArray(article.rich_body) && article.rich_body.length > 0) {
-                      const firstBlock = article.rich_body[0]
-                      if (firstBlock.type === "paragraph" && firstBlock.children) {
-                        return firstBlock.children.map((child, index) => <span key={index}>{child.text}</span>)
-                      }
-                    }
-                    return "Content continues..."
-                  })()}
-                </p>
-                {Array.isArray(article.rich_body) &&
-                  article.rich_body.slice(1).map((block, index) => {
-                    if (block.type === "paragraph") {
-                      return (
-                        <p key={index + 1} className="mb-4">
-                          {block.children?.map((child, childIndex) => (
-                            <span key={childIndex}>{child.text}</span>
-                          ))}
-                        </p>
-                      )
-                    }
-                    if (block.type === "heading") {
-                      const HeadingTag = `h${block.level || 2}`
-                      return (
-                        <HeadingTag key={index + 1} className="font-bold mb-2">
-                          {block.children?.map((child, childIndex) => (
-                            <span key={childIndex}>{child.text}</span>
-                          ))}
-                        </HeadingTag>
-                      )
-                    }
-                    return null
-                  })}
-              </div>
+              {/* Only show date inline if there's a first paragraph, otherwise show it separately */}
+              {firstParagraphText ? (
+                <BlockRenderer
+                  blocks={article.rich_body}
+                  datePrefix={
+                    <span className="font-medium">
+                      {new Date(article.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "America/Los_Angeles",
+                      })}{" "}
+                      -{" "}
+                    </span>
+                  }
+                />
+              ) : (
+                <>
+                  <p className="mb-4">
+                    <span className="font-medium">
+                      {new Date(article.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "America/Los_Angeles",
+                      })}
+                    </span>
+                  </p>
+                  <BlockRenderer blocks={article.rich_body} />
+                </>
+              )}
             </div>
 
             {article.enable_share_buttons && (
