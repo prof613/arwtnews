@@ -1,3 +1,4 @@
+// test comment
 module.exports = [
   'strapi::errors',
   {
