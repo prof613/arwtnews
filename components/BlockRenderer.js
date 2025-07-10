@@ -1,4 +1,5 @@
 import React from "react"
+import { getStrapiMedia } from "../utils/media" // Import the new helper
 
 export default function BlockRenderer({ blocks, datePrefix = null }) {
   if (!blocks || !Array.isArray(blocks)) {
@@ -65,21 +66,21 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
       .replace(/^#### (.*$)/gm, '<h4 class="text-lg font-bold mb-2 text-[#3C3B6E]">$1</h4>')
       .replace(/^##### (.*$)/gm, '<h5 class="text-base font-bold mb-2 text-[#3C3B6E]">$1</h5>')
       .replace(/^###### (.*$)/gm, '<h6 class="text-sm font-bold mb-2 text-[#3C3B6E]">$1</h6>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
       .replace(/\n\n+/g, '</p><p class="mb-4">')
-      .replace(/\n/g, '<br>')
+      .replace(/\n/g, "<br>")
 
     // Wrap in paragraph tags if not already wrapped in headings
-    if (!processedContent.includes('<h') && !processedContent.includes('<p')) {
+    if (!processedContent.includes("<h") && !processedContent.includes("<p")) {
       processedContent = `<p class="mb-4">${processedContent}</p>`
-    } else if (processedContent.includes('<h') && !processedContent.startsWith('<h')) {
+    } else if (processedContent.includes("<h") && !processedContent.startsWith("<h")) {
       // If there are headings but content doesn't start with one, wrap the beginning
-      const firstHeadingIndex = processedContent.search(/<h[1-6]/);
+      const firstHeadingIndex = processedContent.search(/<h[1-6]/)
       if (firstHeadingIndex > 0) {
-        const beforeHeading = processedContent.substring(0, firstHeadingIndex);
-        const afterHeading = processedContent.substring(firstHeadingIndex);
-        processedContent = `<p class="mb-4">${beforeHeading}</p>${afterHeading}`;
+        const beforeHeading = processedContent.substring(0, firstHeadingIndex)
+        const afterHeading = processedContent.substring(firstHeadingIndex)
+        processedContent = `<p class="mb-4">${beforeHeading}</p>${afterHeading}`
       }
     }
 
@@ -96,26 +97,9 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
   }
 
   const renderEnhancedImage = (block, index) => {
-    // DEBUG: Remove this after fixing
-    console.log("Enhanced Image Block:", block)
-    
     const { image, caption, alignment = "center", size = "medium" } = block
-
-    // Build image URL
-    const buildImageUrl = (url) => {
-      if (!url) return null
-      if (url.startsWith("http")) return url
-      if (url.startsWith("/")) return `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`
-      return `${process.env.NEXT_PUBLIC_STRAPI_URL}/${url}`
-    }
-
-    let imageUrl = null
-    let altText = "Article image"
-
-    if (image?.data?.attributes?.url) {
-      imageUrl = buildImageUrl(image.data.attributes.url)
-      altText = image.data.attributes.alternativeText || altText
-    }
+    const imageUrl = getStrapiMedia(image)
+    const altText = image?.data?.attributes?.alternativeText || "Article image"
 
     if (!imageUrl) {
       return (
@@ -228,35 +212,9 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         )
 
       case "image":
-        // Legacy image handling (keep existing logic)
-        const buildImageUrl = (url) => {
-          if (!url) return null
-          if (url.startsWith("http")) return url
-          if (url.startsWith("/")) return `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`
-          return `${process.env.NEXT_PUBLIC_STRAPI_URL}/${url}`
-        }
-
-        let imageUrl = null
-        let altText = "Article image"
-        let caption = null
-
-        if (block.image?.url) {
-          imageUrl = buildImageUrl(block.image.url)
-          altText = block.image.alternativeText || altText
-          caption = block.image.caption
-        } else if (block.image?.data?.attributes?.url) {
-          imageUrl = buildImageUrl(block.image.data.attributes.url)
-          altText = block.image.data.attributes.alternativeText || altText
-          caption = block.image.data.attributes.caption
-        } else if (block.url) {
-          imageUrl = buildImageUrl(block.url)
-          altText = block.alternativeText || altText
-          caption = block.caption
-        } else if (block.file?.url) {
-          imageUrl = buildImageUrl(block.file.url)
-          altText = block.file.alternativeText || altText
-          caption = block.file.caption
-        }
+        const imageUrl = getStrapiMedia(block.image)
+        const altText = block.image?.data?.attributes?.alternativeText || "Article image"
+        const caption = block.image?.data?.attributes?.caption
 
         if (!imageUrl) {
           return (

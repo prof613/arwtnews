@@ -11,6 +11,7 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getFirstParagraphText } from "../../utils/blockHelpers"
+import { getStrapiMedia } from "../../utils/media" // Import the new helper
 
 export default function Opinion() {
   const router = useRouter()
@@ -36,11 +37,8 @@ export default function Opinion() {
 
   if (!opinion) return <div>Loading...</div>
 
-  const imageUrl = opinion.image_path
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.image_path}`
-    : opinion.featured_image?.data?.attributes?.url
-      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.featured_image.data.attributes.url}`
-      : null
+  const imageUrl = getStrapiMedia(opinion.featured_image)
+  const authorImageUrl = getStrapiMedia(opinion.author_image)
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : ""
 
@@ -86,11 +84,7 @@ export default function Opinion() {
             <hr className="border-[#3C3B6E] border-opacity-50 my-2" />
             <div className="flex items-center mb-4">
               <img
-                src={
-                  opinion.author_image?.data?.attributes?.url
-                    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.author_image.data.attributes.url}`
-                    : "/images/staff/authors/placeholder-author.jpg"
-                }
+                src={authorImageUrl || "/images/staff/authors/placeholder-author.jpg"}
                 alt={opinion.author}
                 className="w-12 h-12 rounded-full mr-2"
               />

@@ -14,6 +14,7 @@ import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
 import MemeLightbox from "../../components/MemeLightbox"
 import { ExternalLink } from "lucide-react"
+import { getStrapiMedia } from "../../utils/media" // Import the new helper
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -210,11 +211,7 @@ export default function Category() {
             <div key={item.id} className="p-2 text-center">
               <button onClick={() => openLightbox(index)} className="w-full">
                 <img
-                  src={
-                    item.attributes.image?.data?.attributes?.url
-                      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image.data.attributes.url}`
-                      : "/images/core/placeholder.jpg"
-                  }
+                  src={getStrapiMedia(item.attributes.image) || "/images/core/placeholder.jpg"}
                   alt={item.attributes.artist || "Meme"}
                   className="w-full h-auto rounded mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                 />
@@ -311,17 +308,8 @@ export default function Category() {
               <div className="w-1/3">
                 <img
                   src={
-                    item.type === "opinion"
-                      ? item.attributes.image_path
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-                        : item.attributes.featured_image?.data?.attributes?.url
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.featured_image.data.attributes.url}`
-                          : "/images/core/placeholder.jpg"
-                      : item.attributes.image_path
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-                        : item.attributes.image?.data?.attributes?.url
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image.data.attributes.url}`
-                          : "/images/core/placeholder.jpg"
+                    getStrapiMedia(item.type === "opinion" ? item.attributes.featured_image : item.attributes.image) ||
+                    "/images/core/placeholder.jpg"
                   }
                   alt={item.attributes.title}
                   className="w-full h-auto md:h-32 object-contain rounded bg-gray-50"

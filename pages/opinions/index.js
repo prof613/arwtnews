@@ -12,6 +12,7 @@ import AdvancedPagination from "../../components/AdvancedPagination"
 import { getPageFromQuery } from "../../utils/paginationHelpers"
 import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
+import { getStrapiMedia } from "../../utils/media" // Import the new helper
 
 export default function OpinionsArchive({ initialOpinions, initialPage, initialTotalPages }) {
   const router = useRouter()
@@ -78,13 +79,7 @@ export default function OpinionsArchive({ initialOpinions, initialPage, initialT
                   <div className="flex gap-6 p-2">
                     <div className="w-1/3">
                       <img
-                        src={
-                          opinion.attributes.image_path
-                            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.attributes.image_path}`
-                            : opinion.attributes.featured_image?.data?.attributes?.url
-                              ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.attributes.featured_image.data.attributes.url}`
-                              : "/images/core/placeholder.jpg"
-                        }
+                        src={getStrapiMedia(opinion.attributes.featured_image) || "/images/core/placeholder.jpg"}
                         alt={opinion.attributes.title}
                         className="w-full h-auto md:h-32 object-contain rounded bg-gray-50"
                       />

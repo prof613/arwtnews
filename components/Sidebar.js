@@ -1,10 +1,10 @@
 "use client"
-
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import axios from "axios"
 import { extractTextFromBlocks } from "../utils/blockHelpers"
+import { getStrapiMedia } from "../utils/media" // Import the new helper
 
 export default function Sidebar() {
   const router = useRouter()
@@ -24,7 +24,6 @@ export default function Sidebar() {
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?pagination[page]=1&pagination[pageSize]=2&populate=*&sort[0]=date:desc`,
           ),
         ])
-
         setMemes(memeRes.data.data)
         const sortedOpinions = opinionRes.data.data.sort(
           (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
@@ -34,19 +33,16 @@ export default function Sidebar() {
         console.error("Error fetching sidebar content:", error)
       }
     }
-
     fetchSidebarContent()
   }, [])
 
   const handleSubscribe = async (e) => {
     e.preventDefault()
     setIsSubscribing(true)
-
     try {
       const response = await axios.post("/api/subscribe", {
         email: email,
       })
-
       if (response.data.success) {
         alert("Subscribed successfully!")
         setEmail("")
@@ -68,7 +64,6 @@ export default function Sidebar() {
       const recentSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]")
       const updatedSearches = [searchQuery, ...recentSearches.filter((s) => s !== searchQuery)].slice(0, 5)
       localStorage.setItem("recentSearches", JSON.stringify(updatedSearches))
-
       // Navigate to appropriate search page based on type
       const searchPage = searchType === "articles" ? "/search-all-articles" : "/search-web-articles"
       router.push(`${searchPage}?query=${encodeURIComponent(searchQuery.trim())}`)
@@ -105,7 +100,6 @@ export default function Sidebar() {
               <span className="text-[#3C3B6E]">Our Archive of News from the Web</span>
             </label>
           </div>
-
           <input
             type="text"
             value={searchQuery}
@@ -113,7 +107,6 @@ export default function Sidebar() {
             placeholder={searchType === "articles" ? "Search our articles..." : "Search our web archive..."}
             className="p-2 border rounded"
           />
-
           <div className="flex gap-2">
             <button
               type="submit"
@@ -135,12 +128,33 @@ export default function Sidebar() {
           </div>
         </form>
       </div>
-
       {/* Ad Slot 1 - Top under search */}
       <div className="bg-gray-100 p-4 rounded mb-4">
-
+        <a
+          href="https://ourconservativestore.com/product/trump-fight-never-surrender-mug-iconic-patriotic-trump-coffee-mug/?sld=95"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block hover:opacity-80 transition-opacity"
+        >
+          <img
+            src="https://ourconservativestore.com/wp-content/uploads/2024/09/3598280471593076194_2048-300x300.jpeg"
+            alt="Trump Fight Never Surrender Mug"
+            className="w-full h-auto rounded"
+          />
+        </a>
+        <p className="text-sm text-gray-600 mt-2 text-center">
+          Get your "Fight!" mug at
+          <br />
+          <a
+            href="https://ourconservativestore.com/?sld=95"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#B22234] hover:underline font-medium"
+          >
+            Our Conservative Store
+          </a>
+        </p>
       </div>
-
       {/* Opinion Section - MOVED UP */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">
@@ -160,19 +174,13 @@ export default function Sidebar() {
                   timeZone: "America/Los_Angeles",
                 })}
               </p>
-              {(opinion.attributes.image_path || opinion.attributes.featured_image?.data?.attributes?.url) && (
+              {getStrapiMedia(opinion.attributes.featured_image) && (
                 <div
                   className="w-full bg-gray-200 rounded mb-2 flex items-center justify-center"
                   style={{ minHeight: "120px" }}
                 >
                   <img
-                    src={
-                      opinion.attributes.image_path
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.attributes.image_path}`
-                        : opinion.attributes.featured_image?.data?.attributes?.url
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${opinion.attributes.featured_image.data.attributes.url}`
-                          : "/images/core/placeholder.jpg"
-                    }
+                    src={getStrapiMedia(opinion.attributes.featured_image) || "/images/core/placeholder.jpg"}
                     alt={opinion.attributes.title}
                     className="max-w-full max-h-32 object-contain rounded"
                   />
@@ -192,7 +200,6 @@ export default function Sidebar() {
           </div>
         ))}
       </div>
-
       {/* Memes Section - MOVED DOWN */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">
@@ -214,13 +221,7 @@ export default function Sidebar() {
                   })}
                 </p>
                 <img
-                  src={
-                    meme.attributes.image_path
-                      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${meme.attributes.image_path}`
-                      : meme.attributes.image?.data?.attributes?.url
-                        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${meme.attributes.image.data.attributes.url}`
-                        : "/images/core/placeholder.jpg"
-                  }
+                  src={getStrapiMedia(meme.attributes.image) || "/images/core/placeholder.jpg"}
                   alt="Meme"
                   className="w-full h-auto rounded"
                 />
@@ -229,12 +230,33 @@ export default function Sidebar() {
           </div>
         ))}
       </div>
-
       {/* Ad Slot 2 - Below memes, above subscribe */}
       <div className="bg-gray-100 p-4 rounded mb-4">
-
+        <a
+          href="https://ourconservativestore.com/product/anti-liberal-mug-liberal-tears-white-ceramic-mug/?sld=95"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block hover:opacity-80 transition-opacity"
+        >
+          <img
+            src="https://ourconservativestore.com/wp-content/uploads/2024/08/2828935763882788651_2048-300x300.jpeg"
+            alt="Anti Liberal Mug - Liberal Tears"
+            className="w-full h-auto rounded"
+          />
+        </a>
+        <p className="text-sm text-gray-600 mt-2 text-center">
+          Get your "Liberal Tears" mug at
+          <br />
+          <a
+            href="https://ourconservativestore.com/?sld=95"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#B22234] hover:underline font-medium"
+          >
+            Our Conservative Store
+          </a>
+        </p>
       </div>
-
       {/* Newsletter Subscription - UNCHANGED */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Subscribe to Our Newsletter</h3>
@@ -257,7 +279,6 @@ export default function Sidebar() {
           </button>
         </form>
       </div>
-
       {/* Shop Section */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Shop</h3>
@@ -270,7 +291,6 @@ export default function Sidebar() {
           <img src="/images/core/store-icon.png" alt="Store" className="w-6 h-6 mr-2" /> Our Conservative Store
         </a>
       </div>
-
       {/* Stop TDS Section */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <a href="https://StopTDS.com" target="_blank" rel="noopener noreferrer">
@@ -281,7 +301,6 @@ export default function Sidebar() {
           magna aliqua.
         </p>
       </div>
-
       {/* Connect Section */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Connect</h3>
@@ -324,7 +343,6 @@ export default function Sidebar() {
           </Link>
         </div>
       </div>
-
       {/* About Section */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">About RWTNews</h3>
@@ -332,7 +350,6 @@ export default function Sidebar() {
           Learn More About Red, White and True News
         </Link>
       </div>
-
       {/* Support Section */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Support Our Mission</h3>
@@ -353,7 +370,6 @@ export default function Sidebar() {
           Donate
         </a>
       </div>
-
       {/* Ad Slot 3 - Very bottom */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <a

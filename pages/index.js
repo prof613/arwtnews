@@ -1,8 +1,6 @@
 "use client"
-
 // File: index.js
 // Folder: /rwtnews/pages
-
 import Head from "next/head"
 import Link from "next/link"
 import { useState, useEffect } from "react"
@@ -12,6 +10,7 @@ import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import Footer from "../components/Footer"
 import { extractTextFromBlocks } from "../utils/blockHelpers"
+import { getStrapiMedia } from "../utils/media" // Import the new helper
 
 // Function to format date properly (fix timezone issue)
 const formatDate = (dateString) => {
@@ -27,7 +26,6 @@ const formatDate = (dateString) => {
 // Clean video titles - remove HTML entities and hashtags
 const cleanTitle = (title) => {
   if (!title) return "Video Unavailable"
-
   return title
     .replace(/'/g, "'")
     .replace(/"/g, '"')
@@ -70,7 +68,6 @@ export default function Home() {
             setArticles([])
           }
         }
-
         // Handle external articles separately with 1-year timeout and proper sorting
         try {
           const externalRes = await axios.get(
@@ -98,7 +95,6 @@ export default function Home() {
             setExternalLinks([])
           }
         }
-
         // Handle videos - now using server-side API
         try {
           const videoRes = await axios.get("/api/videos", { signal: controller.signal })
@@ -152,13 +148,7 @@ export default function Home() {
           {/* Image container */}
           <div className={`flex justify-center mb-4 ${isHero ? "" : "mb-2"}`}>
             <img
-              src={
-                attrs.image_path
-                  ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${attrs.image_path}`
-                  : attrs.image?.data?.attributes?.url
-                    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${attrs.image.data.attributes.url}`
-                    : "/images/core/placeholder.jpg"
-              }
+              src={getStrapiMedia(attrs.image) || "/images/core/placeholder.jpg"}
               alt={attrs.title}
               className={`w-full h-auto object-contain rounded ${
                 isHero ? "md:w-4/5 max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem]" : "max-h-48"
@@ -216,18 +206,15 @@ export default function Home() {
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="w-full md:w-3/4">
           <MainBanner />
-
           {/* Featured Articles Section */}
           <section className="my-8">
             <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Articles</h2>
-
             {articlesError ? (
               <p className="text-center text-gray-500 py-8">{articlesError}</p>
             ) : featuredArticles.length > 0 ? (
               <div className="space-y-4">
                 {/* Hero Featured Article */}
                 {renderFeaturedArticle(featuredArticles[0], true)}
-
                 {/* Row of 2 Featured Articles (if we have 2 or 3 total) */}
                 {featuredArticles.length > 1 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,7 +226,6 @@ export default function Home() {
               <p className="text-center text-gray-500 py-8">No featured articles available.</p>
             )}
           </section>
-
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">The RIGHT News</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {articlesError ? (
@@ -249,13 +235,7 @@ export default function Home() {
                 <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
                   <div className="border-l-4 border-[#B22234] p-4">
                     <img
-                      src={
-                        article.attributes.image_path
-                          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image_path}`
-                          : article.attributes.image?.data?.attributes?.url
-                            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${article.attributes.image.data.attributes.url}`
-                            : "/images/core/placeholder.jpg"
-                      }
+                      src={getStrapiMedia(article.attributes.image) || "/images/core/placeholder.jpg"}
                       alt={article.attributes.title}
                       className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
                     />
@@ -373,7 +353,6 @@ export default function Home() {
         </section>
         <Sidebar />
       </main>
-
       {/* ENHANCED VIDEO MODAL WITH FULLSCREEN */}
       {modalVideo && (
         <div
@@ -405,7 +384,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
             {/* Video Container */}
             <div className="relative bg-black">
               <iframe
@@ -418,7 +396,6 @@ export default function Home() {
                 title="Video Player"
               />
             </div>
-
             {/* Footer */}
             <div className="p-4 bg-gray-50 text-center">
               <p className="text-sm text-gray-600">Click outside the video, press × to close, or ⛶ for fullscreen</p>
@@ -426,7 +403,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
       <Footer />
     </>
   )

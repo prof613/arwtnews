@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import ShareButtons from "./ShareButtons"
 import { X, ChevronLeft, ChevronRight, Loader2, ExternalLink } from "lucide-react"
+import { getStrapiMedia } from "../utils/media" // Import the new helper
 
 export default function MemeLightbox({
   initialMemes,
@@ -87,9 +88,7 @@ export default function MemeLightbox({
   const currentMeme = memes[currentIndex]
   if (!currentMeme) return null
 
-  const memeImageUrl = currentMeme.attributes.image?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${currentMeme.attributes.image.data.attributes.url}`
-    : "/images/core/placeholder.jpg"
+  const memeImageUrl = getStrapiMedia(currentMeme.attributes.image) || "/images/core/placeholder.jpg"
 
   const memePageUrl =
     typeof window !== "undefined" ? `${window.location.origin}/memes/${currentMeme.attributes.slug}` : ""
