@@ -14,11 +14,9 @@ module.exports = [
     },
   },
   {
-  name: 'strapi::security',
-  config: {
-    contentSecurityPolicy: false,
-  },
-},
+    name: 'strapi::security',
+    config: {
+      contentSecurityPolicy: false,
     },
   },
   'strapi::poweredBy',
