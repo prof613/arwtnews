@@ -1,5 +1,4 @@
 module.exports = ({ env }) => ({
-
   'users-permissions': {
     enabled: true,
     config: {
@@ -11,24 +10,25 @@ module.exports = ({ env }) => ({
     enabled: true,
   },
 
-upload: {
-  config: {
-    provider: env('UPLOAD_PROVIDER', 'local'), // Default to local
-    providerOptions: env('UPLOAD_PROVIDER') === 'aws-s3' ? {
-      accessKeyId: env('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: env('AWS_SECRET_ACCESS_KEY'),
-      region: env('AWS_REGION'),
-      bucket: env('DO_SPACE_BUCKET'),
-      endpoint: env('DO_SPACE_ENDPOINT'),
-      baseUrl: env('DO_SPACE_CDN'),
-      s3ForcePathStyle: true,
-      params: {
-        ACL: 'public-read',
-        Bucket: env('DO_SPACE_BUCKET'),
+  // Configure DigitalOcean Spaces for file uploads
+  upload: {
+    config: {
+      provider: 'strapi-provider-upload-do',
+      providerOptions: {
+        key: env('DO_SPACE_KEY'),
+        secret: env('DO_SPACE_SECRET'),
+        endpoint: env('DO_SPACE_ENDPOINT'), // e.g., sfo3.digitaloceanspaces.com
+        space: env('DO_SPACE_BUCKET'), // e.g., your-space-name
+        cdn: env('DO_SPACE_CDN', ''), // Optional CDN URL
       },
-    } : {}, // Empty object for local provider
+      actionOptions: {
+        upload: {
+          ACL: 'public-read',
+        },
+        delete: {},
+      },
+    },
   },
-},
 
   // email: {
   //   enabled: true,
@@ -43,5 +43,4 @@ upload: {
   //     },
   //   },
   // },
-
 });
