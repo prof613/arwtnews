@@ -616,7 +616,7 @@ export interface ApiMemeMeme extends Schema.CollectionType {
     ogTitle: Attribute.String;
     publishedAt: Attribute.DateTime;
     searchTags: Attribute.String;
-    slug: Attribute.UID<'api::meme.meme', 'artist'>;
+    slug: Attribute.UID<'api::meme.meme', 'artist'> & Attribute.Required;
     status: Attribute.Enumeration<['draft', 'published', 'archived']> &
       Attribute.DefaultTo<'draft'>;
     updatedAt: Attribute.DateTime;

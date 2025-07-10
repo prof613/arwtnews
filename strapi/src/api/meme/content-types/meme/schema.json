@@ -20,7 +20,9 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "category": {
       "type": "string",
@@ -87,11 +89,17 @@
     },
     "newsletter_inclusion": {
       "type": "enumeration",
-      "enum": ["none", "daily", "weekly", "both"]
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "both"
+      ]
     },
     "slug": {
       "type": "uid",
-      "targetField": "artist"
+      "targetField": "artist",
+      "required": true
     },
     "enable_share_buttons": {
       "type": "boolean",
@@ -101,16 +109,23 @@
       "type": "string"
     },
     "ogImage": {
-      "allowedTypes": ["images"],
       "type": "media",
-      "multiple": false
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
     },
     "searchTags": {
       "type": "string"
     },
     "status": {
       "type": "enumeration",
-      "enum": ["draft", "published", "archived"],
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
       "default": "draft"
     }
   }
