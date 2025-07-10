@@ -1,6 +1,3 @@
-// File: middlewares.js
-// Folder: /rwtnews/strapi/config
-
 module.exports = [
   'strapi::errors',
   {
@@ -22,8 +19,8 @@ module.exports = [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'img-src': ["'self'", 'data:', 'blob:', 'https:'],
-          'media-src': ["'self'", 'data:', 'blob:', 'https:'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https:', 'https://rwtnews-media.nyc3.digitaloceanspaces.com'],
+          'media-src': ["'self'", 'data:', 'blob:', 'https:', 'https://rwtnews-media.nyc3.digitaloceanspaces.com'],
           upgradeInsecureRequests: null,
         },
       },
