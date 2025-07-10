@@ -1,12 +1,9 @@
-// File: next.config.js
-// Folder: /rwtnews
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'rwtnews-media.nyc3.cdn.digitaloceanspaces.com'],
   },
 }
 
