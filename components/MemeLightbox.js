@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import axios from "axios"
-import ShareButtons from "./ShareButtons" // Ensure this is imported
-import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import ShareButtons from "./ShareButtons"
+import { X, ChevronLeft, ChevronRight, Loader2, ExternalLink } from "lucide-react"
+import { getStrapiMedia } from "../utils/media" // Import the new helper
 
 export default function MemeLightbox({
   initialMemes,
@@ -13,11 +14,16 @@ export default function MemeLightbox({
   onClose,
   onMemeChange,
 }) {
+  // State for all memes loaded so far by the lightbox
   const [memes, setMemes] = useState(initialMemes)
+  // The index of the currently viewed meme within the `memes` array
   const [currentIndex, setCurrentIndex] = useState(initialIndexOnPage)
+  // Keep track of which pages have been fetched
   const [pagesLoaded, setPagesLoaded] = useState(new Set([currentPage]))
+  // Loading state for fetching new pages
   const [isLoading, setIsLoading] = useState(false)
 
+  // Effect to handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") onClose()
@@ -26,11 +32,13 @@ export default function MemeLightbox({
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [memes, currentIndex, isLoading])
+  }, [memes, currentIndex, isLoading]) // Re-bind when state changes
 
+  // When the index changes, notify the parent to update the URL slug and page
   useEffect(() => {
     const currentMeme = memes[currentIndex]
     if (currentMeme) {
+      // Calculate which page the current meme index falls on
       const newPage = Math.floor(currentIndex / 10) + 1
       onMemeChange(currentMeme, newPage)
     }
@@ -40,13 +48,18 @@ export default function MemeLightbox({
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1)
     }
+    // Note: fetching previous pages is a more complex feature,
+    // so for now, we only navigate within the already loaded data.
   }
 
   const handleNext = async () => {
     if (isLoading) return
 
+    // If we are at the last loaded meme...
     if (currentIndex === memes.length - 1) {
       const lastLoadedPage = Math.max(...pagesLoaded)
+
+      // ...and if there are more pages to fetch
       if (lastLoadedPage < totalPages) {
         setIsLoading(true)
         const nextPageToFetch = lastLoadedPage + 1
@@ -54,8 +67,11 @@ export default function MemeLightbox({
           const res = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${nextPageToFetch}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`,
           )
+          // Add the new memes to our state
           setMemes((prev) => [...prev, ...res.data.data])
+          // Record that we've loaded this page
           setPagesLoaded((prev) => new Set(prev).add(nextPageToFetch))
+          // Move to the next index
           setCurrentIndex((prev) => prev + 1)
         } catch (error) {
           console.error("Failed to load next page of memes", error)
@@ -64,6 +80,7 @@ export default function MemeLightbox({
         }
       }
     } else {
+      // Otherwise, just navigate to the next meme in the already loaded array
       setCurrentIndex((prev) => prev + 1)
     }
   }
@@ -71,23 +88,58 @@ export default function MemeLightbox({
   const currentMeme = memes[currentIndex]
   if (!currentMeme) return null
 
-  const memeImageUrl = currentMeme.attributes.image?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${currentMeme.attributes.image.data.attributes.url}`
-    : "/images/core/placeholder.jpg"
+  const memeImageUrl = getStrapiMedia(currentMeme.attributes.image) || "/images/core/placeholder.jpg"
 
-  // This creates a "permanent" URL for the specific meme, which is best for sharing
   const memePageUrl =
     typeof window !== "undefined" ? `${window.location.origin}/memes/${currentMeme.attributes.slug}` : ""
 
+  // Determine if the next button should be shown
   const hasMorePages = Math.max(...pagesLoaded) < totalPages
   const showNextButton = currentIndex < memes.length - 1 || (currentIndex === memes.length - 1 && hasMorePages)
 
+  const renderArtistLinks = () => {
+    const link1 = currentMeme.attributes.artist_link_1
+    const link1Label = currentMeme.attributes.artist_link_1_label || "Website"
+    const link2 = currentMeme.attributes.artist_link_2
+    const link2Label = currentMeme.attributes.artist_link_2_label || "Social Media"
+
+    // Only show if at least one link exists
+    if (!link1 && !link2) return null
+
+    return (
+      <div className="mt-4">
+        <p className="text-sm text-gray-600 mb-3">Visit this artist at the links below:</p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {link1 && (
+            <a
+              href={link1}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+            >
+              <ExternalLink size={14} />
+              {link1Label}
+            </a>
+          )}
+          {link2 && (
+            <a
+              href={link2}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#B22234] text-white rounded-md text-sm hover:bg-[#8B1A2B] transition-colors w-32 justify-center"
+            >
+              <ExternalLink size={14} />
+              {link2Label}
+            </a>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-white rounded-lg p-4 md:p-6 max-w-3xl w-full relative max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-white rounded-lg p-4 md:p-6 max-w-3xl w-full relative" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-600 hover:text-black z-10"
@@ -110,27 +162,33 @@ export default function MemeLightbox({
             />
           </div>
 
-          <div className="text-center mt-4 w-full">
-            <h3 className="text-xl font-bold text-[#3C3B6E]">{currentMeme.attributes.artist || "Unknown Artist"}</h3>
-            <p className="text-sm text-gray-600">
+          <div className="text-center mt-4 w-full max-w-lg">
+            <h3 className="text-2xl font-bold text-[#3C3B6E]">{currentMeme.attributes.artist || "Unknown Artist"}</h3>
+            <p className="text-base text-gray-600 mt-1">
               {new Date(currentMeme.attributes.date).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
               })}
             </p>
+            {currentMeme.attributes.description && (
+              <p className="text-base text-gray-700 italic mt-3 px-4">{currentMeme.attributes.description}</p>
+            )}
+            {renderArtistLinks()}
           </div>
 
-          {/* Conditionally render ShareButtons based on the Strapi field */}
           {currentMeme.attributes.enable_share_buttons && (
-            <ShareButtons
-              shareUrl={memePageUrl}
-              title={`Check out this meme by ${currentMeme.attributes.artist || "Unknown"}`}
-            />
+            <div className="mt-5">
+              <ShareButtons
+                shareUrl={memePageUrl}
+                title={`Check out this meme by ${currentMeme.attributes.artist || "Unknown"}`}
+              />
+            </div>
           )}
         </div>
       </div>
 
+      {/* Previous Button */}
       {currentIndex > 0 && (
         <button
           onClick={(e) => {
@@ -144,6 +202,7 @@ export default function MemeLightbox({
         </button>
       )}
 
+      {/* Next Button */}
       {showNextButton && (
         <button
           onClick={(e) => {
