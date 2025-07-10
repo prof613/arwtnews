@@ -1,5 +1,5 @@
 import React from "react"
-import { getStrapiMedia } from "../utils/media" // Import the new helper
+import { getStrapiMedia } from "../utils/media" // Ensure this path is correct
 
 export default function BlockRenderer({ blocks, datePrefix = null }) {
   if (!blocks || !Array.isArray(blocks)) {
@@ -9,7 +9,7 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
   const renderBlock = (block, index) => {
     switch (block.__component) {
       case "blocks.enhanced-text":
-        return renderEnhancedText(block, index)
+        return renderEnhancedText(block, index, blocks)
       case "blocks.enhanced-image":
         return renderEnhancedImage(block, index)
       // Fallback for legacy blocks
@@ -18,20 +18,24 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     }
   }
 
-  const renderEnhancedText = (block, index) => {
-    const { content, style = "normal", layout = "single" } = block
+  const renderEnhancedText = (block, index, allBlocks) => {
+    const { content, style, layout } = block
 
-    // Handle date prefix for first paragraph
-    const isFirstParagraph =
-      index === 0 ||
-      (index > 0 &&
-        blocks.slice(0, index).every((b) => b.__component !== "blocks.enhanced-text" || b.style !== "normal"))
+    // --- SIMPLIFIED LOGIC BASED ON YOUR PROPOSAL ---
+    // 1. Check if this is the very first block in the article.
+    const isTheFirstBlock = index === 0
+
+    // 2. Check if the content of this block starts with a heading.
+    const contentStartsWithHeading = (content || "").trim().startsWith("#")
+
+    // 3. Inject the date ONLY if this is the first block AND it does not start with a heading.
+    const shouldInjectDate = isTheFirstBlock && datePrefix && !contentStartsWithHeading
+    // --- END OF SIMPLIFIED LOGIC ---
 
     const baseClasses = "mb-4"
     let containerClasses = ""
     let contentClasses = ""
 
-    // Style variations
     switch (style) {
       case "pullquote":
         containerClasses =
@@ -53,40 +57,21 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         contentClasses = "text-gray-600"
     }
 
-    // Layout variations
     if (layout === "twocolumn") {
       containerClasses += " md:columns-2 md:gap-6"
     }
 
-    // Process markdown-style content to HTML
-    let processedContent = content
+    let processedContent = (content || "")
       .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4 text-[#3C3B6E]">$1</h1>')
       .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-3 text-[#3C3B6E]">$1</h2>')
       .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-2 text-[#3C3B6E]">$1</h3>')
-      .replace(/^#### (.*$)/gm, '<h4 class="text-lg font-bold mb-2 text-[#3C3B6E]">$1</h4>')
-      .replace(/^##### (.*$)/gm, '<h5 class="text-base font-bold mb-2 text-[#3C3B6E]">$1</h5>')
-      .replace(/^###### (.*$)/gm, '<h6 class="text-sm font-bold mb-2 text-[#3C3B6E]">$1</h6>')
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/\n\n+/g, '</p><p class="mb-4">')
-      .replace(/\n/g, "<br>")
+      .replace(/\n/g, "<br />")
 
-    // Wrap in paragraph tags if not already wrapped in headings
-    if (!processedContent.includes("<h") && !processedContent.includes("<p")) {
-      processedContent = `<p class="mb-4">${processedContent}</p>`
-    } else if (processedContent.includes("<h") && !processedContent.startsWith("<h")) {
-      // If there are headings but content doesn't start with one, wrap the beginning
-      const firstHeadingIndex = processedContent.search(/<h[1-6]/)
-      if (firstHeadingIndex > 0) {
-        const beforeHeading = processedContent.substring(0, firstHeadingIndex)
-        const afterHeading = processedContent.substring(firstHeadingIndex)
-        processedContent = `<p class="mb-4">${beforeHeading}</p>${afterHeading}`
-      }
-    }
-
-    // Add date prefix to first paragraph if needed
-    if (isFirstParagraph && datePrefix && style === "normal") {
-      processedContent = processedContent.replace('<p class="mb-4">', `<p class="mb-4">${datePrefix}`)
+    if (shouldInjectDate) {
+      // Prepend the date string. The space after the date is important for inline spacing.
+      processedContent = datePrefix + processedContent
     }
 
     return (
@@ -101,15 +86,8 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     const imageUrl = getStrapiMedia(image)
     const altText = image?.data?.attributes?.alternativeText || "Article image"
 
-    if (!imageUrl) {
-      return (
-        <div key={index} className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded">
-          <p className="text-gray-600">Image could not be loaded</p>
-        </div>
-      )
-    }
+    if (!imageUrl) return null
 
-    // Size classes
     const sizeClasses = {
       small: "max-w-xs",
       medium: "max-w-md",
@@ -117,38 +95,25 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
       full: "w-full",
     }
 
-    // Alignment classes
     const alignmentClasses = {
       left: "float-left mr-6 mb-4",
       right: "float-right ml-6 mb-4",
-      center: "mx-auto block",
-      full: "w-full",
+      center: "mx-auto",
+      full: "",
     }
 
-    // Container classes for floating images
-    const containerClasses = alignment === "left" || alignment === "right" ? "mb-2" : "mb-6"
-
     return (
-      <div key={index} className={containerClasses}>
+      <figure key={index} className={`${sizeClasses[size]} ${alignmentClasses[alignment]}`}>
         <img
           src={imageUrl || "/placeholder.svg"}
           alt={altText}
-          className={`h-auto rounded-lg ${sizeClasses[size]} ${alignmentClasses[alignment]}`}
+          className="h-auto rounded-lg w-full"
           onError={(e) => {
-            console.error("Image failed to load:", imageUrl)
             e.target.src = "/images/core/placeholder.jpg"
           }}
         />
-        {caption && (
-          <p
-            className={`text-sm text-gray-600 italic mt-2 ${
-              alignment === "center" || alignment === "full" ? "text-center" : ""
-            }`}
-          >
-            {caption}
-          </p>
-        )}
-      </div>
+        {caption && <figcaption className="text-sm text-gray-600 italic mt-2 text-center">{caption}</figcaption>}
+      </figure>
     )
   }
 
@@ -163,23 +128,18 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
             {renderChildren(block.children)}
           </p>
         )
-
       case "heading":
         const HeadingTag = `h${block.level || 2}`
         const headingClasses = {
           1: "text-3xl font-bold mb-4 text-[#3C3B6E]",
           2: "text-2xl font-bold mb-3 text-[#3C3B6E]",
           3: "text-xl font-bold mb-2 text-[#3C3B6E]",
-          4: "text-lg font-bold mb-2 text-[#3C3B6E]",
-          5: "text-base font-bold mb-2 text-[#3C3B6E]",
-          6: "text-sm font-bold mb-2 text-[#3C3B6E]",
         }
         return React.createElement(
           HeadingTag,
           { key: index, className: headingClasses[block.level || 2] },
           renderChildren(block.children),
         )
-
       case "list":
         const ListTag = block.format === "ordered" ? "ol" : "ul"
         const listClass =
@@ -215,26 +175,10 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         const imageUrl = getStrapiMedia(block.image)
         const altText = block.image?.data?.attributes?.alternativeText || "Article image"
         const caption = block.image?.data?.attributes?.caption
-
-        if (!imageUrl) {
-          return (
-            <div key={index} className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded">
-              <p className="text-gray-600">Image could not be loaded</p>
-            </div>
-          )
-        }
-
+        if (!imageUrl) return null
         return (
           <div key={index} className="mb-6">
-            <img
-              src={imageUrl || "/placeholder.svg"}
-              alt={altText}
-              className="w-full h-auto rounded-lg"
-              onError={(e) => {
-                console.error("Image failed to load:", imageUrl)
-                e.target.src = "/images/core/placeholder.jpg"
-              }}
-            />
+            <img src={imageUrl || "/placeholder.svg"} alt={altText} className="w-full h-auto rounded-lg" />
             {caption && <p className="text-sm text-gray-600 italic mt-2 text-center">{caption}</p>}
           </div>
         )

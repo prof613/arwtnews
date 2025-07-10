@@ -1,20 +1,20 @@
-/**
- * Returns the full URL for a Strapi media asset.
- * @param {object} mediaObject - The media object from the Strapi API.
- * @returns {string|null} The full URL of the media or null if not available.
- */
-export function getStrapiMedia(mediaObject) {
-  if (!mediaObject?.data?.attributes?.url) {
-    return null
+export const getStrapiMedia = (media) => {
+  if (!media) {
+    return "/placeholder.svg" // Or some other default
   }
 
-  const { url } = mediaObject.data.attributes
+  const { url } = media?.data?.attributes || media || {}
 
-  // If the URL is already absolute, return it as is.
+  // Verify that the URL exists.
+  if (!url) {
+    return "/placeholder.svg"
+  }
+
+  // Return the full URL if the media is hosted on a CDN
   if (url.startsWith("http") || url.startsWith("//")) {
     return url
   }
 
-  // Otherwise, prepend the Strapi URL.
-  return `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${url}`
+  // Otherwise prepend the URL with the Strapi URL
+  return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || "http://localhost:1337"}${url}`
 }

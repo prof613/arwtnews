@@ -4,14 +4,14 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import { renderToStaticMarkup } from "react-dom/server" // <-- 1. ADD THIS IMPORT
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
-import { getFirstParagraphText } from "../../utils/blockHelpers"
-import { getStrapiMedia } from "../../utils/media" // Import the new helper
+import { getStrapiMedia } from "../../utils/media"
 
 export default function Opinion() {
   const router = useRouter()
@@ -39,11 +39,22 @@ export default function Opinion() {
 
   const imageUrl = getStrapiMedia(opinion.featured_image)
   const authorImageUrl = getStrapiMedia(opinion.author_image)
-
   const pageUrl = typeof window !== "undefined" ? window.location.href : ""
 
-  // Get first paragraph text for date inline placement
-  const firstParagraphText = getFirstParagraphText(opinion.rich_body)
+  // --- 2. NEW DATE PREFIX LOGIC ---
+  const dateComponent = (
+    <span className="font-medium">
+      {new Date(opinion.date).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "America/Los_Angeles",
+      })}
+      &nbsp;-&nbsp;
+    </span>
+  )
+  const datePrefixString = renderToStaticMarkup(dateComponent)
+  // --- END OF NEW LOGIC ---
 
   return (
     <>
@@ -92,38 +103,9 @@ export default function Opinion() {
                 <p className="text-sm font-bold text-gray-600">{opinion.author || "Unknown"}</p>
               </div>
             </div>
+            {/* --- 3. SIMPLIFIED BLOCK RENDERER CALL --- */}
             <div className="text-gray-600 mb-4">
-              {/* Only show date inline if there's a first paragraph, otherwise show it separately */}
-              {firstParagraphText ? (
-                <BlockRenderer
-                  blocks={opinion.rich_body}
-                  datePrefix={
-                    <span className="font-medium">
-                      {new Date(opinion.date).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                        timeZone: "America/Los_Angeles",
-                      })}{" "}
-                      -{" "}
-                    </span>
-                  }
-                />
-              ) : (
-                <>
-                  <p className="mb-4">
-                    <span className="font-medium">
-                      {new Date(opinion.date).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                        timeZone: "America/Los_Angeles",
-                      })}
-                    </span>
-                  </p>
-                  <BlockRenderer blocks={opinion.rich_body} />
-                </>
-              )}
+              <BlockRenderer blocks={opinion.rich_body} datePrefix={datePrefixString} />
             </div>
 
             {opinion.enable_share_buttons && (
