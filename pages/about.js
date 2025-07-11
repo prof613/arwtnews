@@ -61,7 +61,7 @@ export default function About() {
           </ul>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Our Team</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            Our editorial team consists of experienced journalists, military veterans, and concerned citizens who are
+            Our editorial team consists of experienced journalists and concerned citizens who are
             passionate about preserving American values and delivering the truth. We come from diverse backgrounds but
             share a common love for this great nation.
           </p>
