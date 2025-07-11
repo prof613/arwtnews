@@ -10,10 +10,10 @@ module.exports = ({ env }) => ({
     enabled: true,
   },
 
-  // Correct CKEditor plugin configuration
-  ckeditor: {
-    enabled: true,
-  },
+  // REMOVED CKEditor - we don't use it
+  // ckeditor: {
+  //   enabled: true,
+  // },
 
   upload: {
     config: {
