@@ -1,14 +1,5 @@
 import React from "react"
-import { marked } from "marked" // 1. Import the 'marked' library
 import { getStrapiMedia } from "../utils/media" // Ensure this path is correct
-
-// 2. Configure marked to handle Markdown parsing globally
-marked.setOptions({
-  breaks: true, // Converts single line breaks into <br> tags
-  gfm: true, // Enables GitHub Flavored Markdown (for tables, etc.)
-  mangle: false, // Prevents obscuring email addresses
-  headerIds: false, // Prevents adding IDs to headings
-})
 
 export default function BlockRenderer({ blocks, datePrefix = null }) {
   if (!blocks || !Array.isArray(blocks)) {
@@ -18,8 +9,7 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
   const renderBlock = (block, index) => {
     switch (block.__component) {
       case "blocks.enhanced-text":
-        // The 'blocks' array is no longer needed here as we check index directly
-        return renderEnhancedText(block, index)
+        return renderEnhancedText(block, index, blocks)
       case "blocks.enhanced-image":
         return renderEnhancedImage(block, index)
       // Fallback for legacy blocks
@@ -28,14 +18,19 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     }
   }
 
-  const renderEnhancedText = (block, index) => {
+  const renderEnhancedText = (block, index, allBlocks) => {
     const { content, style, layout } = block
 
-    // --- Date Injection Logic (Unchanged) ---
+    // --- SIMPLIFIED LOGIC BASED ON YOUR PROPOSAL ---
+    // 1. Check if this is the very first block in the article.
     const isTheFirstBlock = index === 0
+
+    // 2. Check if the content of this block starts with a heading.
     const contentStartsWithHeading = (content || "").trim().startsWith("#")
+
+    // 3. Inject the date ONLY if this is the first block AND it does not start with a heading.
     const shouldInjectDate = isTheFirstBlock && datePrefix && !contentStartsWithHeading
-    // --- End of Date Logic ---
+    // --- END OF SIMPLIFIED LOGIC ---
 
     const baseClasses = "mb-4"
     let containerClasses = ""
@@ -66,12 +61,16 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
       containerClasses += " md:columns-2 md:gap-6"
     }
 
-    // 3. Replace the fragile .replace() chain with a single, robust call to marked.parse()
-    // This will correctly convert all Markdown (links, lists, quotes, etc.) to HTML.
-    let processedContent = marked.parse(content || "")
+    let processedContent = (content || "")
+      .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4 text-[#3C3B6E]">$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-3 text-[#3C3B6E]">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-2 text-[#3C3B6E]">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/\n/g, "<br />")
 
     if (shouldInjectDate) {
-      // Prepend the date string to the fully formed HTML.
+      // Prepend the date string. The space after the date is important for inline spacing.
       processedContent = datePrefix + processedContent
     }
 
@@ -118,7 +117,7 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     )
   }
 
-  // Legacy block renderer for backward compatibility (Unchanged)
+  // Legacy block renderer for backward compatibility
   const renderLegacyBlock = (block, index) => {
     switch (block.type) {
       case "paragraph":
@@ -194,7 +193,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     }
   }
 
-  // renderChildren function for legacy blocks (Unchanged)
   const renderChildren = (children) => {
     if (!children || !Array.isArray(children)) return ""
 
