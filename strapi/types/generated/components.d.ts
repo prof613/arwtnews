@@ -23,7 +23,7 @@ export interface BlocksEnhancedText extends Schema.Component {
     displayName: 'Enhanced Text';
   };
   attributes: {
-    content: Attribute.RichText & Attribute.Required;
+    content: Attribute.Blocks;
     layout: Attribute.Enumeration<['single', 'twocolumn']> &
       Attribute.DefaultTo<'single'>;
     style: Attribute.Enumeration<

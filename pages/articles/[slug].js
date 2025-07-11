@@ -19,13 +19,13 @@ export default function Article({ initialMetadata }) {
   const { slug } = router.query
   const [article, setArticle] = useState(null) // Your state logic remains
 
-  // Your original useEffect for fetching the full article data remains untouched
+  // Updated useEffect with proper populate parameters for Enhanced Images
   useEffect(() => {
     if (slug) {
       async function fetchArticle() {
         try {
           const articleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate=*`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[image]=*&populate[category]=*&populate[secondary_category]=*&populate[author_image]=*`,
           )
           const articleData = articleRes.data.data[0]
           setArticle(articleData?.attributes || null)

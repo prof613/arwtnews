@@ -15,6 +15,6 @@ export const getStrapiMedia = (media) => {
     return url
   }
 
-  // Otherwise prepend the URL with the Strapi URL
-  return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || "http://localhost:1337"}${url}`
+  // Otherwise prepend the URL with the Strapi URL - FIXED ENVIRONMENT VARIABLE
+  return `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${url}`
 }

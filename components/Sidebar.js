@@ -213,28 +213,30 @@ export default function Sidebar() {
             Memes & Cartoons
           </Link>
         </h3>
-        {memes.map((meme) => (
-          <div key={meme.id} className="mb-2">
-            <Link href="/categories/Meme-Cartoons">
-              <div className="cursor-pointer hover:opacity-80">
-                <p className="text-sm text-gray-600 mb-1">
-                  {meme.attributes.artist || "Unknown"} /{" "}
-                  {new Date(meme.attributes.date).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                    timeZone: "America/Los_Angeles",
-                  })}
-                </p>
-                <img
-                  src={getStrapiMedia(meme.attributes.image) || "/images/core/placeholder.jpg"}
-                  alt="Meme"
-                  className="w-full h-auto rounded"
-                />
-              </div>
-            </Link>
-          </div>
-        ))}
+        {memes.map((meme) => {
+          return (
+            <div key={meme.id} className="mb-2">
+              <Link href="/categories/Meme-Cartoons">
+                <div className="cursor-pointer hover:opacity-80">
+                  <p className="text-sm text-gray-600 mb-1">
+                    {meme.attributes.artist || "Unknown"} /{" "}
+                    {new Date(meme.attributes.date).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                      timeZone: "America/Los_Angeles",
+                    })}
+                  </p>
+                  <img
+                    src={getStrapiMedia(meme.attributes.image) || "/images/core/placeholder.jpg"}
+                    alt="Meme"
+                    className="w-full h-auto rounded"
+                  />
+                </div>
+              </Link>
+            </div>
+          )
+        })}
       </div>
       {/* Ad Slot 2 - Below memes, above subscribe */}
       <div className="bg-gray-100 p-4 rounded mb-4">

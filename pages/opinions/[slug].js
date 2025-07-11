@@ -23,7 +23,7 @@ export default function Opinion() {
       async function fetchOpinion() {
         try {
           const opinionRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate=*&publicationState=live`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[author_image]=*&populate[secondary_category]=*&publicationState=live`,
           )
           const opinionData = opinionRes.data.data[0]
           setOpinion(opinionData?.attributes || null)

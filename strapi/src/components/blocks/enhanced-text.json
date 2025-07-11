@@ -5,19 +5,27 @@
     "description": "Text with styling and layout options"
   },
   "attributes": {
-    "content": {
-      "type": "richtext",
-      "required": true
-    },
     "style": {
       "type": "enumeration",
-      "enum": ["normal", "pullquote", "infobox", "alert", "breaking"],
+      "enum": [
+        "normal",
+        "pullquote",
+        "infobox",
+        "alert",
+        "breaking"
+      ],
       "default": "normal"
     },
     "layout": {
       "type": "enumeration",
-      "enum": ["single", "twocolumn"],
+      "enum": [
+        "single",
+        "twocolumn"
+      ],
       "default": "single"
+    },
+    "content": {
+      "type": "blocks"
     }
   }
 }

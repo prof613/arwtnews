@@ -1,5 +1,5 @@
 import React from "react"
-import { getStrapiMedia } from "../utils/media" // Ensure this path is correct
+import { getStrapiMedia } from "../utils/media"
 
 export default function BlockRenderer({ blocks, datePrefix = null }) {
   if (!blocks || !Array.isArray(blocks)) {
@@ -12,25 +12,36 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         return renderEnhancedText(block, index, blocks)
       case "blocks.enhanced-image":
         return renderEnhancedImage(block, index)
-      // Fallback for legacy blocks
       default:
         return renderLegacyBlock(block, index)
     }
   }
 
+  // Helper function to check if a block contains only heading content
+  const isHeadingOnlyBlock = (content) => {
+    if (!content || !Array.isArray(content)) return false
+
+    // Check if all content items are headings
+    return content.every((item) => item.type === "heading")
+  }
+
   const renderEnhancedText = (block, index, allBlocks) => {
     const { content, style, layout } = block
 
-    // --- SIMPLIFIED LOGIC BASED ON YOUR PROPOSAL ---
-    // 1. Check if this is the very first block in the article.
-    const isTheFirstBlock = index === 0
+    // FIXED DATE INJECTION LOGIC:
+    // If first block is heading-only, inject date in second block
+    // Otherwise inject in first block
+    let shouldInjectDate = false
 
-    // 2. Check if the content of this block starts with a heading.
-    const contentStartsWithHeading = (content || "").trim().startsWith("#")
-
-    // 3. Inject the date ONLY if this is the first block AND it does not start with a heading.
-    const shouldInjectDate = isTheFirstBlock && datePrefix && !contentStartsWithHeading
-    // --- END OF SIMPLIFIED LOGIC ---
+    if (datePrefix) {
+      if (index === 0 && !isHeadingOnlyBlock(content)) {
+        // First block is not heading-only, inject date here
+        shouldInjectDate = true
+      } else if (index === 1 && allBlocks[0] && isHeadingOnlyBlock(allBlocks[0].content)) {
+        // First block was heading-only, inject date in second block
+        shouldInjectDate = true
+      }
+    }
 
     const baseClasses = "mb-4"
     let containerClasses = ""
@@ -61,22 +72,12 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
       containerClasses += " md:columns-2 md:gap-6"
     }
 
-    let processedContent = (content || "")
-      .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4 text-[#3C3B6E]">$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-3 text-[#3C3B6E]">$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-2 text-[#3C3B6E]">$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/\n/g, "<br />")
-
-    if (shouldInjectDate) {
-      // Prepend the date string. The space after the date is important for inline spacing.
-      processedContent = datePrefix + processedContent
-    }
+    // Create a shared state object to track date injection across all recursive calls
+    const dateState = { injected: false }
 
     return (
       <div key={index} className={`${baseClasses} ${containerClasses}`}>
-        <div className={contentClasses} dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <div className={contentClasses}>{renderChildren(content, shouldInjectDate ? datePrefix : null, dateState)}</div>
       </div>
     )
   }
@@ -117,14 +118,14 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     )
   }
 
-  // Legacy block renderer for backward compatibility
   const renderLegacyBlock = (block, index) => {
+    // Legacy block handling remains the same
     switch (block.type) {
       case "paragraph":
         const isFirstParagraph = index === 0 || (index > 0 && blocks.slice(0, index).every((b) => b.type === "heading"))
         return (
           <p key={index} className="mb-4">
-            {isFirstParagraph && datePrefix && datePrefix}
+            {isFirstParagraph && datePrefix && <span dangerouslySetInnerHTML={{ __html: datePrefix }} />}
             {renderChildren(block.children)}
           </p>
         )
@@ -153,7 +154,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
             ))}
           </ListTag>
         )
-
       case "quote":
         return (
           <blockquote
@@ -163,14 +163,12 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
             {renderChildren(block.children)}
           </blockquote>
         )
-
       case "code":
         return (
           <pre key={index} className="bg-gray-100 p-4 rounded mb-4 overflow-x-auto">
             <code>{renderChildren(block.children)}</code>
           </pre>
         )
-
       case "image":
         const imageUrl = getStrapiMedia(block.image)
         const altText = block.image?.data?.attributes?.alternativeText || "Article image"
@@ -182,7 +180,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
             {caption && <p className="text-sm text-gray-600 italic mt-2 text-center">{caption}</p>}
           </div>
         )
-
       default:
         console.warn("Unknown block type:", block.type)
         return (
@@ -193,12 +190,20 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
     }
   }
 
-  const renderChildren = (children) => {
-    if (!children || !Array.isArray(children)) return ""
+  const renderChildren = (children, datePrefix = null, dateState = { injected: false }) => {
+    if (!children || !Array.isArray(children)) {
+      return ""
+    }
 
     return children.map((child, index) => {
       if (child.type === "text") {
         let text = child.text || ""
+
+        // Inject date at the very beginning of the first text node ONLY
+        if (datePrefix && !dateState.injected && text.trim()) {
+          dateState.injected = true
+          return <span key={index} dangerouslySetInnerHTML={{ __html: datePrefix + text }} />
+        }
 
         if (child.bold) text = <strong key={index}>{text}</strong>
         if (child.italic) text = <em key={index}>{text}</em>
@@ -214,6 +219,14 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
         return text
       }
 
+      if (child.type === "paragraph") {
+        return (
+          <p key={index} className="mb-2">
+            {renderChildren(child.children, datePrefix, dateState)}
+          </p>
+        )
+      }
+
       if (child.type === "link") {
         return (
           <a
@@ -223,8 +236,37 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
             target={child.url?.startsWith("http") ? "_blank" : "_self"}
             rel={child.url?.startsWith("http") ? "noopener noreferrer" : ""}
           >
-            {renderChildren(child.children)}
+            {renderChildren(child.children, null, dateState)}
           </a>
+        )
+      }
+
+      if (child.type === "heading") {
+        const HeadingTag = `h${child.level || 2}`
+        const headingClasses = {
+          1: "text-3xl font-bold mb-4 text-[#3C3B6E]",
+          2: "text-2xl font-bold mb-3 text-[#3C3B6E]",
+          3: "text-xl font-bold mb-2 text-[#3C3B6E]",
+        }
+        return React.createElement(
+          HeadingTag,
+          { key: index, className: headingClasses[child.level || 2] },
+          renderChildren(child.children, null, dateState),
+        )
+      }
+
+      if (child.type === "list") {
+        const ListTag = child.format === "ordered" ? "ol" : "ul"
+        const listClass =
+          child.format === "ordered" ? "list-decimal list-inside mb-4 ml-4" : "list-disc list-inside mb-4 ml-4"
+        return (
+          <ListTag key={index} className={listClass}>
+            {child.children?.map((item, itemIndex) => (
+              <li key={itemIndex} className="mb-1">
+                {renderChildren(item.children, null, dateState)}
+              </li>
+            ))}
+          </ListTag>
         )
       }
 
@@ -235,7 +277,6 @@ export default function BlockRenderer({ blocks, datePrefix = null }) {
   return (
     <div className="prose max-w-none">
       {blocks.map((block, index) => renderBlock(block, index))}
-      {/* Clear floats after all blocks */}
       <div className="clear-both"></div>
     </div>
   )
