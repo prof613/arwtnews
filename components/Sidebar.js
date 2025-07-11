@@ -70,6 +70,12 @@ export default function Sidebar() {
     }
   }
 
+  const handleExternalLink = (url, siteName) => {
+    if (confirm(`You're leaving to visit ${siteName}. Continue?`)) {
+      window.open(url, "_blank")
+    }
+  }
+
   return (
     <aside className="w-full md:w-1/4 order-2 md:order-none">
       {/* Search Section */}
@@ -301,43 +307,25 @@ export default function Sidebar() {
           magna aliqua.
         </p>
       </div>
-      {/* Connect Section */}
+      {/* Connect Section - FIXED */}
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Connect</h3>
         <div className="flex justify-between">
-          <a
-            href="https://www.facebook.com/RedWhiteandTrueNews/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.preventDefault()
-              if (confirm("You're leaving to visit Facebook. Continue?")) window.open(e.target.href, "_blank")
-            }}
+          <button
+            onClick={() => handleExternalLink("https://www.facebook.com/RedWhiteandTrueNews/", "Facebook")}
+            className="cursor-pointer"
           >
             <img src="/images/core/facebook-icon-square.png" alt="Facebook" className="w-12 h-12" />
-          </a>
-          <a
-            href="https://x.com/RWTNews"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.preventDefault()
-              if (confirm("You're leaving to visit X. Continue?")) window.open(e.target.href, "_blank")
-            }}
-          >
+          </button>
+          <button onClick={() => handleExternalLink("https://x.com/RWTNews", "X")} className="cursor-pointer">
             <img src="/images/core/x-icon-square.png" alt="X" className="w-12 h-12" />
-          </a>
-          <a
-            href="https://www.youtube.com/@RWTNews"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.preventDefault()
-              if (confirm("You're leaving to visit YouTube. Continue?")) window.open(e.target.href, "_blank")
-            }}
+          </button>
+          <button
+            onClick={() => handleExternalLink("https://www.youtube.com/@RWTNews", "YouTube")}
+            className="cursor-pointer"
           >
             <img src="/images/core/youtube-icon-square.png" alt="YouTube" className="w-12 h-12" />
-          </a>
+          </button>
           <Link href="/contact">
             <img src="/images/core/email-icon.png" alt="Email" className="w-12 h-12 cursor-pointer hover:opacity-80" />
           </Link>

@@ -3,6 +3,12 @@
 import Link from "next/link"
 
 export default function Footer() {
+  const handleExternalLink = (url, siteName) => {
+    if (confirm(`You're leaving to visit ${siteName}. Continue?`)) {
+      window.open(url, "_blank")
+    }
+  }
+
   return (
     <footer className="bg-[#3C3B6E] text-white max-w-7xl mx-auto">
       {/* Main Footer Content */}
@@ -32,46 +38,28 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Center Column - Social & Contact */}
+          {/* Center Column - Social & Contact - FIXED */}
           <div className="text-center">
             <h3 className="text-xl font-bold mb-4 text-white">Connect With Us</h3>
             <div className="flex justify-center gap-4 mb-6">
-              <a
-                href="https://www.facebook.com/RedWhiteandTrueNews/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm("You're leaving to visit Facebook. Continue?")) window.open(e.target.href, "_blank")
-                }}
+              <button
+                onClick={() => handleExternalLink("https://www.facebook.com/RedWhiteandTrueNews/", "Facebook")}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <img src="/images/core/facebook-icon-square.png" alt="Facebook" className="w-12 h-12" />
-              </a>
-              <a
-                href="https://x.com/RWTNews"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm("You're leaving to visit X. Continue?")) window.open(e.target.href, "_blank")
-                }}
+              </button>
+              <button
+                onClick={() => handleExternalLink("https://x.com/RWTNews", "X")}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <img src="/images/core/x-icon-square.png" alt="X" className="w-12 h-12" />
-              </a>
-              <a
-                href="https://www.youtube.com/@RWTNews"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm("You're leaving to visit YouTube. Continue?")) window.open(e.target.href, "_blank")
-                }}
+              </button>
+              <button
+                onClick={() => handleExternalLink("https://www.youtube.com/@RWTNews", "YouTube")}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <img src="/images/core/youtube-icon-square.png" alt="YouTube" className="w-12 h-12" />
-              </a>
+              </button>
               <Link href="/contact" className="hover:opacity-80 transition-opacity">
                 <img src="/images/core/email-icon.png" alt="Email" className="w-12 h-12" />
               </Link>
