@@ -1,10 +1,10 @@
 "use client"
 
 import Head from "next/head"
-import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
+import { useRouter } from "next/router" // Kept
+import { useState, useEffect } from "react" // Kept
 import axios from "axios"
-import { renderToStaticMarkup } from "react-dom/server" // <-- 1. ADD THIS IMPORT
+import { renderToStaticMarkup } from "react-dom/server"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -13,11 +13,13 @@ import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 
-export default function Article() {
+// The component now receives initialMetadata from the server
+export default function Article({ initialMetadata }) {
   const router = useRouter()
   const { slug } = router.query
-  const [article, setArticle] = useState(null)
+  const [article, setArticle] = useState(null) // Your state logic remains
 
+  // Your original useEffect for fetching the full article data remains untouched
   useEffect(() => {
     if (slug) {
       async function fetchArticle() {
@@ -35,14 +37,35 @@ export default function Article() {
     }
   }, [slug])
 
-  if (!article) return <div>Loading...</div>
+  // The Head now uses the pre-fetched metadata from the server
+  // This is what the crawler will see immediately.
+  const head = (
+    <Head>
+      <title>{`${initialMetadata.title} | Red, White and True News`}</title>
+      <meta property="og:title" content={initialMetadata.title} />
+      <meta property="og:description" content={initialMetadata.description} />
+      <meta property="og:image" content={initialMetadata.imageUrl} />
+      <meta property="og:url" content={initialMetadata.pageUrl} />
+      <meta property="og:type" content="article" />
+      <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+  )
 
+  // Your loading state remains, for the user experience
+  if (!article) {
+    return (
+      <>
+        {head}
+        <div>Loading...</div>
+      </>
+    )
+  }
+
+  // The rest of your component logic is identical
   const imageUrl = getStrapiMedia(article.image)
   const authorImageUrl = getStrapiMedia(article.author_image)
-  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+  const pageUrl = initialMetadata.pageUrl // Use the server-generated URL for consistency
 
-  // --- 2. NEW DATE PREFIX LOGIC ---
-  // Create the date as a React component
   const dateComponent = (
     <span className="font-medium">
       {new Date(article.date).toLocaleDateString("en-US", {
@@ -54,20 +77,11 @@ export default function Article() {
       &nbsp;-&nbsp;
     </span>
   )
-  // Convert the component to a plain HTML string
   const datePrefixString = renderToStaticMarkup(dateComponent)
-  // --- END OF NEW LOGIC ---
 
   return (
     <>
-      <Head>
-        <title>{article.title} | Red, White and True News</title>
-        <meta property="og:title" content={article.title} />
-        <meta property="og:description" content={article.quote || ""} />
-        {imageUrl && <meta property="og:image" content={imageUrl} />}
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="article" />
-      </Head>
+      {head}
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
@@ -103,7 +117,6 @@ export default function Article() {
                 <p className="text-sm font-bold text-gray-600">{article.author || "Unknown"}</p>
               </div>
             </div>
-            {/* --- 3. SIMPLIFIED BLOCK RENDERER CALL --- */}
             <div className="text-gray-600 mb-4">
               <BlockRenderer blocks={article.rich_body} datePrefix={datePrefixString} />
             </div>
@@ -118,4 +131,48 @@ export default function Article() {
       <Footer />
     </>
   )
+}
+
+// This function runs on the server, but ONLY fetches what's needed for the <Head>
+export async function getServerSideProps(context) {
+  const { slug } = context.params
+
+  try {
+    // We fetch only the fields needed for metadata to be fast
+    const fields = ["title", "quote", "image"]
+    const populate = ["image"]
+    const articleRes = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&fields[0]=${fields[0]}&fields[1]=${fields[1]}&populate[0]=${populate[0]}`,
+    )
+
+    const article = articleRes.data.data[0]?.attributes
+    if (!article) throw new Error("Article not found")
+
+    const protocol = context.req.headers["x-forwarded-proto"] || "http"
+    const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+    const pageUrl = `${protocol}://${host}${context.req.url}`
+
+    return {
+      props: {
+        initialMetadata: {
+          title: article.title || "Article",
+          description: article.quote || "",
+          imageUrl: getStrapiMedia(article.image) || "",
+          pageUrl: pageUrl,
+        },
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching metadata in getServerSideProps:", error)
+    return {
+      props: {
+        initialMetadata: {
+          title: "Article Not Found",
+          description: "",
+          imageUrl: "",
+          pageUrl: "",
+        },
+      },
+    }
+  }
 }
