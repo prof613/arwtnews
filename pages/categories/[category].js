@@ -14,7 +14,7 @@ import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
 import MemeLightbox from "../../components/MemeLightbox"
 import { ExternalLink } from "lucide-react"
-import { getStrapiMedia } from "../../utils/media" // Import the new helper
+import { getStrapiMedia } from "../../utils/media"
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -139,7 +139,6 @@ export default function Category() {
 
   // Called by the lightbox when the meme changes to update the URL
   const handleMemeChange = (meme, newPage) => {
-    // Use the newPage from the lightbox to keep the URL's page query param in sync
     router.push(`/categories/Meme-Cartoons?page=${newPage}&slug=${meme.attributes.slug}`, undefined, {
       shallow: true,
     })
@@ -165,7 +164,6 @@ export default function Category() {
     const link2 = item.attributes.artist_link_2
     const link2Label = item.attributes.artist_link_2_label || "Social Media"
 
-    // Only show if at least one link exists
     if (!link1 && !link2) return null
 
     return (
@@ -296,7 +294,6 @@ export default function Category() {
       )
     }
 
-    // Default renderer for articles and opinions
     return (
       <div className="flex flex-col gap-4">
         {items.map((item) => (
@@ -370,7 +367,6 @@ export default function Category() {
     )
   }
 
-  // Fix the title error by ensuring category is always a string
   const getPageTitle = () => {
     let categoryName = "Category"
     if (category) {
@@ -397,14 +393,22 @@ export default function Category() {
             {category === "All" ? "All Articles" : category === "news-from-web" ? "News from the Web" : category}{" "}
             Archives
           </h1>
-
+          {category === "Meme-Cartoons" && (
+            <div className="text-lg text-gray-700 text-center mb-8 max-w-2xl mx-auto">
+              Much of the content here is sourced from Facebook and other online platforms. We strive to only use
+              copyrighted material with permission and to provide proper attribution whenever possible. If you recognize
+              something as your own and would like it removed or to be credited, please{" "}
+              <Link href="/contact" className="text-blue-600 hover:underline">
+                contact us
+              </Link>
+              , and we’ll address it promptly.
+            </div>
+          )}
           {renderContent()}
-
           <AdvancedPagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
         </section>
         <Sidebar />
       </main>
-
       {lightboxOpen && category === "Meme-Cartoons" && (
         <MemeLightbox
           initialMemes={items}
