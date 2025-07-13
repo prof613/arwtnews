@@ -1,8 +1,8 @@
 "use client"
 
 import Head from "next/head"
-import { useRouter } from "next/router" // Kept
-import { useState, useEffect } from "react" // Kept
+import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
 import axios from "axios"
 import { renderToStaticMarkup } from "react-dom/server"
 import Header from "../../components/Header"
@@ -17,7 +17,7 @@ import { getStrapiMedia } from "../../utils/media"
 export default function Article({ initialMetadata }) {
   const router = useRouter()
   const { slug } = router.query
-  const [article, setArticle] = useState(null) // Your state logic remains
+  const [article, setArticle] = useState(null)
 
   // Updated useEffect with proper populate parameters for Enhanced Images
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function Article({ initialMetadata }) {
         year: "numeric",
         timeZone: "America/Los_Angeles",
       })}
-      &nbsp;-&nbsp;
+       - 
     </span>
   )
   const datePrefixString = renderToStaticMarkup(dateComponent)
@@ -98,6 +98,9 @@ export default function Article({ initialMetadata }) {
                 <p>No image available</p>
               </div>
             )}
+            <figcaption className="text-sm text-gray-600 italic text-left mb-4">
+              {article.image?.data?.attributes?.caption || ""}
+            </figcaption>
             <p className="text-sm text-gray-600">
               {article.category?.data?.attributes?.name || "None"} /{" "}
               {article.secondary_category?.data?.attributes?.name || ""}

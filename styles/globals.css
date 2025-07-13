@@ -96,3 +96,14 @@ body {
 .prose img.float-right {
   shape-outside: margin-box;
 }
+
+/* Caption styling for consistency */
+figcaption {
+  @apply text-sm text-gray-600 italic text-center;
+}
+
+@media (max-width: 768px) {
+  figcaption {
+    @apply text-xs;
+  }
+}

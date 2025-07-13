@@ -10,7 +10,7 @@ import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import Footer from "../components/Footer"
 import { extractTextFromBlocks } from "../utils/blockHelpers"
-import { getStrapiMedia } from "../utils/media" // Import the new helper
+import { getStrapiMedia } from "../utils/media"
 
 // Function to format date properly (fix timezone issue)
 const formatDate = (dateString) => {
@@ -138,6 +138,7 @@ export default function Home() {
   // Helper function to render individual featured article
   const renderFeaturedArticle = (article, isHero = false) => {
     const attrs = article.attributes
+    const caption = attrs.image?.data?.attributes?.caption || ""
     return (
       <Link href={`/articles/${attrs.slug}`} key={article.id}>
         <div className={`bg-gray-100 p-4 rounded ${isHero ? "" : "h-full"}`}>
@@ -146,14 +147,21 @@ export default function Home() {
             Featured Article
           </h4>
           {/* Image container */}
-          <div className={`flex justify-center mb-4 ${isHero ? "" : "mb-2"}`}>
+          <div className={`mb-4 ${isHero ? "text-center" : "mb-2"}`}>
             <img
               src={getStrapiMedia(attrs.image) || "/images/core/placeholder.jpg"}
               alt={attrs.title}
               className={`w-full h-auto object-contain rounded ${
-                isHero ? "md:w-4/5 max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem]" : "max-h-48"
+                isHero ? "md:w-4/5 max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem] inline-block" : "max-h-48"
               }`}
             />
+            <figcaption
+              className={`text-sm text-gray-600 italic line-clamp-2 min-h-[2.5rem] ${
+                isHero ? "md:w-4/5 text-left ml-auto mr-auto" : "text-left"
+              }`}
+            >
+              {caption || <span className="text-transparent"> </span>}
+            </figcaption>
           </div>
           <h3
             className={`font-bold text-[#3C3B6E] ${isHero ? "text-2xl min-h-[4rem]" : "text-xl min-h-[3.5rem]"} leading-tight`}
@@ -239,6 +247,9 @@ export default function Home() {
                       alt={article.attributes.title}
                       className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
                     />
+                    <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
+                      {article.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                    </figcaption>
                     <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
                       {(() => {
                         const primaryCat = article.attributes.category?.data?.attributes?.name
@@ -325,7 +336,7 @@ export default function Home() {
                   <img
                     src={video.snippet?.thumbnails?.medium?.url || "/images/core/placeholder.jpg"}
                     alt={cleanTitle(video.snippet?.title)}
-                    className="w-full aspect-video object-cover rounded mb-2" // Standard 16:9 video ratio
+                    className="w-full aspect-video object-cover rounded mb-2"
                   />
                   <h3 className="text-md font-semibold text-[#3C3B6E] mb-1 line-clamp-2">
                     {cleanTitle(video.snippet?.title)}

@@ -4,7 +4,7 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { renderToStaticMarkup } from "react-dom/server" // <-- 1. ADD THIS IMPORT
+import { renderToStaticMarkup } from "react-dom/server"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -41,7 +41,7 @@ export default function Opinion() {
   const authorImageUrl = getStrapiMedia(opinion.author_image)
   const pageUrl = typeof window !== "undefined" ? window.location.href : ""
 
-  // --- 2. NEW DATE PREFIX LOGIC ---
+  // --- NEW DATE PREFIX LOGIC ---
   const dateComponent = (
     <span className="font-medium">
       {new Date(opinion.date).toLocaleDateString("en-US", {
@@ -50,7 +50,7 @@ export default function Opinion() {
         year: "numeric",
         timeZone: "America/Los_Angeles",
       })}
-      &nbsp;-&nbsp;
+       - 
     </span>
   )
   const datePrefixString = renderToStaticMarkup(dateComponent)
@@ -82,6 +82,9 @@ export default function Opinion() {
                 <p>No image available</p>
               </div>
             )}
+            <figcaption className="text-sm text-gray-600 italic text-left mb-4">
+              {opinion.featured_image?.data?.attributes?.caption || ""}
+            </figcaption>
             <p className="text-sm text-gray-600">
               Opinion
               {opinion.secondary_category?.data?.attributes?.name
@@ -103,7 +106,6 @@ export default function Opinion() {
                 <p className="text-sm font-bold text-gray-600">{opinion.author || "Unknown"}</p>
               </div>
             </div>
-            {/* --- 3. SIMPLIFIED BLOCK RENDERER CALL --- */}
             <div className="text-gray-600 mb-4">
               <BlockRenderer blocks={opinion.rich_body} datePrefix={datePrefixString} />
             </div>

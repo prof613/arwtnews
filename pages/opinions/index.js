@@ -12,7 +12,7 @@ import AdvancedPagination from "../../components/AdvancedPagination"
 import { getPageFromQuery } from "../../utils/paginationHelpers"
 import { extractTextFromBlocks } from "../../utils/blockHelpers"
 import Link from "next/link"
-import { getStrapiMedia } from "../../utils/media" // Import the new helper
+import { getStrapiMedia } from "../../utils/media"
 
 export default function OpinionsArchive({ initialOpinions, initialPage, initialTotalPages }) {
   const router = useRouter()
@@ -83,6 +83,9 @@ export default function OpinionsArchive({ initialOpinions, initialPage, initialT
                         alt={opinion.attributes.title}
                         className="w-full h-auto md:h-32 object-contain rounded bg-gray-50"
                       />
+                      <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
+                        {opinion.attributes.featured_image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                      </figcaption>
                     </div>
                     <div className="flex-1">
                       <p className="text-sm text-gray-600">

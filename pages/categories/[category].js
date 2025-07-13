@@ -309,6 +309,11 @@ export default function Category() {
                   alt={item.attributes.title}
                   className="w-full h-auto md:h-32 object-contain rounded bg-gray-50"
                 />
+                <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
+                  {item.type === "opinion"
+                    ? item.attributes.featured_image?.data?.attributes?.caption || <span className="text-transparent"> </span>
+                    : item.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                </figcaption>
               </div>
               <div className="flex-1">
                 <p className="text-sm text-gray-600">
