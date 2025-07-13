@@ -112,7 +112,6 @@ export default function Category() {
     }
   }, [category, page])
 
-  // Effect to open lightbox if slug is present in URL
   useEffect(() => {
     if (category === "Meme-Cartoons" && slug && items.length > 0) {
       const initialIndex = items.findIndex((item) => item.attributes.slug === slug)
@@ -137,7 +136,6 @@ export default function Category() {
     router.push(`/categories/Meme-Cartoons?page=${page}`, undefined, { shallow: true })
   }
 
-  // Called by the lightbox when the meme changes to update the URL
   const handleMemeChange = (meme, newPage) => {
     router.push(`/categories/Meme-Cartoons?page=${newPage}&slug=${meme.attributes.slug}`, undefined, {
       shallow: true,
@@ -211,7 +209,7 @@ export default function Category() {
                 <img
                   src={getStrapiMedia(item.attributes.image) || "/images/core/placeholder.jpg"}
                   alt={item.attributes.artist || "Meme"}
-                  className="w-full h-auto rounded mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="w-4/5 h-auto rounded mb-2 cursor-pointer hover:opacity-80 transition-opacity mx-auto"
                 />
               </button>
               <div className="space-y-2">
