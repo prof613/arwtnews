@@ -121,7 +121,7 @@ export default function Privacy() {
 
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">17. How Can You Review, Update, or Delete the Data We Collect?</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            To review, update, or delete your personal information, submit a data subject access request or contact us at <a href="mailto:webcontact@redwhiteandtruenews.com" className="text-[#B22234] hover:underline font-semibold">webcontact@redwhiteandtruenews.com</a>.
+            To review, update, or delete your personal information, submit a data subject access request or contact us at <a href="mailto:webcontact@redwhiteandtruenews.com" className="text-[#B22234] hover:underline font-semibold">webcontact@redwhiteandtruenews.com</a>. We will respond to Dta requests within 30 days.
           </p>
         </section>
         <Sidebar />
