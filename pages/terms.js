@@ -65,20 +65,21 @@ export default function Terms() {
             Our website may contain links to third-party websites. We are not responsible for the content or practices
             of these external sites.
           </p>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">8. Changes to Terms</h2>
+          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">8. Agreement to YouTube Terms of Service</h2>
+          <p className="text-gray-600 mb-4 text-lg">
+            Our website utilizes YouTube API Services to provide video content. By accessing or using our video features,
+            you are agreeing to be bound by the{" "}
+            <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" className="text-[#B22234]                         hover:underline font-medium"> YouTube Terms of Service</a>. We encourage you to review these terms carefully.
+          </p>
+          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">9. Changes to Terms</h2>
           <p className="text-gray-600 mb-4 text-lg">
             We reserve the right to modify these terms at any time. Changes will be posted on this page, and your
             continued use constitutes acceptance of the modified terms.
           </p>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">9. Contact Information</h2>
+          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">10. Contact Information</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            For questions about these Terms of Service, contact us at{" "}
-            <a
-              href="mailto:webpagecontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webpagecontact@redwhiteandtruenews.com
-            </a>
+            For questions about these Terms of Service, contact us by visiting our{" "}
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">Contact Page</a>
             .
           </p>
         </section>
