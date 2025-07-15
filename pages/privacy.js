@@ -21,12 +21,10 @@ export default function Privacy() {
             This Privacy Notice for RWT News LLC ("we," "us," or "our") describes how and why we might access, collect,
             store, use, and/or share ("process") your personal information when you use our services ("Services"),
             including when you visit our website at https://redwhiteandtruenews.com or engage with us in other related
-            ways, including any sales, marketing, or events. If you have questions or concerns, please contact us at{" "}
-            <a
-              href="mailto:webcontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webcontact@redwhiteandtruenews.com
+            ways, including any sales, marketing, or events. If you have questions or concerns, please contact us by
+            visiting our{" "}
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">
+              Contact Page
             </a>
             .
           </p>
@@ -162,12 +160,9 @@ export default function Privacy() {
             <li>Opt out of automated decision-making</li>
           </ul>
           <p className="text-gray-600 mb-4 text-lg">
-            Contact us at{" "}
-            <a
-              href="mailto:webcontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webcontact@redwhiteandtruenews.com
+            Contact us by visiting our{" "}
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">
+              Contact Page
             </a>{" "}
             to exercise these rights.
           </p>
@@ -266,11 +261,8 @@ export default function Privacy() {
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">17. How Can You Contact Us About This Notice?</h2>
           <p className="text-gray-600 mb-4 text-lg">
             Email us at{" "}
-            <a
-              href="mailto:webcontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webcontact@redwhiteandtruenews.com
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">
+              Contact Page
             </a>{" "}
             or contact us by post at:
           </p>
@@ -290,14 +282,11 @@ export default function Privacy() {
           </h2>
           <p className="text-gray-600 mb-4 text-lg">
             To review, update, or delete your personal information, submit a data subject access request or contact us
-            at{" "}
-            <a
-              href="mailto:webcontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webcontact@redwhiteandtruenews.com
+            by visiting our{" "}
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">
+              Contact Page
             </a>
-            . We will respond to Dta requests within 30 days.
+            . We will respond to Data requests within 30 days.
           </p>
         </section>
         <Sidebar />
