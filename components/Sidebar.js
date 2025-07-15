@@ -347,7 +347,7 @@ export default function Sidebar() {
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Support Our Mission</h3>
         <h4 className="text-md text-[#3C3B6E] mb-2">Our Mission</h4>
         <p className="text-sm text-gray-600">
-          Red, White and True News is committed to delivering honest, unbiased journalism that reflects traditional American values.
+          Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional American values. 
         </p>
         <Link href="/support" className="text-[#B22234] text-sm">
           See More

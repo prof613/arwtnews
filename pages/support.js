@@ -20,15 +20,11 @@ export default function Support() {
           <MainBanner />
           <h1 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Support Our Mission</h1>
           <p className="text-gray-600 mb-4 text-lg">
-            Red, White and True News is committed to delivering honest, unbiased journalism that reflects traditional
-            American values. As an independent news organization, we rely on the support of patriots like you to
-            continue our important work.
+           Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional American values. Through our original content and by amplifying the voices of other independent outlets and individuals, we strive to provide a platform for truth in a world clouded by misinformation. As an independent news organization, we rely on the support of patriots like you to fuel our fight against the propaganda spread by corporate media.
           </p>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Why Your Support Matters</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            In today's media landscape, it's increasingly difficult to find news sources that aren't influenced by
-            corporate interests or political agendas. Your support helps us maintain our independence and continue
-            providing the truth that mainstream media won't tell you.
+            In today’s media landscape, corporate outlets dominate, often distorting the truth to serve their own interests. These mainstream giants flood the airwaves with narratives designed to manipulate, mislead, and control the public’s perception. At Red, White and True News, we stand as a counterforce, committed to exposing the facts they bury and amplifying the stories they ignore. Your support empowers us to maintain our independence, reject corporate influence, and deliver unfiltered truth to the American people. With your help, we can continue to challenge the media machine, hold the powerful accountable, and provide a voice for those who value integrity over agenda-driven reporting.
           </p>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">How You Can Help</h2>
           <ul className="text-gray-600 mb-4 text-lg list-disc list-inside space-y-2">

@@ -28,7 +28,7 @@ export default function Footer() {
             <div>
               <h3 className="text-xl font-bold mb-3 text-white">Our Mission</h3>
               <p className="text-sm leading-relaxed mb-3">
-                Red, White and True News is committed to delivering honest, unbiased journalism that reflects traditional American values.
+                Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional American values. 
               </p>
               <Link href="/support" className="text-[#B22234] text-sm font-semibold hover:underline">
                 Support Us →
