@@ -9,6 +9,7 @@ import MainBanner from "../components/MainBanner"
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import Footer from "../components/Footer"
+import VideoConsentModal from "../components/VideoConsentModal"
 import { extractTextFromBlocks } from "../utils/blockHelpers"
 import { getStrapiMedia } from "../utils/media"
 
@@ -45,6 +46,19 @@ export default function Home() {
   const [articlesError, setArticlesError] = useState(null)
   const [externalLinksError, setExternalLinksError] = useState(null)
   const [videosError, setVideosError] = useState(null)
+
+  // New state for video consent management
+  const [hasVideoConsent, setHasVideoConsent] = useState(false)
+  const [showConsentModal, setShowConsentModal] = useState(false)
+  const [pendingVideoUrl, setPendingVideoUrl] = useState(null)
+
+  // Check for existing video consent
+  useEffect(() => {
+    const consent = localStorage.getItem("rwtn-video-consent")
+    if (consent === "true") {
+      setHasVideoConsent(true)
+    }
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -118,7 +132,38 @@ export default function Home() {
     return () => controller.abort() // Cleanup on unmount
   }, [])
 
-  const openVideoModal = (videoUrl) => setModalVideo(videoUrl)
+  // Modified video modal function to check consent first
+  const openVideoModal = (videoUrl) => {
+    if (hasVideoConsent) {
+      // User has already consented, open video directly
+      setModalVideo(videoUrl)
+    } else {
+      // User needs to consent first
+      setPendingVideoUrl(videoUrl)
+      setShowConsentModal(true)
+    }
+  }
+
+  // Handle consent acceptance
+  const handleConsentAccept = () => {
+    // Store consent in localStorage
+    localStorage.setItem("rwtn-video-consent", "true")
+    setHasVideoConsent(true)
+    setShowConsentModal(false)
+
+    // Open the pending video
+    if (pendingVideoUrl) {
+      setModalVideo(pendingVideoUrl)
+      setPendingVideoUrl(null)
+    }
+  }
+
+  // Handle consent modal close
+  const handleConsentClose = () => {
+    setShowConsentModal(false)
+    setPendingVideoUrl(null)
+  }
+
   const closeVideoModal = () => setModalVideo(null)
 
   // Fullscreen functionality
@@ -134,6 +179,28 @@ export default function Home() {
       }
     }
   }
+
+  // Compliance notice for video section
+  const renderComplianceNotice = () => (
+    <div className="text-center mb-4 p-3 bg-gray-50 rounded-lg border">
+      <p className="text-sm text-gray-600">
+        Our video content uses YouTube API Services. By watching videos, you agree to our{" "}
+        <a href="/privacy" className="text-[#B22234] hover:underline">
+          Privacy Policy
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://www.youtube.com/t/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#B22234] hover:underline"
+        >
+          YouTube's Terms of Service
+        </a>
+        .
+      </p>
+    </div>
+  )
 
   // Helper function to render individual featured article
   const renderFeaturedArticle = (article, isHero = false) => {
@@ -160,7 +227,7 @@ export default function Home() {
                 isHero ? "md:w-4/5 text-left ml-auto mr-auto" : "text-left"
               }`}
             >
-              {caption || <span className="text-transparent"> </span>}
+              {caption || <span className="text-transparent"> </span>}
             </figcaption>
           </div>
           <h3
@@ -248,7 +315,9 @@ export default function Home() {
                       className="w-full h-auto md:h-48 object-contain rounded mb-2 bg-gray-50"
                     />
                     <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
-                      {article.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                      {article.attributes.image?.data?.attributes?.caption || (
+                        <span className="text-transparent"> </span>
+                      )}
                     </figcaption>
                     <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
                       {(() => {
@@ -323,6 +392,7 @@ export default function Home() {
             )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
+          {renderComplianceNotice()}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {videosError ? (
               <p className="text-center text-gray-500 py-8">{videosError}</p>
@@ -364,6 +434,10 @@ export default function Home() {
         </section>
         <Sidebar />
       </main>
+
+      {/* Video Consent Modal */}
+      <VideoConsentModal isOpen={showConsentModal} onClose={handleConsentClose} onAccept={handleConsentAccept} />
+
       {/* ENHANCED VIDEO MODAL WITH FULLSCREEN */}
       {modalVideo && (
         <div
