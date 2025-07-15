@@ -208,7 +208,7 @@ export default function Home() {
     <>
       <Head>
         <title>Red, White and True News</title>
-        <link rel="icon" href="/images/core/rwtn_favicon.jpg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
