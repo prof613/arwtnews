@@ -656,6 +656,7 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     featured_image: Attribute.Media<'images'> & Attribute.Required;
     image_path: Attribute.String;
     integrationData: Attribute.JSON & Attribute.Private;
+    is_featured: Attribute.Boolean & Attribute.DefaultTo<false>;
     isSearchable: Attribute.Boolean & Attribute.DefaultTo<true>;
     keep_image_in_assets: Attribute.Boolean & Attribute.DefaultTo<false>;
     metadata: Attribute.JSON & Attribute.Private;

@@ -1,6 +1,6 @@
-const fs = require("fs")
-const path = require("path")
-const strapi = require("@strapi/strapi") // Declare the strapi variable
+const fs = require("fs");
+const path = require("path");
+const strapi = require("@strapi/strapi");
 
 // Helper function to generate slug
 function generateSlug(title) {
@@ -9,7 +9,7 @@ function generateSlug(title) {
     .replace(/[^a-z0-9 -]/g, "") // Remove special characters
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
-    .trim("-") // Remove leading/trailing hyphens
+    .trim("-"); // Remove leading/trailing hyphens
 }
 
 // Function to manage homepage limits
@@ -23,136 +23,117 @@ async function manageHomepageLimits() {
         is_featured: false,
       },
       sort: { date: "desc" },
-      pagination: { limit: -1 }, // Get all to count properly
-    })
+      pagination: { limit: -1 },
+    });
 
-    // If we have more than 6 regular articles, archive the oldest ones
+    // If more than 6 regular articles, archive the oldest ones
     if (activeRegularArticles.length > 6) {
-      const articlesToArchive = activeRegularArticles.slice(6) // Keep first 6, archive the rest
-
+      const articlesToArchive = activeRegularArticles.slice(6);
       for (const article of articlesToArchive) {
         await global.strapi.entityService.update("api::article.article", article.id, {
           data: { homepage_status: "archived" },
-        })
-        console.log(`Archived article from homepage: ${article.title}`)
+        });
+        console.log(`Archived article from homepage: ${article.title}`);
       }
     }
 
-    // Handle featured article limit (NOW ALLOWING 3 FEATURED ARTICLES)
+    // Handle featured limit (3 items across articles and opinions)
     const featuredArticles = await global.strapi.entityService.findMany("api::article.article", {
-      filters: {
-        publishedAt: { $notNull: true },
-        is_featured: true,
-      },
+      filters: { publishedAt: { $notNull: true }, is_featured: true },
       sort: { date: "desc" },
       pagination: { limit: -1 },
-    })
+    });
 
-    // If more than 3 featured articles, unfeatured older ones and archive them
-    if (featuredArticles.length > 3) {
-      const articlesToUnfeatured = featuredArticles.slice(3) // Keep first 3 (newest), unfeatured the rest
+    const featuredOpinions = await global.strapi.entityService.findMany("api::opinion.opinion", {
+      filters: { publishedAt: { $notNull: true }, is_featured: true },
+      sort: { date: "desc" },
+      pagination: { limit: -1 },
+    });
 
-      for (const article of articlesToUnfeatured) {
-        await global.strapi.entityService.update("api::article.article", article.id, {
+    const allFeatured = [
+      ...featuredArticles.map(item => ({ ...item, type: "article" })),
+      ...featuredOpinions.map(item => ({ ...item, type: "opinion" }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (allFeatured.length > 3) {
+      const itemsToUnfeature = allFeatured.slice(3);
+      for (const item of itemsToUnfeature) {
+        const collection = item.type === "article" ? "api::article.article" : "api::opinion.opinion";
+        await global.strapi.entityService.update(collection, item.id, {
           data: {
             is_featured: false,
-            homepage_status: "active", // Move to regular articles area
+            ...(item.type === "article" ? { homepage_status: "active" } : {}),
           },
-        })
-        console.log(`Unfeatured and moved to regular articles: ${article.title}`)
+        });
+        console.log(`Unfeatured ${item.type}: ${item.title}`);
       }
-
-      // After moving ex-featured to regular, check if we exceed 6 regular articles
-      await manageHomepageLimits() // Recursive call to handle the new regular article
     }
   } catch (error) {
-    console.error("Error managing homepage limits:", error)
+    console.error("Error managing homepage limits:", error);
   }
 }
 
 module.exports = {
   async beforeCreate(event) {
-    const { data } = event.params
-
-    // Auto-generate slug if not provided
+    const { data } = event.params;
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title)
+      data.slug = generateSlug(data.title);
     }
-
-    // If being published on creation, set the date and default to active
     if (data.publishedAt) {
-      data.date = new Date()
-      data.homepage_status = "active" // New articles start on homepage
+      data.date = new Date();
+      data.homepage_status = "active";
     }
-
-    // Handle primary category
     if (data.category && typeof data.category === "string") {
       const category = await strapi.controller("api::category.category").createIfNotExists({
         request: { body: { data: { name: data.category } } },
-      })
-      data.category = category.data.id // Replace string with category ID
+      });
+      data.category = category.data.id;
     }
-
-    // Handle secondary category
     if (data.secondary_category && typeof data.secondary_category === "string") {
       const secondaryCategory = await strapi.controller("api::category.category").createIfNotExists({
         request: { body: { data: { name: data.secondary_category } } },
-      })
-      data.secondary_category = secondaryCategory.data.id // Replace string with category ID
+      });
+      data.secondary_category = secondaryCategory.data.id;
     }
   },
 
   async beforeUpdate(event) {
-    const { data, where } = event.params
-
-    // Auto-generate slug if title changed but slug is empty
+    const { data, where } = event.params;
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title)
+      data.slug = generateSlug(data.title);
     }
-
-    // Only set date if we're publishing for the first time
     if (data.publishedAt) {
-      const existingEntry = await global.strapi.entityService.findOne("api::article.article", where.id)
-
-      // If this entry wasn't published before, set the date and make active
+      const existingEntry = await global.strapi.entityService.findOne("api::article.article", where.id);
       if (!existingEntry.publishedAt) {
-        data.date = new Date()
-        data.homepage_status = "active"
+        data.date = new Date();
+        data.homepage_status = "active";
       }
     }
-
-    // Handle primary category
     if (data.category && typeof data.category === "string") {
       const category = await strapi.controller("api::category.category").createIfNotExists({
         request: { body: { data: { name: data.category } } },
-      })
-      data.category = category.data.id // Replace string with category ID
+      });
+      data.category = category.data.id;
     }
-
-    // Handle secondary category
     if (data.secondary_category && typeof data.secondary_category === "string") {
       const secondaryCategory = await strapi.controller("api::category.category").createIfNotExists({
         request: { body: { data: { name: data.secondary_category } } },
-      })
-      data.secondary_category = secondaryCategory.data.id // Replace string with category ID
+      });
+      data.secondary_category = secondaryCategory.data.id;
     }
   },
 
   async afterCreate(event) {
-    const { result } = event
-
-    // Only manage limits if article was published
+    const { result } = event;
     if (result.publishedAt) {
-      await manageHomepageLimits()
+      await manageHomepageLimits();
     }
   },
 
   async afterUpdate(event) {
-    const { result, params } = event
-
-    // Only manage limits if article was published or featured status changed
+    const { result, params } = event;
     if (params.data.publishedAt || params.data.hasOwnProperty("is_featured")) {
-      await manageHomepageLimits()
+      await manageHomepageLimits();
     }
   },
-}
+};

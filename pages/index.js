@@ -33,12 +33,12 @@ const cleanTitle = (title) => {
     .replace(/&/g, "&")
     .replace(/</g, "<")
     .replace(/>/g, ">")
-    .split("#")[0] // Remove everything after first hashtag
+    .split("#")[0]
     .trim()
 }
 
 export default function Home() {
-  const [featuredArticles, setFeaturedArticles] = useState([])
+  const [featuredItems, setFeaturedItems] = useState([])
   const [articles, setArticles] = useState([])
   const [externalLinks, setExternalLinks] = useState([])
   const [videos, setVideos] = useState([])
@@ -46,13 +46,10 @@ export default function Home() {
   const [articlesError, setArticlesError] = useState(null)
   const [externalLinksError, setExternalLinksError] = useState(null)
   const [videosError, setVideosError] = useState(null)
-
-  // New state for video consent management
   const [hasVideoConsent, setHasVideoConsent] = useState(false)
   const [showConsentModal, setShowConsentModal] = useState(false)
   const [pendingVideoUrl, setPendingVideoUrl] = useState(null)
 
-  // Check for existing video consent
   useEffect(() => {
     const consent = localStorage.getItem("rwtn-video-consent")
     if (consent === "true") {
@@ -64,123 +61,122 @@ export default function Home() {
     const controller = new AbortController()
     async function fetchData() {
       try {
-        // Handle articles separately - ONLY ACTIVE articles for homepage
+        // Fetch articles and opinions for featured section
         try {
-          const articleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
-            { signal: controller.signal },
-          )
-          const featuredArticlesList = articleRes.data.data.filter((a) => a.attributes.is_featured)
-          const regularArticles = articleRes.data.data.filter((a) => !a.attributes.is_featured)
-          setFeaturedArticles(featuredArticlesList.slice(0, 3))
-          setArticles(regularArticles.slice(0, 6))
-          setArticlesError(null)
+          const [articleRes, opinionRes] = await Promise.all([
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
+              { signal: controller.signal }
+            ),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true`,
+              { signal: controller.signal }
+            )
+          ]);
+          const featuredArticles = articleRes.data.data
+            .filter(a => a.attributes.is_featured)
+            .map(item => ({ ...item, type: "article" }));
+          const featuredOpinions = opinionRes.data.data
+            .filter(o => o.attributes.is_featured)
+            .map(item => ({ ...item, type: "opinion" }));
+          const allFeatured = [...featuredArticles, ...featuredOpinions]
+            .sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date))
+            .slice(0, 3);
+          const regularArticles = articleRes.data.data
+            .filter(a => !a.attributes.is_featured)
+            .slice(0, 6);
+          setFeaturedItems(allFeatured);
+          setArticles(regularArticles);
+          setArticlesError(null);
         } catch (error) {
           if (error.name !== "AbortError") {
-            setArticlesError("Failed to load articles. Please try again later.")
-            setFeaturedArticles([])
-            setArticles([])
+            setArticlesError("Failed to load articles and opinions. Please try again later.");
+            setFeaturedItems([]);
+            setArticles([]);
           }
         }
-        // Handle external articles separately with 1-year timeout and proper sorting
+        // Handle external articles
         try {
           const externalRes = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*&sort[0]=createdAt:desc`,
-            { signal: controller.signal },
-          )
-          const oneYearAgo = new Date()
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+            { signal: controller.signal }
+          );
+          const oneYearAgo = new Date();
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
           const filteredAndSorted = externalRes.data.data
-            .filter((article) => {
-              const articleDate = new Date(article.attributes.date)
-              return articleDate >= oneYearAgo
-            })
-            .sort((a, b) => {
-              const dateA = new Date(a.attributes.date)
-              const dateB = new Date(b.attributes.date)
-              return dateB - dateA
-            })
-            .slice(0, 10)
-          setExternalLinks(filteredAndSorted)
-          setExternalLinksError(null)
+            .filter(article => new Date(article.attributes.date) >= oneYearAgo)
+            .sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date))
+            .slice(0, 10);
+          setExternalLinks(filteredAndSorted);
+          setExternalLinksError(null);
         } catch (error) {
           if (error.name !== "AbortError") {
-            setExternalLinksError("Failed to load external articles. Please try again later.")
-            setExternalLinks([])
+            setExternalLinksError("Failed to load external articles. Please try again later.");
+            setExternalLinks([]);
           }
         }
-        // Handle videos - now using server-side API
+        // Handle videos
         try {
-          const videoRes = await axios.get("/api/videos", { signal: controller.signal })
-          setVideos(videoRes.data.videos || [])
-          setVideosError(null)
+          const videoRes = await axios.get("/api/videos", { signal: controller.signal });
+          setVideos(videoRes.data.videos || []);
+          setVideosError(null);
         } catch (error) {
           if (error.name !== "AbortError") {
-            setVideosError("Failed to load videos. Please try again later.")
-            setVideos([])
+            setVideosError("Failed to load videos. Please try again later.");
+            setVideos([]);
           }
         }
       } catch (error) {
         if (error.name !== "AbortError") {
-          setArticlesError("Failed to load articles. Please try again later.")
-          setExternalLinksError("Failed to load external articles. Please try again later.")
-          setVideosError("Failed to load videos. Please try again later.")
+          setArticlesError("Failed to load articles. Please try again later.");
+          setExternalLinksError("Failed to load external articles. Please try again later.");
+          setVideosError("Failed to load videos. Please try again later.");
         }
       }
     }
-    fetchData()
-    return () => controller.abort() // Cleanup on unmount
-  }, [])
+    fetchData();
+    return () => controller.abort();
+  }, []);
 
-  // Modified video modal function to check consent first
   const openVideoModal = (videoUrl) => {
     if (hasVideoConsent) {
-      // User has already consented, open video directly
-      setModalVideo(videoUrl)
+      setModalVideo(videoUrl);
     } else {
-      // User needs to consent first
-      setPendingVideoUrl(videoUrl)
-      setShowConsentModal(true)
+      setPendingVideoUrl(videoUrl);
+      setShowConsentModal(true);
     }
-  }
+  };
 
-  // Handle consent acceptance
   const handleConsentAccept = () => {
-    // Store consent in localStorage
-    localStorage.setItem("rwtn-video-consent", "true")
-    setHasVideoConsent(true)
-    setShowConsentModal(false)
-
-    // Open the pending video
+    localStorage.setItem("rwtn-video-consent", "true");
+    setHasVideoConsent(true);
+    setShowConsentModal(false);
     if (pendingVideoUrl) {
-      setModalVideo(pendingVideoUrl)
-      setPendingVideoUrl(null)
+      setModalVideo(pendingVideoUrl);
+      setPendingVideoUrl(null);
     }
-  }
+  };
 
-  // Handle consent modal close
   const handleConsentClose = () => {
-    setShowConsentModal(false)
-    setPendingVideoUrl(null)
-  }
+    setShowConsentModal(false);
+    setPendingVideoUrl(null);
+  };
 
-  const closeVideoModal = () => setModalVideo(null)
+  const closeVideoModal = () => setModalVideo(null);
 
-  // Fullscreen functionality
   const toggleFullscreen = () => {
-    const iframe = document.querySelector("#video-modal-iframe")
+    const iframe = document.querySelector("#video-modal-iframe");
     if (iframe) {
       if (iframe.requestFullscreen) {
-        iframe.requestFullscreen()
+        iframe.requestFullscreen();
       } else if (iframe.webkitRequestFullscreen) {
-        iframe.webkitRequestFullscreen()
+        iframe.webkitRequestFullscreen();
       } else if (iframe.msRequestFullscreen) {
-        iframe.msRequestFullscreen()
+        iframe.msRequestFullscreen();
       }
     }
-  }
+  };
 
-  // Compliance notice for video section
   const renderComplianceNotice = () => (
     <div className="text-center mb-4 p-3 bg-gray-50 rounded-lg border">
       <p className="text-sm text-gray-600">
@@ -196,27 +192,24 @@ export default function Home() {
           className="text-[#B22234] hover:underline"
         >
           YouTube's Terms of Service
-        </a>
-        .
+        </a>.
       </p>
     </div>
-  )
+  );
 
-  // Helper function to render individual featured article
-  const renderFeaturedArticle = (article, isHero = false) => {
-    const attrs = article.attributes
-    const caption = attrs.image?.data?.attributes?.caption || ""
+  const renderFeaturedItem = (item, isHero = false) => {
+    const attrs = item.attributes;
+    const isArticle = item.type === "article";
+    const caption = attrs.image?.data?.attributes?.caption || attrs.featured_image?.data?.attributes?.caption || "";
     return (
-      <Link href={`/articles/${attrs.slug}`} key={article.id}>
+      <Link href={`/${isArticle ? "articles" : "opinions"}/${attrs.slug}`} key={`${item.type}-${item.id}`}>
         <div className={`bg-gray-100 p-4 rounded ${isHero ? "" : "h-full"}`}>
-          {/* Featured Article Label */}
           <h4 className="text-center text-sm font-semibold text-[#B22234] mb-2 uppercase tracking-wide">
-            Featured Article
+            Featured {isArticle ? "Article" : "Opinion"}
           </h4>
-          {/* Image container */}
           <div className={`mb-4 ${isHero ? "text-center" : "mb-2"}`}>
             <img
-              src={getStrapiMedia(attrs.image) || "/images/core/placeholder.jpg"}
+              src={getStrapiMedia(isArticle ? attrs.image : attrs.featured_image) || "/images/core/placeholder.jpg"}
               alt={attrs.title}
               className={`w-full h-auto object-contain rounded ${
                 isHero ? "md:w-4/5 max-h-96 sm:max-h-80 md:max-h-96 lg:max-h-[28rem] inline-block" : "max-h-48"
@@ -245,20 +238,18 @@ export default function Home() {
           </p>
           <p className="text-sm text-gray-600 font-bold">
             {(() => {
-              const primaryCat = attrs.category?.data?.attributes?.name
-              const secondaryCat = attrs.secondary_category?.data?.attributes?.name
+              const primaryCat = isArticle ? attrs.category?.data?.attributes?.name : "Opinion";
+              const secondaryCat = attrs.secondary_category?.data?.attributes?.name;
               if (primaryCat && secondaryCat) {
-                return `${primaryCat} - ${secondaryCat}`
-              } else {
-                return primaryCat || secondaryCat || "None"
+                return `${primaryCat} - ${secondaryCat}`;
               }
+              return primaryCat || secondaryCat || "None";
             })()} / {attrs.author || "Unknown"}
           </p>
           {attrs.quote && (
             <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
               <p className={`leading-5 ${isHero ? "line-clamp-2 min-h-[2.5rem]" : "line-clamp-2 min-h-[2.5rem]"}`}>
-                {attrs.quote}...{" "}
-                <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
+                {attrs.quote}... <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
               </p>
             </div>
           )}
@@ -268,37 +259,40 @@ export default function Home() {
           </p>
         </div>
       </Link>
-    )
-  }
+    );
+  };
 
   return (
     <>
       <Head>
         <title>Red, White and True News</title>
+        <meta name="description" content="" />
+        <meta property="og:title" content="" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:type" content="website" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="w-full md:w-3/4">
           <MainBanner />
-          {/* Featured Articles Section */}
           <section className="my-8">
-            <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Articles</h2>
+            <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">Featured Content</h2>
             {articlesError ? (
               <p className="text-center text-gray-500 py-8">{articlesError}</p>
-            ) : featuredArticles.length > 0 ? (
+            ) : featuredItems.length > 0 ? (
               <div className="space-y-4">
-                {/* Hero Featured Article */}
-                {renderFeaturedArticle(featuredArticles[0], true)}
-                {/* Row of 2 Featured Articles (if we have 2 or 3 total) */}
-                {featuredArticles.length > 1 && (
+                {renderFeaturedItem(featuredItems[0], true)}
+                {featuredItems.length > 1 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {featuredArticles.slice(1, 3).map((article) => renderFeaturedArticle(article, false))}
+                    {featuredItems.slice(1, 3).map(item => renderFeaturedItem(item, false))}
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-center text-gray-500 py-8">No featured articles available.</p>
+              <p className="text-center text-gray-500 py-8">No featured content available.</p>
             )}
           </section>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">The RIGHT News</h2>
@@ -306,7 +300,7 @@ export default function Home() {
             {articlesError ? (
               <p className="text-center text-gray-500 py-8">{articlesError}</p>
             ) : (
-              articles.map((article) => (
+              articles.map(article => (
                 <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
                   <div className="border-l-4 border-[#B22234] p-4">
                     <img
@@ -321,12 +315,12 @@ export default function Home() {
                     </figcaption>
                     <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
                       {(() => {
-                        const primaryCat = article.attributes.category?.data?.attributes?.name
-                        const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name
+                        const primaryCat = article.attributes.category?.data?.attributes?.name;
+                        const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name;
                         if (primaryCat && secondaryCat) {
-                          return `${primaryCat} - ${secondaryCat}`
+                          return `${primaryCat} - ${secondaryCat}`;
                         } else {
-                          return primaryCat || secondaryCat || "None"
+                          return primaryCat || secondaryCat || "None";
                         }
                       })()} / {article.attributes.author || "Unknown"} /{" "}
                       {new Date(article.attributes.date).toLocaleDateString("en-US", {
@@ -360,16 +354,16 @@ export default function Home() {
             {externalLinksError ? (
               <p className="text-center text-gray-500 py-8">{externalLinksError}</p>
             ) : (
-              externalLinks.map((link) => (
+              externalLinks.map(link => (
                 <a
                   key={link.id}
                   href={link.attributes.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault()
+                  onClick={e => {
+                    e.preventDefault();
                     if (confirm("You're about to visit an external site. Continue?"))
-                      window.open(link.attributes.link, "_blank")
+                      window.open(link.attributes.link, "_blank");
                   }}
                 >
                   <div className="p-2">
@@ -434,11 +428,7 @@ export default function Home() {
         </section>
         <Sidebar />
       </main>
-
-      {/* Video Consent Modal */}
       <VideoConsentModal isOpen={showConsentModal} onClose={handleConsentClose} onAccept={handleConsentAccept} />
-
-      {/* ENHANCED VIDEO MODAL WITH FULLSCREEN */}
       {modalVideo && (
         <div
           className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4"
@@ -446,9 +436,8 @@ export default function Home() {
         >
           <div
             className="bg-white rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-300"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-[#3C3B6E]">Video Player</h3>
               <div className="flex gap-2">
@@ -469,7 +458,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            {/* Video Container */}
             <div className="relative bg-black">
               <iframe
                 id="video-modal-iframe"
@@ -481,7 +469,6 @@ export default function Home() {
                 title="Video Player"
               />
             </div>
-            {/* Footer */}
             <div className="p-4 bg-gray-50 text-center">
               <p className="text-sm text-gray-600">Click outside the video, press × to close, or ⛶ for fullscreen</p>
             </div>
@@ -490,5 +477,5 @@ export default function Home() {
       )}
       <Footer />
     </>
-  )
+  );
 }

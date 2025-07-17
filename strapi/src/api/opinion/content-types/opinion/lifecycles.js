@@ -1,85 +1,34 @@
 const fs = require("fs");
 const path = require("path");
 
-// Helper function to generate slug
-function generateSlug(title) {
-  return title
+// Helper function to generate unique slug
+async function generateSlug(title, existingId = null) {
+  let baseSlug = title
     .toLowerCase()
     .replace(/[^a-z0-9 -]/g, "") // Remove special characters
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .trim("-"); // Remove leading/trailing hyphens
-}
 
-/*
-// Commented out custom image movement logic to restore Strapi default file management
-async function moveImageToContentFolder(data, id) {
-  if (!data.featured_image || !data.featured_image.id) {
-    return
-  }
+  let slug = baseSlug;
+  let counter = 1;
 
-  try {
-    // Get the image details
-    const imageId = data.featured_image.id
-    const image = await strapi.entityService.findOne("plugin::upload.file", imageId)
+  // Check for existing slugs, excluding the current record if updating
+  while (true) {
+    const existing = await global.strapi.entityService.findMany("api::opinion.opinion", {
+      filters: { slug, ...(existingId ? { id: { $ne: existingId } } : {}) },
+      pagination: { limit: 1 },
+    });
 
-    if (!image) {
-      return
+    if (existing.length === 0) {
+      return slug; // Unique slug found
     }
 
-    // Get current date for folder structure
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, "0")
-    const day = String(now.getDate()).padStart(2, "0")
-
-    // Create the directory structure with opinions subfolder
-    const contentDir = path.join(process.cwd(), "public", "images", "content", "opinions", String(year), month, day)
-
-    if (!fs.existsSync(contentDir)) {
-      fs.mkdirSync(contentDir, { recursive: true })
-    }
-
-    // Find the source file
-    const possiblePaths = [
-      path.join(process.cwd(), "public", "uploads", image.name),
-      path.join(process.cwd(), "uploads", image.name),
-      path.join(process.cwd(), "public", image.url),
-      path.join(process.cwd(), "public", "uploads", image.name),
-    ]
-
-    let currentPath = null
-    for (const possiblePath of possiblePaths) {
-      if (fs.existsSync(possiblePath)) {
-        currentPath = possiblePath
-        break
-      }
-    }
-
-    if (!currentPath || !fs.existsSync(currentPath)) {
-      return
-    }
-
-    // Generate new filename
-    const fileExtension = path.extname(image.name)
-    const newFileName = `${id}-1${fileExtension}`
-    const newFilePath = path.join(contentDir, newFileName)
-
-    // Copy the file
-    fs.copyFileSync(currentPath, newFilePath)
-
-    // Update the database with new path
-    const newImagePath = `/images/content/opinions/${year}/${month}/${day}/${newFileName}`
-    await strapi.entityService.update("api::opinion.opinion", id, {
-      data: {
-        image_path: newImagePath,
-      },
-    })
-  } catch (error) {
-    console.error("Error moving opinion image:", error)
+    // Append suffix for duplicates
+    slug = `${baseSlug}-${counter}`;
+    counter++;
   }
 }
-*/
 
 module.exports = {
   async beforeCreate(event) {
@@ -87,7 +36,7 @@ module.exports = {
 
     // Auto-generate slug if not provided
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title);
+      data.slug = await generateSlug(data.title);
     }
 
     // If being published on creation, set the date
@@ -101,7 +50,7 @@ module.exports = {
 
     // Auto-generate slug if title changed but slug is empty
     if (data.title && !data.slug) {
-      data.slug = generateSlug(data.title);
+      data.slug = await generateSlug(data.title, where.id);
     }
 
     // Only set date if we're publishing
@@ -119,8 +68,6 @@ module.exports = {
     // Commented out to disable custom image movement
     /*
     const { result } = event;
-
-    // Only process if being published, has featured_image, and checkbox is unchecked
     if (result.publishedAt && result.featured_image && !result.keep_image_in_assets) {
       await moveImageToContentFolder(result, result.id);
     }
@@ -131,8 +78,6 @@ module.exports = {
     // Commented out to disable custom image movement
     /*
     const { result, params } = event;
-
-    // Only process if being published, has featured_image, and checkbox is unchecked
     if (params.data.publishedAt && result.featured_image && !result.keep_image_in_assets) {
       await moveImageToContentFolder(result, result.id);
     }

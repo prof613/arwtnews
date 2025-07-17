@@ -12,38 +12,21 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "title": {
-      "type": "string",
-      "required": true
-    },
-    "slug": {
-      "type": "uid",
-      "targetField": "title"
-    },
-    "quote": {
-      "type": "text",
-      "required": true
-    },
+    "title": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "title" },
+    "quote": { "type": "text", "required": true },
     "featured_image": {
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
-    "author": {
-      "type": "string",
-      "default": "Editorial Team",
-      "required": true
-    },
+    "author": { "type": "string", "default": "Editorial Team", "required": true },
     "author_image": {
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "secondary_category": {
       "type": "relation",
@@ -51,135 +34,52 @@
       "target": "api::category.category",
       "inversedBy": "opinions_using_this_as_secondary"
     },
-    "keep_image_in_assets": {
-      "type": "boolean",
-      "default": false
-    },
-    "date": {
-      "type": "datetime"
-    },
-    "image_path": {
-      "type": "string"
-    },
+    "keep_image_in_assets": { "type": "boolean", "default": false },
+    "date": { "type": "datetime" },
+    "image_path": { "type": "string" },
     "newsletter_inclusion": {
       "type": "enumeration",
-      "enum": [
-        "none",
-        "daily",
-        "weekly",
-        "both"
-      ]
+      "enum": ["none", "daily", "weekly", "both"]
     },
-    "enable_share_buttons": {
-      "type": "boolean",
-      "default": true
-    },
-    "metaTitle": {
-      "type": "string"
-    },
-    "seoKeywords": {
-      "type": "string"
-    },
-    "canonicalUrl": {
-      "type": "string"
-    },
-    "ogTitle": {
-      "type": "string"
-    },
-    "metaDescription": {
-      "type": "text"
-    },
-    "ogDescription": {
-      "type": "text"
-    },
+    "enable_share_buttons": { "type": "boolean", "default": true },
+    "metaTitle": { "type": "string" },
+    "seoKeywords": { "type": "string" },
+    "canonicalUrl": { "type": "string" },
+    "ogTitle": { "type": "string" },
+    "metaDescription": { "type": "text" },
+    "ogDescription": { "type": "text" },
     "ogImage": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
-    "searchTags": {
-      "type": "string"
-    },
-    "searchableContent": {
-      "type": "text",
-      "private": true
-    },
-    "searchPriority": {
-      "type": "integer",
-      "default": 5
-    },
-    "searchBoost": {
-      "type": "decimal",
-      "default": 1
-    },
-    "viewCount": {
-      "type": "integer",
-      "private": true,
-      "default": 0
-    },
-    "isSearchable": {
-      "type": "boolean",
-      "default": true
-    },
-    "sticky": {
-      "type": "boolean",
-      "default": false
-    },
+    "searchTags": { "type": "string" },
+    "searchableContent": { "type": "text", "private": true },
+    "searchPriority": { "type": "integer", "default": 5 },
+    "searchBoost": { "type": "decimal", "default": 1 },
+    "viewCount": { "type": "integer", "private": true, "default": 0 },
+    "isSearchable": { "type": "boolean", "default": true },
+    "sticky": { "type": "boolean", "default": false },
     "status": {
       "type": "enumeration",
-      "enum": [
-        "draft",
-        "published",
-        "archived"
-      ],
+      "enum": ["draft", "published", "archived"],
       "default": "draft"
     },
-    "trackingId": {
-      "type": "string",
-      "private": true
-    },
-    "analyticsData": {
-      "type": "json",
-      "private": true
-    },
-    "performanceMetrics": {
-      "type": "json",
-      "private": true
-    },
-    "pluginData": {
-      "type": "json",
-      "private": true
-    },
-    "seoConfig": {
-      "type": "json",
-      "private": true
-    },
-    "searchConfig": {
-      "type": "json",
-      "private": true
-    },
-    "customFields": {
-      "type": "json",
-      "private": true
-    },
-    "integrationData": {
-      "type": "json",
-      "private": true
-    },
-    "metadata": {
-      "type": "json",
-      "private": true
-    },
+    "trackingId": { "type": "string", "private": true },
+    "analyticsData": { "type": "json", "private": true },
+    "performanceMetrics": { "type": "json", "private": true },
+    "pluginData": { "type": "json", "private": true },
+    "seoConfig": { "type": "json", "private": true },
+    "searchConfig": { "type": "json", "private": true },
+    "customFields": { "type": "json", "private": true },
+    "integrationData": { "type": "json", "private": true },
+    "metadata": { "type": "json", "private": true },
     "rich_body": {
       "type": "dynamiczone",
-      "components": [
-        "blocks.enhanced-text",
-        "blocks.enhanced-image"
-      ],
+      "components": ["blocks.enhanced-text", "blocks.enhanced-image"],
       "required": true
-    }
+    },
+    "is_featured": { "type": "boolean", "default": false }
   }
 }
