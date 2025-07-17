@@ -247,13 +247,9 @@ export default function Category() {
                 </a>
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                {item.attributes.author || "Unknown"} /{" "}
-                {typeof item.attributes.category?.data?.attributes?.name === "string"
-                  ? item.attributes.category.data.attributes.name
-                  : typeof item.attributes.category?.name === "string"
-                    ? item.attributes.category.name
-                    : "General"}{" "}
-                / {item.attributes.date ? formatDate(item.attributes.date) : "No date"}
+                {item.attributes.author || "Unknown"} / {/* FIX START */}
+                {item.attributes.category || "General"} {/* FIX END */}/{" "}
+                {item.attributes.date ? formatDate(item.attributes.date) : "No date"}
               </p>
               {item.attributes.quote && (
                 <p className="text-sm text-gray-500 mb-3 italic border-l-4 border-[#B22234] pl-2 line-clamp-2">
@@ -311,7 +307,9 @@ export default function Category() {
                 />
                 <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
                   {item.type === "opinion"
-                    ? item.attributes.featured_image?.data?.attributes?.caption || <span className="text-transparent"> </span>
+                    ? item.attributes.featured_image?.data?.attributes?.caption || (
+                        <span className="text-transparent"> </span>
+                      )
                     : item.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
                 </figcaption>
               </div>
