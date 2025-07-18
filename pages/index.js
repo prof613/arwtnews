@@ -368,7 +368,7 @@ export default function Home() {
                   className="h-full"
                 >
                   <div className="p-2 flex flex-col h-full">
-                    <h3 className="text-xl font-bold text-[#3C3B6E] line-clamp-4 min-h-[5rem]">
+                    <h3 className="text-xl font-bold text-[#3C3B6E] line-clamp-3 min-h-[3.75rem]">
                       {link.attributes.title}
                     </h3>
                     <div className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
