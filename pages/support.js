@@ -51,13 +51,9 @@ export default function Support() {
           </p>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Contact Us</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            Questions about supporting our mission? Reach out to us at{" "}
-            <a
-              href="mailto:webpagecontact@redwhiteandtruenews.com"
-              className="text-[#B22234] hover:underline font-semibold"
-            >
-              webpagecontact@redwhiteandtruenews.com
-            </a>
+            Questions about supporting our mission? Reach out to us from our{" "}
+            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">Contact Page</a>
+            .
           </p>
           <div className="bg-gray-100 p-6 rounded-lg mt-6">
             <h3 className="text-xl font-bold text-[#3C3B6E] mb-3">Thank You</h3>

@@ -20,7 +20,7 @@ export default function Terms() {
           <MainBanner />
           <h1 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Terms of Service</h1>
           <p className="text-gray-600 mb-4 text-lg">
-            Welcome to Red, White and True News LLC. By accessing or using our website at
+            Welcome to Red, White and True News, an RWT News LLC property. By accessing or using our website at
             https://redwhiteandtruenews.com/, you agree to comply with and be bound by the following terms and
             conditions.
           </p>
@@ -57,7 +57,7 @@ export default function Terms() {
           </p>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">6. Limitation of Liability</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            Red, White and True News LLC shall not be liable for any direct, indirect, incidental, or consequential
+            RWT News LLC shall not be liable for any direct, indirect, incidental, or consequential
             damages arising from your use of this website.
           </p>
           <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">7. External Links</h2>
