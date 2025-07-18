@@ -17,6 +17,12 @@ function MyApp({ Component, pageProps }) {
           content="https://rwtnews-live-frontend-s7ibg.ondigitalocean.app/images/core/og-image.jpg"
         />
         <meta property="og:site_name" content="Red, White and True News" />
+        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Red, White and True News" />
+        <meta name="twitter:description" content="The RIGHT News for America." />
+        <meta name="twitter:image" content="https://rwtnews-live-frontend-s7ibg.ondigitalocean.app/images/core/og-image.jpg" />
+        <meta name="twitter:site" content="@RWTNews" />
       </Head>
       <Component {...pageProps} />
     </>
