@@ -365,14 +365,19 @@ export default function Home() {
                     if (confirm("You're about to visit an external site. Continue?"))
                       window.open(link.attributes.link, "_blank")
                   }}
+                  className="h-full"
                 >
-                  <div className="p-2">
-                    <h3 className="text-xl font-bold text-[#3C3B6E]">{link.attributes.title}</h3>
-                    {link.attributes.quote && (
-                      <p className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
-                        {link.attributes.quote.substring(0, 100)}...
-                      </p>
-                    )}
+                  <div className="p-2 flex flex-col h-full">
+                    <h3 className="text-xl font-bold text-[#3C3B6E] line-clamp-4 min-h-[5rem]">
+                      {link.attributes.title}
+                    </h3>
+                    <div className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
+                      {link.attributes.quote ? (
+                        <p className="line-clamp-2">{link.attributes.quote.substring(0, 100)}...</p>
+                      ) : (
+                        <span className="text-transparent">.</span> // Placeholder to maintain height
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600">
                       {link.attributes.category || "None"} / {link.attributes.author || "Unknown"} /{" "}
                       {formatDate(link.attributes.date)}
