@@ -368,9 +368,12 @@ export default function Home() {
                   className="h-full"
                 >
                   <div className="p-2 flex flex-col h-full">
-                    <h3 className="text-xl font-bold text-[#3C3B6E] line-clamp-3 min-h-[3.75rem]">
-                      {link.attributes.title}
-                    </h3>
+                    {/* Fixed height container for the title */}
+                    <div className="h-[3.75rem] overflow-hidden">
+                      {" "}
+                      {/* Approx 3 lines of text */}
+                      <h3 className="text-xl font-bold text-[#3C3B6E] line-clamp-3">{link.attributes.title}</h3>
+                    </div>
                     <div className="text-sm text-gray-500 italic border-l-4 border-[#B22234] pl-2 mb-2 min-h-[2.5rem] leading-5">
                       {link.attributes.quote ? (
                         <p className="line-clamp-2">{link.attributes.quote.substring(0, 100)}...</p>
