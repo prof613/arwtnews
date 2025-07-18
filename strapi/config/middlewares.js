@@ -7,6 +7,8 @@ module.exports = [
       origin: [
         'http://localhost:3000',
         'https://redwhiteandtruenews.com',
+        'https://rwtnews.com',
+        'https://therightnewsforamerica.com',
         'https://rwtnews-live-frontend-s7ibg.ondigitalocean.app',
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
