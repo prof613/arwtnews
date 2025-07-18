@@ -151,7 +151,6 @@ export default function Home() {
     setShowConsentModal(false)
     if (pendingVideoUrl) {
       setModalVideo(pendingVideoUrl)
-      setModalVideo(pendingVideoUrl)
       setPendingVideoUrl(null)
     }
   }
@@ -340,11 +339,11 @@ export default function Home() {
                         <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
                       </p>
                     )}
-                    <p className="text-sm text-gray-500 line-clamp-5 whitespace-pre-line">
-                      {extractTextFromBlocks(article.attributes.rich_body, 200)}...{" "}
-                      <span className="text-[#B22234] cursor-pointer hover:underline">see more</span>
+                    <p className="text-sm text-gray-500 line-clamp-4 whitespace-pre-line">
+                      {extractTextFromBlocks(article.attributes.rich_body, 300)}
                     </p>
-                    <hr className="border-[#3C3B6E] border-opacity-50 mt-4" />
+                    <div className="text-sm text-[#B22234] cursor-pointer hover:underline mt-1">see more</div>
+                    <hr className="border-[#3C3B6E] border-opacity-50 mt-auto" />
                   </div>
                 </Link>
               ))
