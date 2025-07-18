@@ -13,7 +13,7 @@ import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 
-export default function Opinion() {
+export default function Opinion({ initialMetadata }) {
   const router = useRouter()
   const { slug } = router.query
   const [opinion, setOpinion] = useState(null)
@@ -23,7 +23,7 @@ export default function Opinion() {
       async function fetchOpinion() {
         try {
           const opinionRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[author_image]=*&populate[secondary_category]=*&publicationState=live`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[author_image]=*&populate[secondary_category]=*&populate[ogImage]=*&publicationState=live`,
           )
           const opinionData = opinionRes.data.data[0]
           setOpinion(opinionData?.attributes || null)
@@ -35,13 +35,27 @@ export default function Opinion() {
     }
   }, [slug])
 
-  if (!opinion) return <div>Loading...</div>
+  if (!opinion) {
+    return (
+      <>
+        <Head>
+          <title>{`${initialMetadata.title} | Red, White and True News`}</title>
+          <meta property="og:title" content={initialMetadata.title} />
+          <meta property="og:description" content={initialMetadata.description} />
+          <meta property="og:image" content={initialMetadata.imageUrl} />
+          <meta property="og:url" content={initialMetadata.pageUrl} />
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Head>
+        <div>Loading...</div>
+      </>
+    )
+  }
 
   const imageUrl = getStrapiMedia(opinion.featured_image)
   const authorImageUrl = getStrapiMedia(opinion.author_image)
-  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+  const pageUrl = initialMetadata.pageUrl
 
-  // --- NEW DATE PREFIX LOGIC ---
   const dateComponent = (
     <span className="font-medium">
       {new Date(opinion.date).toLocaleDateString("en-US", {
@@ -54,17 +68,17 @@ export default function Opinion() {
     </span>
   )
   const datePrefixString = renderToStaticMarkup(dateComponent)
-  // --- END OF NEW LOGIC ---
 
   return (
     <>
       <Head>
-        <title>{opinion.title} | Red, White and True News</title>
-        <meta property="og:title" content={opinion.title} />
-        <meta property="og:description" content={opinion.quote || ""} />
-        {imageUrl && <meta property="og:image" content={imageUrl} />}
+        <title>{`${opinion.ogTitle || opinion.title} | Red, White and True News`}</title>
+        <meta property="og:title" content={opinion.ogTitle || opinion.title} />
+        <meta property="og:description" content={opinion.ogDescription || opinion.quote || ""} />
+        <meta property="og:image" content={getStrapiMedia(opinion.ogImage) || getStrapiMedia(opinion.featured_image) || ""} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -109,7 +123,6 @@ export default function Opinion() {
             <div className="text-gray-600 mb-4">
               <BlockRenderer blocks={opinion.rich_body} datePrefix={datePrefixString} />
             </div>
-
             {opinion.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
             )}
@@ -120,4 +133,42 @@ export default function Opinion() {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const { slug } = context.params
+  try {
+    const fields = ["title", "quote", "featured_image", "ogTitle", "ogDescription", "ogImage"]
+    const populate = ["featured_image", "ogImage"]
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&fields=${fields.join(",")}&populate=${populate.join(",")}&publicationState=live`,
+    )
+    const opinion = res.data.data[0]?.attributes
+    if (!opinion) throw new Error("Opinion not found")
+    const protocol = context.req.headers["x-forwarded-proto"] || "http"
+    const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+    const pageUrl = `https://www.redwhiteandtruenews.com/opinions/${slug}`
+    return {
+      props: {
+        initialMetadata: {
+          title: opinion.ogTitle || opinion.title || "Opinion",
+          description: opinion.ogDescription || opinion.quote || "",
+          imageUrl: getStrapiMedia(opinion.ogImage) || getStrapiMedia(opinion.featured_image) || "",
+          pageUrl,
+        },
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching opinion metadata:", error)
+    return {
+      props: {
+        initialMetadata: {
+          title: "Opinion Not Found",
+          description: "",
+          imageUrl: "",
+          pageUrl: "",
+        },
+      },
+    }
+  }
 }

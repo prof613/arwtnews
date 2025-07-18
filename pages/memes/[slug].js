@@ -10,8 +10,9 @@ import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import { ExternalLink } from "lucide-react"
+import { getStrapiMedia } from "../../utils/media"
 
-export default function MemePage() {
+export default function MemePage({ initialMetadata }) {
   const router = useRouter()
   const { slug } = router.query
   const [meme, setMeme] = useState(null)
@@ -21,7 +22,7 @@ export default function MemePage() {
       async function fetchMeme() {
         try {
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?filters[slug][$eq]=${slug}&populate=*`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?filters[slug][$eq]=${slug}&populate[image]=*&populate[ogImage]=*`,
           )
           const memeData = res.data.data[0]
           setMeme(memeData?.attributes || null)
@@ -33,19 +34,25 @@ export default function MemePage() {
     }
   }, [slug])
 
-  if (!meme) return <div>Loading...</div>
-
-  const imageUrl = meme.image?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${meme.image.data.attributes.url}`
-    : "/images/core/placeholder.jpg"
-
-  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
-
-  // Fix potential title issues by ensuring artist is always a string
-  const getPageTitle = () => {
-    const artistName = Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"
-    return `Meme by ${artistName} | Red, White and True News`
+  if (!meme) {
+    return (
+      <>
+        <Head>
+          <title>{`${initialMetadata.title} | Red, White and True News`}</title>
+          <meta property="og:title" content={initialMetadata.title} />
+          <meta property="og:description" content={initialMetadata.description} />
+          <meta property="og:image" content={initialMetadata.imageUrl} />
+          <meta property="og:url" content={initialMetadata.pageUrl} />
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Head>
+        <div>Loading...</div>
+      </>
+    )
   }
+
+  const imageUrl = getStrapiMedia(meme.image)
+  const pageUrl = initialMetadata.pageUrl
 
   const renderArtistLinks = () => {
     const link1 = meme.artist_link_1
@@ -53,7 +60,6 @@ export default function MemePage() {
     const link2 = meme.artist_link_2
     const link2Label = meme.artist_link_2_label || "Social Media"
 
-    // Only show if at least one link exists
     if (!link1 && !link2) return null
 
     return (
@@ -90,15 +96,13 @@ export default function MemePage() {
   return (
     <>
       <Head>
-        <title>{getPageTitle()}</title>
-        <meta
-          property="og:title"
-          content={`Meme by ${Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"}`}
-        />
-        <meta property="og:image" content={imageUrl} />
+        <title>{`${meme.ogTitle || `Meme by ${meme.artist || "Unknown"}`} | Red, White and True News`}</title>
+        <meta property="og:title" content={meme.ogTitle || `Meme by ${meme.artist || "Unknown"}`} />
+        <meta property="og:description" content={meme.description || ""} />
+        <meta property="og:image" content={getStrapiMedia(meme.ogImage) || getStrapiMedia(meme.image) || ""} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="article" />
-        {meme.description && <meta property="og:description" content={meme.description} />}
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -107,12 +111,12 @@ export default function MemePage() {
           <div className="my-8 flex flex-col items-center">
             <img
               src={imageUrl || "/placeholder.svg"}
-              alt={Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Meme"}
+              alt={meme.artist || "Meme"}
               className="max-w-full w-full md:max-w-2xl h-auto rounded-lg mb-4"
             />
             <div className="text-center max-w-2xl">
               <h1 className="text-3xl font-bold text-[#3C3B6E]">
-                {Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown Artist"}
+                {meme.artist || "Unknown Artist"}
               </h1>
               <p className="text-lg text-gray-600 mb-3">
                 {new Date(meme.date).toLocaleDateString("en-US", {
@@ -128,7 +132,7 @@ export default function MemePage() {
               <div className="mt-6">
                 <ShareButtons
                   shareUrl={pageUrl}
-                  title={`Check out this meme by ${Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"}`}
+                  title={`Check out this meme by ${meme.artist || "Unknown"}`}
                 />
               </div>
             )}
@@ -139,4 +143,42 @@ export default function MemePage() {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const { slug } = context.params
+  try {
+    const fields = ["artist", "description", "image", "ogTitle", "ogImage"]
+    const populate = ["image", "ogImage"]
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?filters[slug][$eq]=${slug}&fields=${fields.join(",")}&populate=${populate.join(",")}`,
+    )
+    const meme = res.data.data[0]?.attributes
+    if (!meme) throw new Error("Meme not found")
+    const protocol = context.req.headers["x-forwarded-proto"] || "http"
+    const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+    const pageUrl = `https://www.redwhiteandtruenews.com/memes/${slug}`
+    return {
+      props: {
+        initialMetadata: {
+          title: meme.ogTitle || `Meme by ${meme.artist || "Unknown"}`,
+          description: meme.description || "",
+          imageUrl: getStrapiMedia(meme.ogImage) || getStrapiMedia(meme.image) || "",
+          pageUrl,
+        },
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching meme metadata:", error)
+    return {
+      props: {
+        initialMetadata: {
+          title: "Meme Not Found",
+          description: "",
+          imageUrl: "",
+          pageUrl: "",
+        },
+      },
+    }
+  }
 }
