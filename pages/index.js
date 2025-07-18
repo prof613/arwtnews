@@ -300,7 +300,7 @@ export default function Home() {
           <section className="my-8 p-4 bg-gray-50 rounded-lg shadow-sm">
             <p className="text-xl text-[#3C3B6E] mb-4 leading-relaxed">
               Welcome to Red, White and True News! This page is currently in "Beta" while we search for any remaining
-              bugs and continue to add features. Please help us out and click everything on the page to try and find
+              bugs, continue to develop content and add features. Please help us out and click everything on the page to try and find
               things that are broken or not visually displaying properly. If you find any bugs, have a suggestion or
               just want to say Hi, you can do so through our{" "}
               <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
