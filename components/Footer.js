@@ -114,7 +114,7 @@ export default function Footer() {
               Privacy Policy
             </Link>
           </div>
-          <p className="text-sm font-medium">© 2025 Red, White and True News LLC</p>
+          <p className="text-sm font-medium">© 2025 RWT News LLC</p>
         </div>
       </div>
     </footer>
