@@ -66,116 +66,115 @@ export default function Home() {
           const [articleRes, opinionRes] = await Promise.all([
             axios.get(
               `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
-              { signal: controller.signal }
+              { signal: controller.signal },
             ),
             axios.get(
               `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true`,
-              { signal: controller.signal }
-            )
-          ]);
+              { signal: controller.signal },
+            ),
+          ])
           const featuredArticles = articleRes.data.data
-            .filter(a => a.attributes.is_featured)
-            .map(item => ({ ...item, type: "article" }));
+            .filter((a) => a.attributes.is_featured)
+            .map((item) => ({ ...item, type: "article" }))
           const featuredOpinions = opinionRes.data.data
-            .filter(o => o.attributes.is_featured)
-            .map(item => ({ ...item, type: "opinion" }));
+            .filter((o) => o.attributes.is_featured)
+            .map((item) => ({ ...item, type: "opinion" }))
           const allFeatured = [...featuredArticles, ...featuredOpinions]
             .sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date))
-            .slice(0, 3);
-          const regularArticles = articleRes.data.data
-            .filter(a => !a.attributes.is_featured)
-            .slice(0, 6);
-          setFeaturedItems(allFeatured);
-          setArticles(regularArticles);
-          setArticlesError(null);
+            .slice(0, 3)
+          const regularArticles = articleRes.data.data.filter((a) => !a.attributes.is_featured).slice(0, 6)
+          setFeaturedItems(allFeatured)
+          setArticles(regularArticles)
+          setArticlesError(null)
         } catch (error) {
           if (error.name !== "AbortError") {
-            setArticlesError("Failed to load articles and opinions. Please try again later.");
-            setFeaturedItems([]);
-            setArticles([]);
+            setArticlesError("Failed to load articles and opinions. Please try again later.")
+            setFeaturedItems([])
+            setArticles([])
           }
         }
         // Handle external articles
         try {
           const externalRes = await axios.get(
             `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*&sort[0]=createdAt:desc`,
-            { signal: controller.signal }
-          );
-          const oneYearAgo = new Date();
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            { signal: controller.signal },
+          )
+          const oneYearAgo = new Date()
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
           const filteredAndSorted = externalRes.data.data
-            .filter(article => new Date(article.attributes.date) >= oneYearAgo)
+            .filter((article) => new Date(article.attributes.date) >= oneYearAgo)
             .sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date))
-            .slice(0, 10);
-          setExternalLinks(filteredAndSorted);
-          setExternalLinksError(null);
+            .slice(0, 10)
+          setExternalLinks(filteredAndSorted)
+          setExternalLinksError(null)
         } catch (error) {
           if (error.name !== "AbortError") {
-            setExternalLinksError("Failed to load external articles. Please try again later.");
-            setExternalLinks([]);
+            setExternalLinksError("Failed to load external articles. Please try again later.")
+            setExternalLinks([])
           }
         }
         // Handle videos
         try {
-          const videoRes = await axios.get("/api/videos", { signal: controller.signal });
-          setVideos(videoRes.data.videos || []);
-          setVideosError(null);
+          const videoRes = await axios.get("/api/videos", { signal: controller.signal })
+          setVideos(videoRes.data.videos || [])
+          setVideosError(null)
         } catch (error) {
           if (error.name !== "AbortError") {
-            setVideosError("Failed to load videos. Please try again later.");
-            setVideos([]);
+            setVideosError("Failed to load videos. Please try again later.")
+            setVideos([])
           }
         }
       } catch (error) {
         if (error.name !== "AbortError") {
-          setArticlesError("Failed to load articles. Please try again later.");
-          setExternalLinksError("Failed to load external articles. Please try again later.");
-          setVideosError("Failed to load videos. Please try again later.");
+          setArticlesError("Failed to load articles. Please try again later.")
+          setExternalLinksError("Failed to load external articles. Please try again later.")
+          setVideosError("Failed to load videos. Please try again later.")
         }
       }
     }
-    fetchData();
-    return () => controller.abort();
-  }, []);
+    fetchData()
+    return () => controller.abort()
+  }, [])
 
   const openVideoModal = (videoUrl) => {
     if (hasVideoConsent) {
-      setModalVideo(videoUrl);
+      setModalVideo(videoUrl)
     } else {
-      setPendingVideoUrl(videoUrl);
-      setShowConsentModal(true);
+      setPendingVideoUrl(videoUrl)
+      setShowConsentModal(true)
     }
-  };
+  }
 
   const handleConsentAccept = () => {
-    localStorage.setItem("rwtn-video-consent", "true");
-    setHasVideoConsent(true);
-    setShowConsentModal(false);
+    localStorage.setItem("rwtn-video-consent", "true")
+    setHasVideoConsent(true)
+    setShowConsentModal(false)
     if (pendingVideoUrl) {
-      setModalVideo(pendingVideoUrl);
-      setPendingVideoUrl(null);
+      setModalVideo(pendingVideoUrl)
+      setModalVideo(pendingVideoUrl)
+      setPendingVideoUrl(null)
     }
-  };
+  }
 
   const handleConsentClose = () => {
-    setShowConsentModal(false);
-    setPendingVideoUrl(null);
-  };
+    setShowConsentModal(false)
+    setPendingVideoUrl(null)
+  }
 
-  const closeVideoModal = () => setModalVideo(null);
+  const closeVideoModal = () => setModalVideo(null)
 
   const toggleFullscreen = () => {
-    const iframe = document.querySelector("#video-modal-iframe");
+    const iframe = document.querySelector("#video-modal-iframe")
     if (iframe) {
       if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
+        iframe.requestFullscreen()
       } else if (iframe.webkitRequestFullscreen) {
-        iframe.webkitRequestFullscreen();
+        iframe.webkitRequestFullscreen()
       } else if (iframe.msRequestFullscreen) {
-        iframe.msRequestFullscreen();
+        iframe.msRequestFullscreen()
       }
     }
-  };
+  }
 
   const renderComplianceNotice = () => (
     <div className="text-center mb-4 p-3 bg-gray-50 rounded-lg border">
@@ -192,15 +191,16 @@ export default function Home() {
           className="text-[#B22234] hover:underline"
         >
           YouTube's Terms of Service
-        </a>.
+        </a>
+        .
       </p>
     </div>
-  );
+  )
 
   const renderFeaturedItem = (item, isHero = false) => {
-    const attrs = item.attributes;
-    const isArticle = item.type === "article";
-    const caption = attrs.image?.data?.attributes?.caption || attrs.featured_image?.data?.attributes?.caption || "";
+    const attrs = item.attributes
+    const isArticle = item.type === "article"
+    const caption = attrs.image?.data?.attributes?.caption || attrs.featured_image?.data?.attributes?.caption || ""
     return (
       <Link href={`/${isArticle ? "articles" : "opinions"}/${attrs.slug}`} key={`${item.type}-${item.id}`}>
         <div className={`bg-gray-100 p-4 rounded ${isHero ? "" : "h-full"}`}>
@@ -238,18 +238,19 @@ export default function Home() {
           </p>
           <p className="text-sm text-gray-600 font-bold">
             {(() => {
-              const primaryCat = isArticle ? attrs.category?.data?.attributes?.name : "Opinion";
-              const secondaryCat = attrs.secondary_category?.data?.attributes?.name;
+              const primaryCat = isArticle ? attrs.category?.data?.attributes?.name : "Opinion"
+              const secondaryCat = attrs.secondary_category?.data?.attributes?.name
               if (primaryCat && secondaryCat) {
-                return `${primaryCat} - ${secondaryCat}`;
+                return `${primaryCat} - ${secondaryCat}`
               }
-              return primaryCat || secondaryCat || "None";
+              return primaryCat || secondaryCat || "None"
             })()} / {attrs.author || "Unknown"}
           </p>
           {attrs.quote && (
             <div className="italic text-gray-500 border-l-4 border-[#B22234] pl-2 mb-2">
               <p className={`leading-5 ${isHero ? "line-clamp-2 min-h-[2.5rem]" : "line-clamp-2 min-h-[2.5rem]"}`}>
-                {attrs.quote}... <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
+                {attrs.quote}...{" "}
+                <span className="text-[#B22234] cursor-pointer hover:underline not-italic">see more</span>
               </p>
             </div>
           )}
@@ -259,8 +260,8 @@ export default function Home() {
           </p>
         </div>
       </Link>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -287,7 +288,7 @@ export default function Home() {
                 {renderFeaturedItem(featuredItems[0], true)}
                 {featuredItems.length > 1 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {featuredItems.slice(1, 3).map(item => renderFeaturedItem(item, false))}
+                    {featuredItems.slice(1, 3).map((item) => renderFeaturedItem(item, false))}
                   </div>
                 )}
               </div>
@@ -300,9 +301,9 @@ export default function Home() {
             {articlesError ? (
               <p className="text-center text-gray-500 py-8">{articlesError}</p>
             ) : (
-              articles.map(article => (
-                <Link key={article.id} href={`/articles/${article.attributes.slug}`}>
-                  <div className="border-l-4 border-[#B22234] p-4">
+              articles.map((article) => (
+                <Link key={article.id} href={`/articles/${article.attributes.slug}`} className="h-full">
+                  <div className="border-l-4 border-[#B22234] p-4 flex flex-col h-full">
                     <img
                       src={getStrapiMedia(article.attributes.image) || "/images/core/placeholder.jpg"}
                       alt={article.attributes.title}
@@ -315,12 +316,12 @@ export default function Home() {
                     </figcaption>
                     <p className="text-sm text-gray-600 font-bold min-h-[2.5rem] leading-tight">
                       {(() => {
-                        const primaryCat = article.attributes.category?.data?.attributes?.name;
-                        const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name;
+                        const primaryCat = article.attributes.category?.data?.attributes?.name
+                        const secondaryCat = article.attributes.secondary_category?.data?.attributes?.name
                         if (primaryCat && secondaryCat) {
-                          return `${primaryCat} - ${secondaryCat}`;
+                          return `${primaryCat} - ${secondaryCat}`
                         } else {
-                          return primaryCat || secondaryCat || "None";
+                          return primaryCat || secondaryCat || "None"
                         }
                       })()} / {article.attributes.author || "Unknown"} /{" "}
                       {new Date(article.attributes.date).toLocaleDateString("en-US", {
@@ -354,16 +355,16 @@ export default function Home() {
             {externalLinksError ? (
               <p className="text-center text-gray-500 py-8">{externalLinksError}</p>
             ) : (
-              externalLinks.map(link => (
+              externalLinks.map((link) => (
                 <a
                   key={link.id}
                   href={link.attributes.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={e => {
-                    e.preventDefault();
+                  onClick={(e) => {
+                    e.preventDefault()
                     if (confirm("You're about to visit an external site. Continue?"))
-                      window.open(link.attributes.link, "_blank");
+                      window.open(link.attributes.link, "_blank")
                   }}
                 >
                   <div className="p-2">
@@ -436,7 +437,7 @@ export default function Home() {
         >
           <div
             className="bg-white rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-300"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-[#3C3B6E]">Video Player</h3>
@@ -477,5 +478,5 @@ export default function Home() {
       )}
       <Footer />
     </>
-  );
+  )
 }
