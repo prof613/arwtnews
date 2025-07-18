@@ -295,6 +295,39 @@ export default function Home() {
               <p className="text-center text-gray-500 py-8">No featured content available.</p>
             )}
           </section>
+
+          {/* New Beta Section */}
+          <section className="my-8 p-4 bg-gray-50 rounded-lg shadow-sm">
+            <p className="text-xl text-[#3C3B6E] mb-4 leading-relaxed">
+              Welcome to Red, White and True News! This page is currently in "Beta" while we search for any remaining
+              bugs and continue to add features. Please help us out and click everything on the page to try and find
+              things that are broken or not visually displaying properly. If you find any bugs, have a suggestion or
+              just want to say Hi, you can do so through our{" "}
+              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
+                contact page
+              </Link>
+              . Please use the subjects "Bug Report" or "Suggestion" as appropriate. Thank you for dropping by!
+            </p>
+
+            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues/features under development:</h3>
+            <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
+              <li>
+                Community page currently connects to our Facebook page followers group. Over time we will be developing
+                our own stand alone community where you can engage with like minded people (and I'm sure some trolls)
+                about the issues of the day. Stay tuned.
+              </li>
+              <li>
+                We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
+                now so you do receive it once we do have it up and running.
+              </li>
+              <li>
+                We will be adding likes and commenting to our articles very soon. This may be done through the Facebook
+                plug in or we may use a different mechanism. We haven't 100% decided yet.
+              </li>
+            </ul>
+          </section>
+          {/* End New Beta Section */}
+
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center mb-4">The RIGHT News</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {articlesError ? (
