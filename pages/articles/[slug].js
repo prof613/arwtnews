@@ -13,17 +13,19 @@ import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 
+// The component now receives initialMetadata from the server
 export default function Article({ initialMetadata }) {
   const router = useRouter()
   const { slug } = router.query
   const [article, setArticle] = useState(null)
 
+  // Updated useEffect with proper populate parameters for Enhanced Images
   useEffect(() => {
     if (slug) {
       async function fetchArticle() {
         try {
           const articleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[image]=*&populate[category]=*&populate[secondary_category]=*&populate[author_image]=*&populate[ogImage]=*`,
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[image]=*&populate[category]=*&populate[secondary_category]=*&populate[author_image]=*`,
           )
           const articleData = articleRes.data.data[0]
           setArticle(articleData?.attributes || null)
@@ -35,26 +37,34 @@ export default function Article({ initialMetadata }) {
     }
   }, [slug])
 
+  // The Head now uses the pre-fetched metadata from the server
+  // This is what the crawler will see immediately.
+  const head = (
+    <Head>
+      <title>{`${initialMetadata.title} | Red, White and True News`}</title>
+      <meta property="og:title" content={initialMetadata.title} />
+      <meta property="og:description" content={initialMetadata.description} />
+      <meta property="og:image" content={initialMetadata.imageUrl} />
+      <meta property="og:url" content={initialMetadata.pageUrl} />
+      <meta property="og:type" content="article" />
+      <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+  )
+
+  // Your loading state remains, for the user experience
   if (!article) {
     return (
       <>
-        <Head>
-          <title>{`${initialMetadata.title} | Red, White and True News`}</title>
-          <meta property="og:title" content={initialMetadata.title} />
-          <meta property="og:description" content={initialMetadata.description} />
-          <meta property="og:image" content={initialMetadata.imageUrl} />
-          <meta property="og:url" content={initialMetadata.pageUrl} />
-          <meta property="og:type" content="article" />
-          <meta name="twitter:card" content="summary_large_image" />
-        </Head>
+        {head}
         <div>Loading...</div>
       </>
     )
   }
 
+  // The rest of your component logic is identical
   const imageUrl = getStrapiMedia(article.image)
   const authorImageUrl = getStrapiMedia(article.author_image)
-  const pageUrl = initialMetadata.pageUrl
+  const pageUrl = initialMetadata.pageUrl // Use the server-generated URL for consistency
 
   const dateComponent = (
     <span className="font-medium">
@@ -71,15 +81,7 @@ export default function Article({ initialMetadata }) {
 
   return (
     <>
-      <Head>
-        <title>{`${article.ogTitle || article.title} | Red, White and True News`}</title>
-        <meta property="og:title" content={article.ogTitle || article.title} />
-        <meta property="og:description" content={article.ogDescription || article.quote || ""} />
-        <meta property="og:image" content={getStrapiMedia(article.ogImage) || getStrapiMedia(article.image) || ""} />
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
+      {head}
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
@@ -121,6 +123,7 @@ export default function Article({ initialMetadata }) {
             <div className="text-gray-600 mb-4">
               <BlockRenderer blocks={article.rich_body} datePrefix={datePrefixString} />
             </div>
+
             {article.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={article.title} summary={article.quote} />
             )}
@@ -133,26 +136,32 @@ export default function Article({ initialMetadata }) {
   )
 }
 
+// This function runs on the server, but ONLY fetches what's needed for the <Head>
 export async function getServerSideProps(context) {
   const { slug } = context.params
+
   try {
-    const fields = ["title", "quote", "image", "ogTitle", "ogDescription", "ogImage"]
-    const populate = ["image", "ogImage"]
+    // We fetch only the fields needed for metadata to be fast
+    const fields = ["title", "quote", "image"]
+    const populate = ["image"]
     const articleRes = await axios.get(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&fields=${fields.join(",")}&populate=${populate.join(",")}`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&fields[0]=${fields[0]}&fields[1]=${fields[1]}&populate[0]=${populate[0]}`,
     )
+
     const article = articleRes.data.data[0]?.attributes
     if (!article) throw new Error("Article not found")
+
     const protocol = context.req.headers["x-forwarded-proto"] || "http"
     const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-    const pageUrl = `https://www.redwhiteandtruenews.com/articles/${slug}`
+    const pageUrl = `${protocol}://${host}${context.req.url}`
+
     return {
       props: {
         initialMetadata: {
-          title: article.ogTitle || article.title || "Article",
-          description: article.ogDescription || article.quote || "",
-          imageUrl: getStrapiMedia(article.ogImage) || getStrapiMedia(article.image) || "",
-          pageUrl,
+          title: article.title || "Article",
+          description: article.quote || "",
+          imageUrl: getStrapiMedia(article.image) || "",
+          pageUrl: pageUrl,
         },
       },
     }
