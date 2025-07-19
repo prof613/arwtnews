@@ -1,10 +1,6 @@
-"use client"
-
 import Head from "next/head"
-import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
-import axios from "axios"
 import { renderToStaticMarkup } from "react-dom/server"
+import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -13,58 +9,43 @@ import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 
-// The component now receives initialMetadata from the server
-export default function Article({ initialMetadata }) {
-  const router = useRouter()
-  const { slug } = router.query
-  const [article, setArticle] = useState(null)
+// The component now receives the full article data from getServerSideProps
+export default function Article({ article, pageUrl }) {
+  // No need for useRouter or useState/useEffect for article data anymore
 
-  // Updated useEffect with proper populate parameters for Enhanced Images
-  useEffect(() => {
-    if (slug) {
-      async function fetchArticle() {
-        try {
-          const articleRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[image]=*&populate[category]=*&populate[secondary_category]=*&populate[author_image]=*`,
-          )
-          const articleData = articleRes.data.data[0]
-          setArticle(articleData?.attributes || null)
-        } catch (error) {
-          console.error("Error fetching article:", error)
-        }
-      }
-      fetchArticle()
-    }
-  }, [slug])
-
-  // The Head now uses the pre-fetched metadata from the server
-  // This is what the crawler will see immediately.
-  const head = (
-    <Head>
-      <title>{`${initialMetadata.title} | Red, White and True News`}</title>
-      <meta property="og:title" content={initialMetadata.title} />
-      <meta property="og:description" content={initialMetadata.description} />
-      <meta property="og:image" content={initialMetadata.imageUrl} />
-      <meta property="og:url" content={initialMetadata.pageUrl} />
-      <meta property="og:type" content="article" />
-      <meta name="twitter:card" content="summary_large_image" />
-    </Head>
-  )
-
-  // Your loading state remains, for the user experience
+  // If article is null (e.g., not found by getServerSideProps), render a not found state
   if (!article) {
     return (
       <>
-        {head}
-        <div>Loading...</div>
+        <Head>
+          <title>Article Not Found | Red, White and True News</title>
+          <meta property="og:title" content="Article Not Found" />
+          <meta property="og:description" content="The requested article could not be found." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:image" content="/placeholder.svg" /> {/* Fallback image */}
+          <meta name="twitter:card" content="summary_large_image" />
+        </Head>
+        <Header />
+        <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
+          <section className="flex-1">
+            <MainBanner />
+            <div className="my-8 text-center">
+              <h1 className="text-3xl font-bold text-[#3C3B6E] mb-4">Article Not Found</h1>
+              <p className="text-lg text-gray-700">
+                We couldn't find the article you're looking for. It might have been moved or deleted.
+              </p>
+            </div>
+          </section>
+          <Sidebar />
+        </main>
+        <Footer />
       </>
     )
   }
 
-  // The rest of your component logic is identical
   const imageUrl = getStrapiMedia(article.image)
   const authorImageUrl = getStrapiMedia(article.author_image)
-  const pageUrl = initialMetadata.pageUrl // Use the server-generated URL for consistency
 
   const dateComponent = (
     <span className="font-medium">
@@ -81,7 +62,20 @@ export default function Article({ initialMetadata }) {
 
   return (
     <>
-      {head}
+      <Head>
+        <title>{`${article.title} | Red, White and True News`}</title>
+        <meta property="og:title" content={article.ogTitle || article.title} />
+        <meta property="og:description" content={article.ogDescription || article.quote || ""} />
+        <meta property="og:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Red, White and True News" /> {/* Add site name for consistency */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={article.ogTitle || article.title} />
+        <meta name="twitter:description" content={article.ogDescription || article.quote || ""} />
+        <meta name="twitter:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta name="twitter:site" content="@RWTNews" /> {/* Add twitter site for consistency */}
+      </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
@@ -136,45 +130,46 @@ export default function Article({ initialMetadata }) {
   )
 }
 
-// This function runs on the server, but ONLY fetches what's needed for the <Head>
+// This function runs on the server for every request
 export async function getServerSideProps(context) {
   const { slug } = context.params
 
+  // Construct the full page URL for OG tags
+  const protocol = context.req.headers["x-forwarded-proto"] || "http"
+  const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+  const pageUrl = `${protocol}://${host}${context.req.url}`
+
   try {
-    // We fetch only the fields needed for metadata to be fast
-    const fields = ["title", "quote", "image"]
-    const populate = ["image"]
+    // Fetch all necessary article data with proper populate parameters
     const articleRes = await axios.get(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&fields[0]=${fields[0]}&fields[1]=${fields[1]}&populate[0]=${populate[0]}`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[image]=*&populate[author_image]=*&populate[category]=*&populate[secondary_category]=*&populate[rich_body][populate]=*&populate[ogImage]=*`,
     )
 
     const article = articleRes.data.data[0]?.attributes
-    if (!article) throw new Error("Article not found")
 
-    const protocol = context.req.headers["x-forwarded-proto"] || "http"
-    const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-    const pageUrl = `${protocol}://${host}${context.req.url}`
+    if (!article) {
+      // If article not found, return props with null article to trigger not found UI
+      return {
+        props: {
+          article: null,
+          pageUrl: pageUrl, // Still provide pageUrl for the not found page's OG tags
+        },
+      }
+    }
 
     return {
       props: {
-        initialMetadata: {
-          title: article.title || "Article",
-          description: article.quote || "",
-          imageUrl: getStrapiMedia(article.image) || "",
-          pageUrl: pageUrl,
-        },
+        article: article,
+        pageUrl: pageUrl,
       },
     }
   } catch (error) {
-    console.error("Error fetching metadata in getServerSideProps:", error)
+    console.error("Error fetching article in getServerSideProps:", error)
+    // In case of an error during fetch, return null article to show not found UI
     return {
       props: {
-        initialMetadata: {
-          title: "Article Not Found",
-          description: "",
-          imageUrl: "",
-          pageUrl: "",
-        },
+        article: null,
+        pageUrl: pageUrl,
       },
     }
   }

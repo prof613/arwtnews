@@ -1,8 +1,4 @@
-"use client"
-
 import Head from "next/head"
-import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
 import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
@@ -10,36 +6,44 @@ import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import { ExternalLink } from "lucide-react"
+import { getStrapiMedia } from "../../utils/media" // Ensure getStrapiMedia is imported
 
-export default function MemePage() {
-  const router = useRouter()
-  const { slug } = router.query
-  const [meme, setMeme] = useState(null)
+// The component now receives the full meme data from getServerSideProps
+export default function MemePage({ meme, pageUrl }) {
+  // No need for useRouter or useState/useEffect for meme data anymore
 
-  useEffect(() => {
-    if (slug) {
-      async function fetchMeme() {
-        try {
-          const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?filters[slug][$eq]=${slug}&populate=*`,
-          )
-          const memeData = res.data.data[0]
-          setMeme(memeData?.attributes || null)
-        } catch (error) {
-          console.error("Error fetching meme:", error)
-        }
-      }
-      fetchMeme()
-    }
-  }, [slug])
+  if (!meme) {
+    return (
+      <>
+        <Head>
+          <title>Meme Not Found | Red, White and True News</title>
+          <meta property="og:title" content="Meme Not Found" />
+          <meta property="og:description" content="The requested meme could not be found." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:image" content="/placeholder.svg" /> {/* Fallback image */}
+          <meta name="twitter:card" content="summary_large_image" />
+        </Head>
+        <Header />
+        <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
+          <section className="flex-1">
+            <MainBanner />
+            <div className="my-8 text-center">
+              <h1 className="text-3xl font-bold text-[#3C3B6E] mb-4">Meme Not Found</h1>
+              <p className="text-lg text-gray-700">
+                We couldn't find the meme you're looking for. It might have been moved or deleted.
+              </p>
+            </div>
+          </section>
+          <Sidebar />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
-  if (!meme) return <div>Loading...</div>
-
-  const imageUrl = meme.image?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${meme.image.data.attributes.url}`
-    : "/images/core/placeholder.jpg"
-
-  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
+  // Use getStrapiMedia for image URL
+  const imageUrl = getStrapiMedia(meme.image)
 
   // Fix potential title issues by ensuring artist is always a string
   const getPageTitle = () => {
@@ -93,12 +97,21 @@ export default function MemePage() {
         <title>{getPageTitle()}</title>
         <meta
           property="og:title"
-          content={`Meme by ${Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"}`}
+          content={meme.ogTitle || `Meme by ${Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"}`}
         />
-        <meta property="og:image" content={imageUrl} />
+        <meta property="og:description" content={meme.ogDescription || meme.description || ""} />
+        <meta property="og:image" content={getStrapiMedia(meme.ogImage) || imageUrl || "/placeholder.svg"} />
         <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="article" />
-        {meme.description && <meta property="og:description" content={meme.description} />}
+        <meta property="og:type" content="article" /> {/* Memes are often treated as articles for OG */}
+        <meta property="og:site_name" content="Red, White and True News" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={meme.ogTitle || `Meme by ${Array.isArray(meme.artist) ? meme.artist[0] : meme.artist || "Unknown"}`}
+        />
+        <meta name="twitter:description" content={meme.ogDescription || meme.description || ""} />
+        <meta name="twitter:image" content={getStrapiMedia(meme.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta name="twitter:site" content="@RWTNews" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -139,4 +152,43 @@ export default function MemePage() {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const { slug } = context.params
+
+  const protocol = context.req.headers["x-forwarded-proto"] || "http"
+  const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+  const pageUrl = `${protocol}://${host}${context.req.url}`
+
+  try {
+    const memeRes = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?filters[slug][$eq]=${slug}&populate[image]=*&populate[ogImage]=*`,
+    )
+    const meme = memeRes.data.data[0]?.attributes
+
+    if (!meme) {
+      return {
+        props: {
+          meme: null,
+          pageUrl: pageUrl,
+        },
+      }
+    }
+
+    return {
+      props: {
+        meme: meme,
+        pageUrl: pageUrl,
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching meme in getServerSideProps:", error)
+    return {
+      props: {
+        meme: null,
+        pageUrl: pageUrl,
+      },
+    }
+  }
 }

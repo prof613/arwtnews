@@ -1,10 +1,6 @@
-"use client"
-
 import Head from "next/head"
-import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
-import axios from "axios"
 import { renderToStaticMarkup } from "react-dom/server"
+import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -13,33 +9,42 @@ import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 
-export default function Opinion() {
-  const router = useRouter()
-  const { slug } = router.query
-  const [opinion, setOpinion] = useState(null)
+// The component now receives the full opinion data from getServerSideProps
+export default function Opinion({ opinion, pageUrl }) {
+  // No need for useRouter or useState/useEffect for opinion data anymore
 
-  useEffect(() => {
-    if (slug) {
-      async function fetchOpinion() {
-        try {
-          const opinionRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[rich_body][populate]=*&populate[featured_image]=*&populate[author]=*&populate[author_image]=*&populate[secondary_category]=*&publicationState=live`,
-          )
-          const opinionData = opinionRes.data.data[0]
-          setOpinion(opinionData?.attributes || null)
-        } catch (error) {
-          console.error("Error fetching opinion:", error)
-        }
-      }
-      fetchOpinion()
-    }
-  }, [slug])
-
-  if (!opinion) return <div>Loading...</div>
+  if (!opinion) {
+    return (
+      <>
+        <Head>
+          <title>Opinion Not Found | Red, White and True News</title>
+          <meta property="og:title" content="Opinion Not Found" />
+          <meta property="og:description" content="The requested opinion piece could not be found." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:image" content="/placeholder.svg" /> {/* Fallback image */}
+          <meta name="twitter:card" content="summary_large_image" />
+        </Head>
+        <Header />
+        <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
+          <section className="flex-1">
+            <MainBanner />
+            <div className="my-8 text-center">
+              <h1 className="text-3xl font-bold text-[#3C3B6E] mb-4">Opinion Not Found</h1>
+              <p className="text-lg text-gray-700">
+                We couldn't find the opinion piece you're looking for. It might have been moved or deleted.
+              </p>
+            </div>
+          </section>
+          <Sidebar />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   const imageUrl = getStrapiMedia(opinion.featured_image)
   const authorImageUrl = getStrapiMedia(opinion.author_image)
-  const pageUrl = typeof window !== "undefined" ? window.location.href : ""
 
   // --- NEW DATE PREFIX LOGIC ---
   const dateComponent = (
@@ -59,12 +64,19 @@ export default function Opinion() {
   return (
     <>
       <Head>
-        <title>{opinion.title} | Red, White and True News</title>
-        <meta property="og:title" content={opinion.title} />
-        <meta property="og:description" content={opinion.quote || ""} />
-        {imageUrl && <meta property="og:image" content={imageUrl} />}
+        <title>{`${opinion.title} | Red, White and True News`}</title>
+        <meta property="og:title" content={opinion.ogTitle || opinion.title} />
+        <meta property="og:description" content={opinion.ogDescription || opinion.quote || ""} />
+        <meta property="og:image" content={getStrapiMedia(opinion.ogImage) || imageUrl || "/placeholder.svg"} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Red, White and True News" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={opinion.ogTitle || opinion.title} />
+        <meta name="twitter:description" content={opinion.ogDescription || opinion.quote || ""} />
+        <meta name="twitter:image" content={getStrapiMedia(opinion.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta name="twitter:site" content="@RWTNews" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -120,4 +132,43 @@ export default function Opinion() {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const { slug } = context.params
+
+  const protocol = context.req.headers["x-forwarded-proto"] || "http"
+  const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
+  const pageUrl = `${protocol}://${host}${context.req.url}`
+
+  try {
+    const opinionRes = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[featured_image]=*&populate[author_image]=*&populate[secondary_category]=*&populate[rich_body][populate]=*&populate[ogImage]=*&publicationState=live`,
+    )
+    const opinion = opinionRes.data.data[0]?.attributes
+
+    if (!opinion) {
+      return {
+        props: {
+          opinion: null,
+          pageUrl: pageUrl,
+        },
+      }
+    }
+
+    return {
+      props: {
+        opinion: opinion,
+        pageUrl: pageUrl,
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching opinion in getServerSideProps:", error)
+    return {
+      props: {
+        opinion: null,
+        pageUrl: pageUrl,
+      },
+    }
+  }
 }

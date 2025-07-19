@@ -1,29 +1,25 @@
 import "../styles/globals.css"
 import Head from "next/head"
+import Script from "next/script" // Import Script from next/script
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        {/* Plausible Analytics Script */}
-        <script defer data-domain="rwtnews.com" src="https://plausible.io/js/script.js"></script>
-
-        <meta property="og:title" content="Red, White and True News" />
-        <meta property="og:description" content="The RIGHT News for America." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.redwhiteandtruenews.com" />
-        <meta
-          property="og:image"
-          content="https://www.redwhiteandtruenews.com/images/core/og-image.jpg"
-        />
-        <meta property="og:site_name" content="Red, White and True News" />
-        
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Red, White and True News" />
-        <meta name="twitter:description" content="The RIGHT News for America." />
-        <meta name="twitter:image" content="https://www.redwhiteandtruenews.com/images/core/og-image.jpg" />
-        <meta name="twitter:site" content="@RWTNews" />
+        {/* Basic meta tags for global settings */}
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" /> {/* Assuming you have a favicon */}
+        {/* No specific OG/Twitter tags here, they will be handled per page */}
       </Head>
+
+      {/* Plausible Analytics Script using next/script */}
+      <Script
+        src="https://plausible.io/js/script.js"
+        data-domain="rwtnews.com"
+        strategy="afterInteractive" // Load after the page is interactive
+      />
+
       <Component {...pageProps} />
     </>
   )
