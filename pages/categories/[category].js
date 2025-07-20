@@ -84,12 +84,15 @@ export default function Category() {
             combinedItems = allExternalItems.slice(startIndex, endIndex)
             fetchedTotalPages = Math.ceil(allExternalItems.length / 20)
           } else {
+            // FIX START: URL-encode the category name for the API request
+            const encodedCategory = encodeURIComponent(category)
+            // FIX END
             const [articlesRes, opinionsRes] = await Promise.all([
               axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${category}&filters[$or][1][secondary_category][name][$eq]=${category}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
+                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
               ),
               axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${category}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
+                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
               ),
             ])
             const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
