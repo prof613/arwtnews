@@ -1,5 +1,7 @@
-import Head from "next/head"
-import { renderToStaticMarkup } from "react-dom/server"
+"use client"
+
+import { useRouter } from "next/router"
+import Head from "next/head" // Import Head for meta tags
 import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
@@ -8,10 +10,31 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
+import { renderToStaticMarkup } from "react-dom/server"
 
-// The component now receives the full article data from getServerSideProps
+// This is a placeholder for your data fetching logic
+// In a real app, you would fetch article data based on the slug
+async function getArticleBySlug(slug) {
+  // Simulate fetching data
+  return {
+    id: slug,
+    title: `Article Title for ${slug.replace(/-/g, " ")}`,
+    description: `This is a description for the article about ${slug.replace(/-/g, " ")}.`,
+    imageUrl: `/placeholder.svg?height=600&width=1200&query=article%20image%20for%20${slug}`,
+  }
+}
+
 export default function Article({ article, pageUrl }) {
-  // No need for useRouter or useState/useEffect for article data anymore
+  const router = useRouter()
+  const { slug } = router.query // Get the dynamic slug from the URL [^5]
+
+  // Construct the canonical URL for the current article
+  // In a real application, you might get the base URL from an environment variable
+  // or a global configuration. For client-side, window.location.origin works.
+  const canonicalUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/articles/${slug}`
+      : `https://yourwebsite.com/articles/${slug}` // Fallback for server-side rendering
 
   // If article is null (e.g., not found by getServerSideProps), render a not found state
   if (!article) {
@@ -121,6 +144,29 @@ export default function Article({ article, pageUrl }) {
             {article.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={article.title} summary={article.quote} />
             )}
+
+            {/* Facebook Like and Comments Plugins */}
+            <div className="mt-8 pt-4 border-t border-gray-200">
+              <h2 className="text-xl font-bold text-[#3C3B6E] mb-4">Join the Discussion</h2>
+              <div className="mb-4">
+                <div
+                  className="fb-like"
+                  data-href={pageUrl}
+                  data-layout="standard"
+                  data-action="like"
+                  data-size="small"
+                  data-share="true"
+                ></div>
+              </div>
+              <div>
+                <div
+                  className="fb-comments"
+                  data-href={pageUrl}
+                  data-width="100%" // Changed to 100% for responsiveness
+                  data-numposts="5"
+                ></div>
+              </div>
+            </div>
           </article>
         </section>
         <Sidebar />

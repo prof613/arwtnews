@@ -125,6 +125,29 @@ export default function Opinion({ opinion, pageUrl }) {
             {opinion.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
             )}
+
+            {/* Facebook Like and Comments Plugins */}
+            <div className="mt-8 pt-4 border-t border-gray-200">
+              <h2 className="text-xl font-bold text-[#3C3B6E] mb-4">Join the Discussion</h2>
+              <div className="mb-4">
+                <div
+                  className="fb-like"
+                  data-href={pageUrl}
+                  data-layout="standard"
+                  data-action="like"
+                  data-size="small"
+                  data-share="true"
+                ></div>
+              </div>
+              <div>
+                <div
+                  className="fb-comments"
+                  data-href={pageUrl}
+                  data-width="100%" // Changed to 100% for responsiveness
+                  data-numposts="5"
+                ></div>
+              </div>
+            </div>
           </article>
         </section>
         <Sidebar />
