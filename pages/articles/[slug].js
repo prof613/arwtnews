@@ -92,12 +92,13 @@ export default function Article({ article, pageUrl }) {
         <meta property="og:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="article" />
-        <meta property="og:site_name" content="Red, White and True News" /> {/* Add site name for consistency */}
+        <meta property="og:site_name" content="Red, White and True News" />
+        <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.ogTitle || article.title} />
         <meta name="twitter:description" content={article.ogDescription || article.quote || ""} />
         <meta name="twitter:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
-        <meta name="twitter:site" content="@RWTNews" /> {/* Add twitter site for consistency */}
+        <meta name="twitter:site" content="@RWTNews" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">

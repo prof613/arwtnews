@@ -71,7 +71,7 @@ export default function Opinion({ opinion, pageUrl }) {
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Red, White and True News" />
-
+        <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={opinion.ogTitle || opinion.title} />
         <meta name="twitter:description" content={opinion.ogDescription || opinion.quote || ""} />
