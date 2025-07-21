@@ -18,8 +18,30 @@ function MyApp({ Component, pageProps }) {
 
     router.events.on("routeChangeComplete", handleRouteChangeComplete)
 
+    // Add Facebook SDK debug listener
+    if (window.FB) {
+      window.FB.Event.subscribe("xfbml.render", (response) => {
+        console.log("Facebook XFBML Render Event:", response)
+        if (response.error) {
+          console.error("Facebook XFBML Render Error:", response.error)
+        }
+      })
+      window.FB.Event.subscribe("xfbml.parse", () => {
+        console.log("Facebook XFBML Parse Event triggered.")
+      })
+      window.FB.Event.subscribe("auth.statusChange", (response) => {
+        console.log("Facebook Auth Status Change:", response.status)
+      })
+    }
+
     return () => {
       router.events.off("routeChangeComplete", handleRouteChangeComplete)
+      // Clean up Facebook SDK event listeners on unmount
+      if (window.FB) {
+        window.FB.Event.unsubscribe("xfbml.render")
+        window.FB.Event.unsubscribe("xfbml.parse")
+        window.FB.Event.unsubscribe("auth.statusChange")
+      }
     }
   }, [router.events])
 
