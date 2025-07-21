@@ -137,7 +137,6 @@ export default function Opinion({ opinion, pageUrl }) {
                   data-action="like"
                   data-size="small"
                   data-share="true"
-                  data-width="100px" // ADD THIS LINE
                 ></div>
               </div>
               <div>
@@ -163,7 +162,7 @@ export async function getServerSideProps(context) {
 
   const protocol = context.req.headers["x-forwarded-proto"] || "http"
   const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}/opinions/${slug}`
+  const pageUrl = `${protocol}://${host}${context.req.url}`
 
   try {
     const opinionRes = await axios.get(

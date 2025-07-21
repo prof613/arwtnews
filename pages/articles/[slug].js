@@ -157,7 +157,6 @@ export default function Article({ article, pageUrl }) {
                   data-action="like"
                   data-size="small"
                   data-share="true"
-                  data-width="100px" // Updated line
                 ></div>
               </div>
               <div>
@@ -185,7 +184,7 @@ export async function getServerSideProps(context) {
   // Construct the full page URL for OG tags
   const protocol = context.req.headers["x-forwarded-proto"] || "http"
   const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}/articles/${slug}`
+  const pageUrl = `${protocol}://${host}${context.req.url}`
 
   try {
     // Fetch all necessary article data with proper populate parameters
