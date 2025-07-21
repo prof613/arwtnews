@@ -2,12 +2,12 @@
 
 import "../styles/globals.css"
 import Head from "next/head"
-import Script from "next/script"
-import { useRouter } from "next/router" // Import useRouter
-import { useEffect } from "react" // Import useEffect
+import Script from "next/script" // Import Script from "next/script"
+import { useRouter } from "next/router"
+import { useEffect } from "react"
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter() // Initialize useRouter
+  const router = useRouter()
 
   useEffect(() => {
     const handleRouteChangeComplete = () => {
@@ -16,14 +16,12 @@ function MyApp({ Component, pageProps }) {
       }
     }
 
-    // Listen for route changes to re-parse Facebook XFBML
     router.events.on("routeChangeComplete", handleRouteChangeComplete)
 
-    // Clean up the event listener when the component unmounts
     return () => {
       router.events.off("routeChangeComplete", handleRouteChangeComplete)
     }
-  }, [router.events]) // Depend on router.events to ensure listener is correctly managed
+  }, [router.events])
 
   return (
     <>
@@ -33,23 +31,22 @@ function MyApp({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" /> {/* Assuming you have a favicon */}
         {/* No specific OG/Twitter tags here, they will be handled per page */}
-        <Script
-          strategy="lazyOnload"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=1181307003800550`} // Use environment variable
+        {/* TEMPORARY: Direct HTML script tag for Facebook SDK */}
+        <script
+          async
+          defer
+          crossOrigin="anonymous"
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=1181307003800550`}
           onLoad={() => {
             if (window.FB) {
               window.FB.XFBML.parse()
             }
           }}
-        />
+        ></script>
+        {/* Plausible Analytics Script using next/script */}
+        {/* Keep this one as it was, as it's not the source of the current problem */}
+        <Script src="https://plausible.io/js/script.js" data-domain="rwtnews.com" strategy="afterInteractive" />
       </Head>
-
-      {/* Plausible Analytics Script using next/script */}
-      <Script
-        src="https://plausible.io/js/script.js"
-        data-domain="rwtnews.com"
-        strategy="afterInteractive" // Load after the page is interactive
-      />
 
       <Component {...pageProps} />
     </>
