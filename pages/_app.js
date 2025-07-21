@@ -36,7 +36,7 @@ function MyApp({ Component, pageProps }) {
           async
           defer
           crossOrigin="anonymous"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`}
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v23.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`}
           onLoad={() => {
             if (window.FB) {
               window.FB.XFBML.parse()
