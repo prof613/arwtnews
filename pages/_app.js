@@ -2,7 +2,7 @@
 
 import "../styles/globals.css"
 import Head from "next/head"
-import Script from "next/script"
+import Script from "next/script" // Keep this import for Plausible Analytics
 import { useRouter } from "next/router"
 import { useEffect } from "react"
 
@@ -23,9 +23,6 @@ function MyApp({ Component, pageProps }) {
     }
   }, [router.events])
 
-  // Construct the Facebook SDK URL explicitly
-  const facebookSdkSrc = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`
-
   return (
     <>
       <Head>
@@ -34,19 +31,25 @@ function MyApp({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" /> {/* Assuming you have a favicon */}
         {/* No specific OG/Twitter tags here, they will be handled per page */}
-        <Script
-          strategy="beforeInteractive" // Changed strategy for earlier loading
-          src={facebookSdkSrc} // Pass the pre-constructed URL
+        {/* Direct HTML script tag for Facebook SDK - This is the working solution */}
+        <script
+          async
+          defer
+          crossOrigin="anonymous"
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`}
           onLoad={() => {
             if (window.FB) {
               window.FB.XFBML.parse()
             }
           }}
+        ></script>
+        {/* Plausible Analytics Script using next/script - This is its original and correct form */}
+        <Script
+          src="https://plausible.io/js/script.js"
+          data-domain="rwtnews.com"
+          strategy="afterInteractive" // Load after the page is interactive
         />
       </Head>
-
-      {/* Plausible Analytics Script using next/script */}
-      <Script src="https://plausible.io/js/script.js" data-domain="rwtnews.com" strategy="afterInteractive" />
 
       <Component {...pageProps} />
     </>
