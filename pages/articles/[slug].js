@@ -184,7 +184,7 @@ export async function getServerSideProps(context) {
   // Construct the full page URL for OG tags
   const protocol = context.req.headers["x-forwarded-proto"] || "http"
   const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}${context.req.url}`
+  const pageUrl = `${protocol}://${host}/articles/${slug}`
 
   try {
     // Fetch all necessary article data with proper populate parameters

@@ -162,7 +162,7 @@ export async function getServerSideProps(context) {
 
   const protocol = context.req.headers["x-forwarded-proto"] || "http"
   const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}${context.req.url}`
+  const pageUrl = `${protocol}://${host}/opinions/${slug}`
 
   try {
     const opinionRes = await axios.get(
