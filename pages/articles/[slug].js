@@ -157,6 +157,7 @@ export default function Article({ article, pageUrl }) {
                   data-action="like"
                   data-size="small"
                   data-share="true"
+                  data-width="100px" // Updated line
                 ></div>
               </div>
               <div>

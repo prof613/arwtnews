@@ -137,6 +137,7 @@ export default function Opinion({ opinion, pageUrl }) {
                   data-action="like"
                   data-size="small"
                   data-share="true"
+                  data-width="100px" // ADD THIS LINE
                 ></div>
               </div>
               <div>
