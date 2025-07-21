@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }) {
         {/* No specific OG/Twitter tags here, they will be handled per page */}
         <Script
           strategy="lazyOnload"
-          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}`} // Use environment variable
+          src={`https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v20.0&appId=1181307003800550`} // Use environment variable
           onLoad={() => {
             if (window.FB) {
               window.FB.XFBML.parse()
