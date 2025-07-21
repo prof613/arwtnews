@@ -312,17 +312,16 @@ export default function Home() {
             <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues/features under development:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
-                Community page currently connects to our Facebook page followers group. Over time we will be developing
-                our own stand alone community where you can engage with like minded people (and I'm sure some trolls)
-                about the issues of the day. Stay tuned.
+                Currently in process of debugging Facebook liking and commenting. No bug reports needed for those features right now, we know they have issues at the moment.
               </li>
               <li>
                 We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
                 now so you do receive it once we do have it up and running.
               </li>
               <li>
-                We will be adding likes and commenting to our articles very soon. This may be done through the Facebook
-                plug in or we may use a different mechanism. We haven't 100% decided yet.
+                Community page currently connects to our Facebook page followers group. Over time we will be developing
+                our own stand alone community where you can engage with like minded people (and I'm sure some trolls)
+                about the issues of the day. Stay tuned.
               </li>
             </ul>
           </section>
