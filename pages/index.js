@@ -267,10 +267,10 @@ export default function Home() {
       <Head>
         <title>Red, White and True News</title>
         <meta name="description" content="" />
-        <meta property="og:title" content="" />
-        <meta property="og:description" content="" />
-        <meta property="og:image" content="" />
-        <meta property="og:url" content="" />
+        <meta property="og:title" content="Red, White and True News" />
+        <meta property="og:description" content="The RIGHT News For America" />
+        <meta property="og:image" content="images\core\og-image.jpg" />
+        <meta property="og:url" content="RWTNews.com" />
         <meta property="og:type" content="website" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
