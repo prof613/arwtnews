@@ -264,14 +264,19 @@ export default function Home() {
 
   return (
     <>
-      <Head>
+       <Head>
         <title>Red, White and True News</title>
-        <meta name="description" content="" />
+        <meta name="description" content="The RIGHT News For America" />
         <meta property="og:title" content="Red, White and True News" />
         <meta property="og:description" content="The RIGHT News For America" />
         <meta property="og:image" content="images\core\og-image.jpg" />
         <meta property="og:url" content="RWTNews.com" />
         <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Red, White and True News" />
+        <meta name="twitter:description" content="The RIGHT News For America" />
+        <meta name="twitter:image" content="images\core\og-image.jpg" />
+        <meta name="twitter:url" content="RWTNews.com" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
       <Header />
