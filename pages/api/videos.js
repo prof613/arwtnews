@@ -43,7 +43,7 @@ const videoCache = {
   failures: {},
 }
 
-const CACHE_DURATION = 60 * 60 * 1000 // 1 hour
+const CACHE_DURATION = 2 * 60 * 60 * 1000 // 2 hours
 
 // Configure SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
