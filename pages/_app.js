@@ -11,6 +11,7 @@ function MyApp({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" /> {/* Assuming you have a favicon */}
         {/* No specific OG/Twitter tags here, they will be handled per page */}
+        <meta name="facebook-domain-verification" content="w15cpa90l9h1j3wrrtbft8drm9uhvt" />
       </Head>
 
       {/* Plausible Analytics Script using next/script */}
