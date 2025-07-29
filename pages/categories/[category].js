@@ -44,14 +44,11 @@ export default function Category() {
   useEffect(() => {
     if (!category) return;
 
-    let isCurrent = true; // Track active fetch
-    console.log('Starting fetch for category:', category, 'page:', page);
-    console.log('Current items before fetch:', items);
+    let isCurrent = true;
 
     const fetchItems = async () => {
       setLoading(true);
-      setItems([]); // Clear items immediately
-      console.log('Items cleared, fetching new data...');
+      setItems([]);
 
       try {
         let combinedItems = [];
@@ -122,16 +119,13 @@ export default function Category() {
           }
         }
         if (isCurrent) {
-          console.log('New items set:', combinedItems);
           setItems(combinedItems);
           setTotalPages(fetchedTotalPages);
         }
       } catch (error) {
-        console.error("Error fetching items:", error);
       } finally {
         if (isCurrent) {
           setLoading(false);
-          console.log('Fetch complete, loading:', false);
         }
       }
     };
@@ -139,8 +133,7 @@ export default function Category() {
     fetchItems();
 
     return () => {
-      isCurrent = false; // Cleanup to prevent stale updates
-      console.log('Cleaning up fetch for category:', category);
+      isCurrent = false;
     };
   }, [category, page]);
 
@@ -153,33 +146,6 @@ export default function Category() {
       }
     }
   }, [slug, items, category])
-
-
-// Add the new useEffect for router event listeners here
-  useEffect(() => {
-    const handleRouteChangeStart = () => {
-      setLoading(true);
-      setItems([]);
-      console.log('Route change started, clearing items and setting loading');
-    };
-
-    const handleRouteChangeComplete = () => {
-      console.log('Route change complete');
-    };
-
-    router.events.on('routeChangeStart', handleRouteChangeStart);
-    router.events.on('routeChangeComplete', handleRouteChangeComplete);
-    router.events.on('routeChangeError', (err) => console.log('Route change error:', err));
-
-    return () => {
-      router.events.off('routeChangeStart', handleRouteChangeStart);
-      router.events.off('routeChangeComplete', handleRouteChangeComplete);
-      router.events.off('routeChangeError');
-    };
-  }, [router.events]);
-
-
-
 
   const openLightbox = (indexOnPage) => {
     const meme = items[indexOnPage]
@@ -203,7 +169,6 @@ export default function Category() {
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      console.log('Navigating to page:', newPage, 'for category:', category);
       router.push(`/categories/${category}?page=${newPage}`)
       window.scrollTo(0, 0)
     }
@@ -258,18 +223,14 @@ export default function Category() {
   }
 
   const renderContent = () => {
-    console.log('Rendering content for category:', category, 'with items:', items);
     if (loading) {
-      console.log('Loading state active, rendering loading...');
       return <p>Loading...</p>
     }
     if (items.length === 0) {
-      console.log('No items available for category:', category);
       return <p>No items available.</p>
     }
 
     if (category === "Meme-Cartoons") {
-      console.log('Rendering Meme-Cartoons items:', items);
       return (
         <div className="flex flex-col gap-8">
           {items.map((item, index) => (
@@ -302,7 +263,6 @@ export default function Category() {
     }
 
     if (category === "news-from-web") {
-      console.log('Rendering external items:', items);
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {items.map((item) => (
@@ -357,7 +317,6 @@ export default function Category() {
       )
     }
 
-    console.log('Rendering standard items:', items);
     return (
       <div className="flex flex-col gap-4">
         {items.map((item) => (
