@@ -20,8 +20,8 @@ const channelConfig = [
     apiKey: process.env.YOUTUBE_API_KEY_RSBN,
   },
   {
-    id: "UC588htN7jqso3D80OnGGrAw",
-    name: "Just The News",
+    id: "UCIveFvW-ARp_B_RckhweNJw",
+    name: "Steven Crowder",
     apiKey: process.env.YOUTUBE_API_KEY_JUSTTHENEWS,
   },
   {

@@ -203,6 +203,9 @@
     "metadata": {
       "type": "json",
       "private": true
+    },
+    "relatedTags": {
+      "type": "string"
     }
   }
 }

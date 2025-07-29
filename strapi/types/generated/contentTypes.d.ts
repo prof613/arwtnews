@@ -419,6 +419,7 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text & Attribute.Required;
+    relatedTags: Attribute.String;
     rich_body: Attribute.DynamicZone<
       ['blocks.enhanced-text', 'blocks.enhanced-image']
     > &
@@ -672,6 +673,7 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     pluginData: Attribute.JSON & Attribute.Private;
     publishedAt: Attribute.DateTime;
     quote: Attribute.Text & Attribute.Required;
+    relatedTags: Attribute.String;
     rich_body: Attribute.DynamicZone<
       ['blocks.enhanced-text', 'blocks.enhanced-image']
     > &
