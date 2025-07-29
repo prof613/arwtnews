@@ -123,6 +123,7 @@ export default function Category() {
           setTotalPages(fetchedTotalPages);
         }
       } catch (error) {
+        console.error("Error fetching items:", error);
       } finally {
         if (isCurrent) {
           setLoading(false);
@@ -146,6 +147,25 @@ export default function Category() {
       }
     }
   }, [slug, items, category])
+
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      setLoading(true);
+      setItems([]);
+    };
+
+    const handleRouteChangeComplete = () => {};
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    router.events.on('routeChangeError', (err) => console.error('Route change error:', err));
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+      router.events.off('routeChangeError');
+    };
+  }, [router.events]);
 
   const openLightbox = (indexOnPage) => {
     const meme = items[indexOnPage]
