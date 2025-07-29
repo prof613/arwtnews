@@ -44,6 +44,8 @@ export default function Category() {
   useEffect(() => {
     if (category) {
       async function fetchItems() {
+        console.log('Fetching for category:', category, 'page:', page);
+        console.log('Current items before fetch:', items);
         setLoading(true) // Set loading to true
         setItems([]) // Clear items to avoid stale data
         try {
@@ -107,6 +109,7 @@ export default function Category() {
             fetchedTotalPages = Math.ceil(allItems.length / 10)
           }
           setItems(combinedItems)
+          console.log('New items set:', combinedItems);
           setTotalPages(fetchedTotalPages)
         } catch (error) {
           console.error("Error fetching items:", error)
@@ -204,6 +207,7 @@ export default function Category() {
   }
 
   const renderContent = () => {
+    console.log('Rendering content for category:', category, 'with items:', items);
     if (loading) return <p>Loading...</p> // Show loading state
     if (items.length === 0) return <p>No items available.</p>
 
@@ -240,6 +244,7 @@ export default function Category() {
     }
 
     if (category === "news-from-web") {
+      console.log('Rendering external items:', items);
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {items.map((item) => (
@@ -294,6 +299,7 @@ export default function Category() {
       )
     }
 
+    console.log('Rendering standard items:', items);
     return (
       <div className="flex flex-col gap-4">
         {items.map((item) => (
