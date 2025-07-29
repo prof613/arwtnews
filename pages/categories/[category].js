@@ -154,6 +154,33 @@ export default function Category() {
     }
   }, [slug, items, category])
 
+
+// Add the new useEffect for router event listeners here
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      setLoading(true);
+      setItems([]);
+      console.log('Route change started, clearing items and setting loading');
+    };
+
+    const handleRouteChangeComplete = () => {
+      console.log('Route change complete');
+    };
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    router.events.on('routeChangeError', (err) => console.log('Route change error:', err));
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+      router.events.off('routeChangeError');
+    };
+  }, [router.events]);
+
+
+
+
   const openLightbox = (indexOnPage) => {
     const meme = items[indexOnPage]
     if (meme && meme.attributes.slug) {
