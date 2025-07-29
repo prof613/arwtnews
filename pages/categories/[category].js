@@ -32,6 +32,7 @@ export default function Category() {
   const [items, setItems] = useState([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(false) // Add loading state
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedMemeIndex, setSelectedMemeIndex] = useState(null)
 
@@ -43,6 +44,8 @@ export default function Category() {
   useEffect(() => {
     if (category) {
       async function fetchItems() {
+        setLoading(true) // Set loading to true
+        setItems([]) // Clear items to avoid stale data
         try {
           let combinedItems = []
           let fetchedTotalPages = 1
@@ -84,9 +87,7 @@ export default function Category() {
             combinedItems = allExternalItems.slice(startIndex, endIndex)
             fetchedTotalPages = Math.ceil(allExternalItems.length / 20)
           } else {
-            // FIX START: URL-encode the category name for the API request
             const encodedCategory = encodeURIComponent(category)
-            // FIX END
             const [articlesRes, opinionsRes] = await Promise.all([
               axios.get(
                 `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
@@ -109,6 +110,8 @@ export default function Category() {
           setTotalPages(fetchedTotalPages)
         } catch (error) {
           console.error("Error fetching items:", error)
+        } finally {
+          setLoading(false) // Set loading to false
         }
       }
       fetchItems()
@@ -201,6 +204,7 @@ export default function Category() {
   }
 
   const renderContent = () => {
+    if (loading) return <p>Loading...</p> // Show loading state
     if (items.length === 0) return <p>No items available.</p>
 
     if (category === "Meme-Cartoons") {
@@ -250,8 +254,7 @@ export default function Category() {
                 </a>
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                {item.attributes.author || "Unknown"} / {/* FIX START */}
-                {item.attributes.category || "General"} {/* FIX END */}/{" "}
+                {item.attributes.author || "Unknown"} / {item.attributes.category || "General"} /{" "}
                 {item.attributes.date ? formatDate(item.attributes.date) : "No date"}
               </p>
               {item.attributes.quote && (
