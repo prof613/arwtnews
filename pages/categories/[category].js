@@ -32,7 +32,7 @@ export default function Category() {
   const [items, setItems] = useState([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [loading, setLoading] = useState(false) // Add loading state
+  const [loading, setLoading] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedMemeIndex, setSelectedMemeIndex] = useState(null)
 
@@ -42,84 +42,107 @@ export default function Category() {
   }, [router.query])
 
   useEffect(() => {
-    if (category) {
-      async function fetchItems() {
-        console.log('Fetching for category:', category, 'page:', page);
-        console.log('Current items before fetch:', items);
-        setLoading(true) // Set loading to true
-        setItems([]) // Clear items to avoid stale data
-        try {
-          let combinedItems = []
-          let fetchedTotalPages = 1
+    if (!category) return;
 
-          if (category === "Meme-Cartoons") {
-            const res = await axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`,
-            )
-            combinedItems = res.data.data
-            fetchedTotalPages = res.data.meta.pagination.pageCount
-          } else if (category === "All") {
-            const [articlesRes, opinionsRes] = await Promise.all([
-              axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`,
-              ),
-              axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true`,
-              ),
-            ])
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
+    let isCurrent = true; // Track active fetch
+    console.log('Starting fetch for category:', category, 'page:', page);
+    console.log('Current items before fetch:', items);
+
+    const fetchItems = async () => {
+      setLoading(true);
+      setItems([]); // Clear items immediately
+      console.log('Items cleared, fetching new data...');
+
+      try {
+        let combinedItems = [];
+        let fetchedTotalPages = 1;
+
+        if (category === "Meme-Cartoons") {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`
+          );
+          if (isCurrent) {
+            combinedItems = res.data.data;
+            fetchedTotalPages = res.data.meta.pagination.pageCount;
+          }
+        } else if (category === "All") {
+          const [articlesRes, opinionsRes] = await Promise.all([
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`
+            ),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true`
+            ),
+          ]);
+          if (isCurrent) {
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
             const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
-            )
-            const startIndex = (page - 1) * 10
-            const endIndex = startIndex + 10
-            combinedItems = allItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allItems.length / 10)
-          } else if (category === "news-from-web") {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`)
-            const oneYearAgo = new Date()
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
+            );
+            const startIndex = (page - 1) * 10;
+            const endIndex = startIndex + 10;
+            combinedItems = allItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allItems.length / 10);
+          }
+        } else if (category === "news-from-web") {
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`);
+          if (isCurrent) {
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
             const allExternalItems = res.data.data
               .filter((item) => new Date(item.attributes.createdAt) >= oneYearAgo)
               .map((item) => ({ ...item, type: "external" }))
-              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt))
-            const startIndex = (page - 1) * 20
-            const endIndex = startIndex + 20
-            combinedItems = allExternalItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allExternalItems.length / 20)
-          } else {
-            const encodedCategory = encodeURIComponent(category)
-            const [articlesRes, opinionsRes] = await Promise.all([
-              axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
-              ),
-              axios.get(
-                `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
-              ),
-            ])
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
-            const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
-            )
-            const startIndex = (page - 1) * 10
-            const endIndex = startIndex + 10
-            combinedItems = allItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allItems.length / 10)
+              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt));
+            const startIndex = (page - 1) * 20;
+            const endIndex = startIndex + 20;
+            combinedItems = allExternalItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allExternalItems.length / 20);
           }
-          setItems(combinedItems)
+        } else {
+          const encodedCategory = encodeURIComponent(category);
+          const [articlesRes, opinionsRes] = await Promise.all([
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
+            ),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
+            ),
+          ]);
+          if (isCurrent) {
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
+            const allItems = [...articles, ...opinions].sort(
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
+            );
+            const startIndex = (page - 1) * 10;
+            const endIndex = startIndex + 10;
+            combinedItems = allItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allItems.length / 10);
+          }
+        }
+        if (isCurrent) {
           console.log('New items set:', combinedItems);
-          setTotalPages(fetchedTotalPages)
-        } catch (error) {
-          console.error("Error fetching items:", error)
-        } finally {
-          setLoading(false) // Set loading to false
+          setItems(combinedItems);
+          setTotalPages(fetchedTotalPages);
+        }
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      } finally {
+        if (isCurrent) {
+          setLoading(false);
+          console.log('Fetch complete, loading:', false);
         }
       }
-      fetchItems()
-    }
-  }, [category, page])
+    };
+
+    fetchItems();
+
+    return () => {
+      isCurrent = false; // Cleanup to prevent stale updates
+      console.log('Cleaning up fetch for category:', category);
+    };
+  }, [category, page]);
 
   useEffect(() => {
     if (category === "Meme-Cartoons" && slug && items.length > 0) {
@@ -153,6 +176,7 @@ export default function Category() {
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
+      console.log('Navigating to page:', newPage, 'for category:', category);
       router.push(`/categories/${category}?page=${newPage}`)
       window.scrollTo(0, 0)
     }
@@ -208,10 +232,17 @@ export default function Category() {
 
   const renderContent = () => {
     console.log('Rendering content for category:', category, 'with items:', items);
-    if (loading) return <p>Loading...</p> // Show loading state
-    if (items.length === 0) return <p>No items available.</p>
+    if (loading) {
+      console.log('Loading state active, rendering loading...');
+      return <p>Loading...</p>
+    }
+    if (items.length === 0) {
+      console.log('No items available for category:', category);
+      return <p>No items available.</p>
+    }
 
     if (category === "Meme-Cartoons") {
+      console.log('Rendering Meme-Cartoons items:', items);
       return (
         <div className="flex flex-col gap-8">
           {items.map((item, index) => (
