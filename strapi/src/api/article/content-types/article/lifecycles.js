@@ -2,6 +2,56 @@ const fs = require("fs")
 const path = require("path")
 const strapi = require("@strapi/strapi")
 
+// Keyword-extractor based tag generation helper
+function generateTags(title, richBody) {
+  const keywordExtractor = require("keyword-extractor")
+
+  let fullText = title || ""
+
+  // Extract text from rich_body dynamic zone
+  if (richBody && Array.isArray(richBody)) {
+    richBody.forEach((block) => {
+      if (block.__component === "blocks.enhanced-text" && block.content) {
+        block.content.forEach((contentItem) => {
+          if (contentItem.children) {
+            contentItem.children.forEach((child) => {
+              if (child.text) {
+                fullText += " " + child.text
+              }
+            })
+          }
+        })
+      }
+    })
+  }
+
+  if (!fullText.trim()) return ""
+
+  // Use keyword-extractor for better quality tags
+  const extractionResult = keywordExtractor.extract(fullText, {
+    language: "english",
+    remove_duplicates: true,
+    return_changed_case: true,
+    return_chained_words: true,
+    return_max_ngrams: 2,
+  })
+
+  // Build the tags string while respecting the 255 character limit
+  let tagsString = ""
+  const maxLength = 250 // Leave some buffer under 255
+
+  for (const tag of extractionResult) {
+    const nextTag = tagsString ? `,${tag}` : tag
+    if ((tagsString + nextTag).length <= maxLength) {
+      tagsString += nextTag
+    } else {
+      break // Stop adding tags if we'd exceed the limit
+    }
+  }
+
+  return tagsString
+}
+
 // Helper function to generate unique slug (adapted from opinion lifecycles)
 async function generateSlug(title, existingId = null) {
   let baseSlug = title
@@ -58,7 +108,6 @@ async function manageHomepageLimits() {
         await global.strapi.entityService.update("api::article.article", article.id, {
           data: { homepage_status: "archived" },
         })
-        // console.log(`Archived article from homepage: ${article.title}`); // Debug log removed
       }
     }
 
@@ -90,28 +139,25 @@ async function manageHomepageLimits() {
             ...(item.type === "article" ? { homepage_status: "active" } : {}),
           },
         })
-        // console.log(`Unfeatured ${item.type}: ${item.title}`); // Debug log removed
       }
     }
   } catch (error) {
-    // console.error("Error managing homepage limits:", error); // Debug log removed
+    console.error("Error managing homepage limits:", error)
   }
 }
 
 module.exports = {
   async beforeCreate(event) {
     const { data } = event.params
-    // console.log("beforeCreate hook triggered for Article."); // Debug log removed
-    // console.log("Initial data.title:", data.title); // Debug log removed
-    // console.log("Initial data.slug:", data.slug); // Debug log removed
 
     // Always generate slug from title if title is present, overriding any pre-filled value
     if (data.title) {
-      // console.log("data.title is present, generating/overwriting slug..."); // Debug log removed
       data.slug = await generateSlug(data.title)
-      // console.log("Generated slug:", data.slug); // Debug log removed
-    } else {
-      // console.log("data.title is empty, cannot generate slug."); // Debug log removed
+    }
+
+    // Generate tags from title and rich_body content
+    if (data.title || data.rich_body) {
+      data.relatedTags = generateTags(data.title, data.rich_body)
     }
 
     if (data.publishedAt) {
@@ -134,18 +180,24 @@ module.exports = {
 
   async beforeUpdate(event) {
     const { data, where } = event.params
-    // console.log("beforeUpdate hook triggered for Article."); // Debug log removed
-    // console.log("Initial data.title:", data.title); // Debug log removed
-    // console.log("Initial data.slug:", data.slug); // Debug log removed
 
     // Always generate slug from title if title is present, overriding any pre-filled value
     // and ensuring uniqueness for updates
     if (data.title) {
-      // console.log("data.title is present on update, generating/overwriting slug..."); // Debug log removed
       data.slug = await generateSlug(data.title, where.id)
-      // console.log("Generated slug:", data.slug); // Debug log removed
-    } else {
-      // console.log("data.title is empty on update, cannot generate slug."); // Debug log removed
+    }
+
+    // Regenerate tags if title or rich_body changed
+    if (data.title !== undefined || data.rich_body !== undefined) {
+      // Get existing data to merge with updates
+      const existingEntry = await global.strapi.entityService.findOne("api::article.article", where.id, {
+        populate: ["rich_body"],
+      })
+
+      const titleToUse = data.title !== undefined ? data.title : existingEntry.title
+      const richBodyToUse = data.rich_body !== undefined ? data.rich_body : existingEntry.rich_body
+
+      data.relatedTags = generateTags(titleToUse, richBodyToUse)
     }
 
     if (data.publishedAt) {

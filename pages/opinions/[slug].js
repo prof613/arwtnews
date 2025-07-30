@@ -1,4 +1,7 @@
+"use client"
+
 import Head from "next/head"
+import { useState, useEffect } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import axios from "axios"
 import Header from "../../components/Header"
@@ -8,6 +11,110 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
+import Link from "next/link"
+
+// Related Articles Component
+function RelatedArticles({ opinion }) {
+  const [relatedArticles, setRelatedArticles] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isFallback, setIsFallback] = useState(false)
+
+  useEffect(() => {
+    if (opinion?.relatedTags && opinion?.id) {
+      fetchRelatedArticles()
+    } else if (opinion?.id) {
+      // Even if no tags, try to get featured articles as fallback
+      fetchRelatedArticles()
+    }
+  }, [opinion])
+
+  const fetchRelatedArticles = async () => {
+    try {
+      setLoading(true)
+      const tags = opinion.relatedTags || ""
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions/related?tags=${encodeURIComponent(
+          tags,
+        )}&type=opinion&currentId=${opinion.id}`,
+      )
+
+      if (response.data) {
+        setRelatedArticles(response.data.items || [])
+        setIsFallback(response.data.isFallback || false)
+      }
+    } catch (error) {
+      console.error("Error fetching related articles:", error)
+      setRelatedArticles([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="mt-12 border-t pt-8">
+        <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">Related Articles</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+              <div className="w-full h-48 bg-gray-200"></div>
+              <div className="p-4">
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (relatedArticles.length === 0) {
+    return null // Don't show section if no related articles
+  }
+
+  return (
+    <section className="mt-12 border-t pt-8">
+      <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">
+        {isFallback ? "Suggested Articles" : "Related Articles"}
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedArticles.map((item) => (
+          <Link
+            key={item.id}
+            href={item._type === "opinion" ? `/opinions/${item.slug}` : `/articles/${item.slug}`}
+            className="block group"
+          >
+            <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+              <img
+                src={
+                  getStrapiMedia(item._type === "opinion" ? item.featured_image : item.image) ||
+                  "/placeholder.svg?height=200&width=300&query=article"
+                }
+                alt={item.title}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  {item._type === "opinion" ? "Opinion" : "Article"} •{" "}
+                  {new Date(item.date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <h4 className="font-bold text-[#3C3B6E] group-hover:text-[#B22234] transition-colors line-clamp-2">
+                  {item.title}
+                </h4>
+                {item.quote && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{item.quote}</p>}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
 
 // The component now receives the full opinion data from getServerSideProps
 export default function Opinion({ opinion, pageUrl }) {
@@ -22,7 +129,7 @@ export default function Opinion({ opinion, pageUrl }) {
           <meta property="og:description" content="The requested opinion piece could not be found." />
           <meta property="og:type" content="website" />
           <meta property="og:url" content={pageUrl} />
-          <meta property="og:image" content="/placeholder.svg" /> {/* Fallback image */}
+          <meta property="og:image" content="/placeholder.svg" />
           <meta name="twitter:card" content="summary_large_image" />
         </Head>
         <Header />
@@ -55,7 +162,7 @@ export default function Opinion({ opinion, pageUrl }) {
         year: "numeric",
         timeZone: "America/Los_Angeles",
       })}
-       - 
+      {" - "}
     </span>
   )
   const datePrefixString = renderToStaticMarkup(dateComponent)
@@ -126,28 +233,8 @@ export default function Opinion({ opinion, pageUrl }) {
               <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
             )}
 
-            {/* Facebook Like and Comments Plugins */}
-            <div className="mt-8 pt-4 border-t border-gray-200">
-              <h2 className="text-xl font-bold text-[#3C3B6E] mb-4">Join the Discussion</h2>
-              <div className="mb-4">
-                <div
-                  className="fb-like"
-                  data-href={pageUrl}
-                  data-layout="standard"
-                  data-action="like"
-                  data-size="small"
-                  data-share="true"
-                ></div>
-              </div>
-              <div>
-                <div
-                  className="fb-comments"
-                  data-href={pageUrl}
-                  data-width="100%" // Changed to 100% for responsiveness
-                  data-numposts="5"
-                ></div>
-              </div>
-            </div>
+            {/* Related Articles Section */}
+            <RelatedArticles opinion={opinion} />
           </article>
         </section>
         <Sidebar />
@@ -179,9 +266,15 @@ export async function getServerSideProps(context) {
       }
     }
 
+    // Add the ID to the opinion object for related articles
+    const opinionWithId = {
+      ...opinion,
+      id: opinionRes.data.data[0].id,
+    }
+
     return {
       props: {
-        opinion: opinion,
+        opinion: opinionWithId,
         pageUrl: pageUrl,
       },
     }
