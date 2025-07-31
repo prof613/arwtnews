@@ -9,6 +9,7 @@ import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
+import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 import Link from "next/link"
@@ -232,6 +233,9 @@ export default function Opinion({ opinion, pageUrl }) {
             {opinion.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
             )}
+
+            {/* Comments Section */}
+            <DisqusComments title={opinion.title} slug={opinion.slug} url={pageUrl} type="opinion" />
 
             {/* Related Articles Section */}
             <RelatedArticles opinion={opinion} />

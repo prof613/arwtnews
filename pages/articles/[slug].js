@@ -9,6 +9,7 @@ import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
+import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 import { renderToStaticMarkup } from "react-dom/server"
@@ -236,6 +237,9 @@ export default function Article({ article, pageUrl }) {
             {article.enable_share_buttons && (
               <ShareButtons shareUrl={pageUrl} title={article.title} summary={article.quote} />
             )}
+
+            {/* Comments Section */}
+            <DisqusComments title={article.title} slug={article.slug} url={pageUrl} type="article" />
 
             {/* Related Articles Section */}
             <RelatedArticles article={article} />
