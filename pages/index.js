@@ -314,11 +314,26 @@ export default function Home() {
               . Please use the subjects "Bug Report" or "Suggestion" as appropriate. Thank you for dropping by!
             </p>
 
-            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues/features under development:</h3>
+            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
-                Currently in process of debugging Facebook liking and commenting. No bug reports needed for those
-                features right now, we know they have issues at the moment.
+                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it to us{" "}
+              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
+                here
+              </Link>. 
+              </li>
+            </ul>
+            <br/>
+            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Features under development:</h3>
+            <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
+              <li>
+                <s>Add "Related Articles" to individual Article pages.</s>
+              </li>
+              <li>
+                <s>Add "Commenting" to individual Article pages.</s>
+              </li>
+              <li>
+                Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.
               </li>
               <li>
                 We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
