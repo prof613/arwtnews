@@ -136,28 +136,23 @@ export default function Sidebar() {
       </div>
       {/* Ad Slot 1 - Top under search */}
       <div className="bg-gray-100 p-4 rounded mb-4">
+        <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Are You Prepared?</h3>
         <a
-          href="https://ourconservativestore.com/product/trump-fight-never-surrender-mug-iconic-patriotic-trump-coffee-mug/?sld=95"
+          href="https://www.mypatriotsupply.com?_ef_transaction_id=&utm_source=everflow&utm_medium=aff&utm_campaign=&utm_term=774&utm_content=&oid=1&affid=774"
           target="_blank"
           rel="noopener noreferrer"
           className="block hover:opacity-80 transition-opacity"
         >
-          <img
-            src="https://ourconservativestore.com/wp-content/uploads/2024/09/3598280471593076194_2048-300x300.jpeg"
-            alt="Trump Fight Never Surrender Mug"
-            className="w-full h-auto rounded"
-          />
+          <img src="\images\patriot-supply\1-Week-300x300.jpg" alt="Patriot Supply" className="w-full h-auto rounded" />
         </a>
         <p className="text-sm text-gray-600 mt-2 text-center">
-          Get your "Fight!" mug at
-          <br />
           <a
-            href="https://ourconservativestore.com/?sld=95"
+            href="https://www.mypatriotsupply.com?_ef_transaction_id=&utm_source=everflow&utm_medium=aff&utm_campaign=&utm_term=774&utm_content=&oid=1&affid=774"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#B22234] hover:underline font-medium"
           >
-            Our Conservative Store
+            Get Your Emergency Food Kit Today at Patriot Supply
           </a>
         </p>
       </div>
@@ -240,28 +235,29 @@ export default function Sidebar() {
       </div>
       {/* Ad Slot 2 - Below memes, above subscribe */}
       <div className="bg-gray-100 p-4 rounded mb-4">
+        <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">What will you do when the Grid goes down?</h3>
         <a
-          href="https://ourconservativestore.com/product/anti-liberal-mug-liberal-tears-white-ceramic-mug/?sld=95"
+          href="https://www.mypatriotsupply.com/pages/special-offer-grid-doctor-3300emp?_ef_transaction_id=&oid=12&affid=774"
           target="_blank"
           rel="noopener noreferrer"
           className="block hover:opacity-80 transition-opacity"
         >
           <img
-            src="https://ourconservativestore.com/wp-content/uploads/2024/08/2828935763882788651_2048-300x300.jpeg"
-            alt="Anti Liberal Mug - Liberal Tears"
+            src="\images\patriot-supply\Banner2-300X300.jpg"
+            alt="Patriot Supply"
             className="w-full h-auto rounded"
           />
         </a>
         <p className="text-sm text-gray-600 mt-2 text-center">
-          Get your "Liberal Tears" mug at
-          <br />
           <a
-            href="https://ourconservativestore.com/?sld=95"
+            href="https://www.mypatriotsupply.com/pages/special-offer-grid-doctor-3300emp?_ef_transaction_id=&oid=12&affid=774"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#B22234] hover:underline font-medium"
           >
-            Our Conservative Store
+            The Grid Doctor 3300 Solar Generator
+            <br />
+            America's #1 Power Generator
           </a>
         </p>
       </div>
@@ -305,7 +301,9 @@ export default function Sidebar() {
           <img src="/images/core/stoptdslogo1.png" alt="Stop TDS" className="w-full h-auto rounded" />
         </a>
         <p className="text-sm text-gray-600 mt-2">
-          Coming soon: Stop TDS is being developed as supportive space for those suffering from Trump Derangement Syndrome (TDS). Explore self-assessment tools, educational resources, practical steps for finding balance, and a caring community to help you gain clarity and emotional well-being.
+          Coming soon: Stop TDS is being developed as supportive space for those suffering from Trump Derangement
+          Syndrome (TDS). Explore self-assessment tools, educational resources, practical steps for finding balance, and
+          a caring community to help you gain clarity and emotional well-being.
         </p>
       </div>
       {/* Connect Section - FIXED */}
@@ -336,7 +334,8 @@ export default function Sidebar() {
       <div className="bg-gray-100 p-4 rounded mb-4">
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">About RWTNews</h3>
         <p className="text-sm text-gray-600">
-          Red, White and True News is the unyielding voice of conservative truth, delivering hard-hitting news and commentary that upholds the core of American values.
+          Red, White and True News is the unyielding voice of conservative truth, delivering hard-hitting news and
+          commentary that upholds the core of American values.
         </p>
         <Link href="/about" className="text-[#B22234] text-sm">
           Learn More About Red, White and True News
@@ -347,7 +346,8 @@ export default function Sidebar() {
         <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Support Our Mission</h3>
         <h4 className="text-md text-[#3C3B6E] mb-2">Our Mission</h4>
         <p className="text-sm text-gray-600">
-          Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional American values. 
+          Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional
+          American values.
         </p>
         <Link href="/support" className="text-[#B22234] text-sm">
           See More
