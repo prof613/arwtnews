@@ -2,6 +2,12 @@ const fs = require("fs")
 const path = require("path")
 const keywordExtractor = require("keyword-extractor")
 
+// Function to generate canonical URL
+function generateCanonicalUrl(slug) {
+  const baseUrl = process.env.FRONTEND_URL || 'https://rwtnews.com'
+  return `${baseUrl}/opinions/${slug}`
+}
+
 // Keyword-extractor based tag generation helper
 function generateTags(title, richBody) {
   let fullText = title || ""
@@ -88,6 +94,11 @@ module.exports = {
       data.slug = await generateSlug(data.title)
     }
 
+    // Auto-generate canonical URL if slug exists and canonical URL is not set
+    if (data.slug && !data.canonicalUrl) {
+      data.canonicalUrl = generateCanonicalUrl(data.slug)
+    }
+
     // Generate tags from title and rich_body content
     if (data.title || data.rich_body) {
       data.relatedTags = generateTags(data.title, data.rich_body)
@@ -105,6 +116,11 @@ module.exports = {
     // Auto-generate slug if title changed but slug is empty
     if (data.title && !data.slug) {
       data.slug = await generateSlug(data.title, where.id)
+    }
+
+    // Auto-generate canonical URL if slug exists and canonical URL is not set
+    if (data.slug && !data.canonicalUrl) {
+      data.canonicalUrl = generateCanonicalUrl(data.slug)
     }
 
     // Regenerate tags if title or rich_body changed

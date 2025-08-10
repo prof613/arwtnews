@@ -2,6 +2,12 @@ const fs = require("fs")
 const path = require("path")
 const strapi = require("@strapi/strapi")
 
+// Function to generate canonical URL
+function generateCanonicalUrl(slug) {
+  const baseUrl = process.env.FRONTEND_URL || 'https://rwtnews.com'
+  return `${baseUrl}/articles/${slug}`
+}
+
 // Keyword-extractor based tag generation helper
 function generateTags(title, richBody) {
   const keywordExtractor = require("keyword-extractor")
@@ -153,6 +159,10 @@ module.exports = {
     // Always generate slug from title if title is present, overriding any pre-filled value
     if (data.title) {
       data.slug = await generateSlug(data.title)
+      // Auto-generate canonical URL based on slug if not already set
+      if (!data.canonicalUrl) {
+        data.canonicalUrl = generateCanonicalUrl(data.slug)
+      }
     }
 
     // Generate tags from title and rich_body content
@@ -185,6 +195,10 @@ module.exports = {
     // and ensuring uniqueness for updates
     if (data.title) {
       data.slug = await generateSlug(data.title, where.id)
+      // Auto-generate canonical URL based on new slug if not already set
+      if (!data.canonicalUrl) {
+        data.canonicalUrl = generateCanonicalUrl(data.slug)
+      }
     }
 
     // Regenerate tags if title or rich_body changed
