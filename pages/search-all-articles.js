@@ -392,157 +392,156 @@ export default function SearchAllArticles() {
                   }}
                 >
                   <div className="flex gap-4">
-  <div className="w-1/4 flex-shrink-0">
-    <img
-      src={
-        item.type === "opinion"
-          ? item.attributes.image_path
-            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-            : item.attributes.featured_image?.data?.attributes?.formats?.small?.url ||
-              item.attributes.featured_image?.data?.attributes?.url
-              ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
-                 item.attributes.featured_image.data.attributes.url).startsWith('http')
-                ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
-                   item.attributes.featured_image.data.attributes.url)
-                : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
-                    item.attributes.featured_image.data.attributes.formats?.small?.url ||
-                    item.attributes.featured_image.data.attributes.url
-                  }`
-              : "/images/core/placeholder.jpg"
-          : item.attributes.image_path
-            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-            : item.attributes.image?.data?.attributes?.formats?.small?.url ||
-              item.attributes.image?.data?.attributes?.url
-              ? (item.attributes.image.data.attributes.formats?.small?.url ||
-                 item.attributes.image.data.attributes.url).startsWith('http')
-                ? (item.attributes.image.data.attributes.formats?.small?.url ||
-                   item.attributes.image.data.attributes.url)
-                : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
-                    item.attributes.image.data.attributes.formats?.small?.url ||
-                    item.attributes.image.data.attributes.url
-                  }`
-              : "/images/core/placeholder.jpg"
-      }
-      alt={
-        item.type === "opinion"
-          ? item.attributes.featured_image?.data?.attributes?.alternativeText || item.attributes.title
-          : item.attributes.image?.data?.attributes?.alternativeText || item.attributes.title
-      }
-      className="w-full h-auto md:h-24 object-contain rounded bg-gray-50"
-    />
-  </div>
+                    <div className="w-1/4 flex-shrink-0">
+                      <img
+                        src={
+                          item.type === "opinion"
+                            ? item.attributes.image_path
+                              ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
+                              : item.attributes.featured_image?.data?.attributes?.formats?.small?.url ||
+                                item.attributes.featured_image?.data?.attributes?.url
+                                ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                   item.attributes.featured_image.data.attributes.url).startsWith('http')
+                                  ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                     item.attributes.featured_image.data.attributes.url)
+                                  : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                      item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                      item.attributes.featured_image.data.attributes.url
+                                    }`
+                                : "/images/core/placeholder.jpg"
+                            : item.attributes.image_path
+                              ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
+                              : item.attributes.image?.data?.attributes?.formats?.small?.url ||
+                                item.attributes.image?.data?.attributes?.url
+                                ? (item.attributes.image.data.attributes.formats?.small?.url ||
+                                   item.attributes.image.data.attributes.url).startsWith('http')
+                                  ? (item.attributes.image.data.attributes.formats?.small?.url ||
+                                     item.attributes.image.data.attributes.url)
+                                  : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                      item.attributes.image.data.attributes.formats?.small?.url ||
+                                      item.attributes.image.data.attributes.url
+                                    }`
+                                : "/images/core/placeholder.jpg"
+                        }
+                        alt={
+                          item.type === "opinion"
+                            ? item.attributes.featured_image?.data?.attributes?.alternativeText || item.attributes.title
+                            : item.attributes.image?.data?.attributes?.alternativeText || item.attributes.title
+                        }
+                        className="w-full h-auto md:h-24 object-contain rounded bg-gray-50"
+                      />
+                    </div>
 
-  <div className="flex-1">
-    {/* Title */}
-    <Link
-      href={
-        item.type === "opinion"
-          ? `/opinions/${item.attributes.slug}`
-          : `/articles/${item.attributes.slug}`
-      }
-    >
-      <h3 className="text-xl font-bold text-[#3C3B6E] hover:text-[#B22234] cursor-pointer mb-2">
-        {highlightText(item.attributes.title, searchQuery)}
-      </h3>
-    </Link>
+                    <div className="flex-1">
+                      {/* Title */}
+                      <Link
+                        href={
+                          item.type === "opinion"
+                            ? `/opinions/${item.attributes.slug}`
+                            : `/articles/${item.attributes.slug}`
+                        }
+                      >
+                        <h3 className="text-xl font-bold text-[#3C3B6E] hover:text-[#B22234] cursor-pointer mb-2">
+                          {highlightText(item.attributes.title, searchQuery)}
+                        </h3>
+                      </Link>
 
-    {/* Metadata */}
-    <p className="text-sm text-gray-600 mb-2">
-      {(() => {
-        let categoryText = ""
-        if (item.type === "opinion") {
-          categoryText = "Opinion"
-        } else {
-          const primaryCat = item.attributes.category?.data?.attributes?.name
-          const secondaryCat = item.attributes.secondary_category?.data?.attributes?.name
-          if (primaryCat && secondaryCat) {
-            categoryText = `${primaryCat} - ${secondaryCat}`
-          } else {
-            categoryText = primaryCat || secondaryCat || "General"
-          }
-        }
+                      {/* Metadata */}
+                      <p className="text-sm text-gray-600 mb-2">
+                        {(() => {
+                          let categoryText = ""
+                          if (item.type === "opinion") {
+                            categoryText = "Opinion"
+                          } else {
+                            const primaryCat = item.attributes.category?.data?.attributes?.name
+                            const secondaryCat = item.attributes.secondary_category?.data?.attributes?.name
+                            if (primaryCat && secondaryCat) {
+                              categoryText = `${primaryCat} - ${secondaryCat}`
+                            } else {
+                              categoryText = primaryCat || secondaryCat || "General"
+                            }
+                          }
 
-        const authorText = item.attributes.author || "Unknown"
-        const displayDate = item.attributes.date
+                          const authorText = item.attributes.author || "Unknown"
+                          const displayDate = item.attributes.date
 
-        return (
-          <>
-            {highlightText(categoryText, searchQuery)} / {highlightText(authorText, searchQuery)} /{" "}
-            {new Date(displayDate).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              timeZone: "America/Los_Angeles",
-            })}
-          </>
-        )
-      })()}
-    </p>
+                          return (
+                            <>
+                              {highlightText(categoryText, searchQuery)} / {highlightText(authorText, searchQuery)} /{" "}
+                              {new Date(displayDate).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                                timeZone: "America/Los_Angeles",
+                              })}
+                            </>
+                          )
+                        })()}
+                      </p>
 
-    {/* Tags */}
-    {item.attributes.tags?.data && item.attributes.tags.data.length > 0 && (
-      <div className="flex flex-wrap gap-1 mb-2">
-        {item.attributes.tags.data.slice(0, 5).map((tag) => (
-          <span
-            key={tag.id}
-            className="inline-block bg-[#B22234] text-white text-xs px-2 py-1 rounded-full"
-          >
-            {highlightText(tag.attributes.name, searchQuery)}
-          </span>
-        ))}
-        {item.attributes.tags.data.length > 5 && (
-          <span className="text-xs text-gray-500">+{item.attributes.tags.data.length - 5} more</span>
-        )}
-      </div>
-    )}
+                      {/* Tags */}
+                      {item.attributes.tags?.data && item.attributes.tags.data.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {item.attributes.tags.data.slice(0, 5).map((tag) => (
+                            <span
+                              key={tag.id}
+                              className="inline-block bg-[#B22234] text-white text-xs px-2 py-1 rounded-full"
+                            >
+                              {highlightText(tag.attributes.name, searchQuery)}
+                            </span>
+                          ))}
+                          {item.attributes.tags.data.length > 5 && (
+                            <span className="text-xs text-gray-500">+{item.attributes.tags.data.length - 5} more</span>
+                          )}
+                        </div>
+                      )}
 
-    {/* Quote */}
-    {item.attributes.quote && (
-      <blockquote className="text-sm text-gray-500 italic mb-2 border-l-4 border-[#B22234] pl-2">
-        {highlightText(item.attributes.quote.substring(0, 150), searchQuery)}
-        {item.attributes.quote.length > 150 && "..."}
-      </blockquote>
-    )}
+                      {/* Quote */}
+                      {item.attributes.quote && (
+                        <blockquote className="text-sm text-gray-500 italic mb-2 border-l-4 border-[#B22234] pl-2">
+                          {highlightText(item.attributes.quote.substring(0, 150), searchQuery)}
+                          {item.attributes.quote.length > 150 && "..."}
+                        </blockquote>
+                      )}
 
-    {/* Content Preview */}
-    <p className="text-sm text-gray-500 mb-2">
-      {(() => {
-        let preview = ""
-        if (item.type === "opinion") {
-          if (typeof item.attributes.rich_body === "string") {
-            const cleanText = item.attributes.rich_body.replace(/<[^>]*>/g, "")
-            preview = cleanText.substring(0, 200)
-          }
-        } else {
-          if (Array.isArray(item.attributes.rich_body)) {
-            let excerpt = ""
-            for (const block of item.attributes.rich_body) {
-              if (block.type === "paragraph" && block.children) {
-                const text = block.children.map((child) => child.text).join("")
-                excerpt += text + " "
-                if (excerpt.length > 200) break
-              }
-            }
-            preview = excerpt.substring(0, 200)
-          }
-        }
-        return highlightText(preview, searchQuery)
-      })()}...
-    </p>
+                      {/* Content Preview */}
+                      <p className="text-sm text-gray-500 mb-2">
+                        {(() => {
+                          let preview = ""
+                          if (item.type === "opinion") {
+                            if (typeof item.attributes.rich_body === "string") {
+                              const cleanText = item.attributes.rich_body.replace(/<[^>]*>/g, "")
+                              preview = cleanText.substring(0, 200)
+                            }
+                          } else {
+                            if (Array.isArray(item.attributes.rich_body)) {
+                              let excerpt = ""
+                              for (const block of item.attributes.rich_body) {
+                                if (block.type === "paragraph" && block.children) {
+                                  const text = block.children.map((child) => child.text).join("")
+                                  excerpt += text + " "
+                                  if (excerpt.length > 200) break
+                                }
+                              }
+                              preview = excerpt.substring(0, 200)
+                            }
+                          }
+                          return highlightText(preview, searchQuery)
+                        })()}...
+                      </p>
 
-    {/* Action Link */}
-    <Link
-      href={
-        item.type === "opinion"
-          ? `/opinions/${item.attributes.slug}`
-          : `/articles/${item.attributes.slug}`
-      }
-      className="text-[#B22234] hover:underline font-medium text-sm"
-    >
-      Read Full Article →
-    </Link>
-  </div>
-</div>
+                      {/* Action Link */}
+                      <Link
+                        href={
+                          item.type === "opinion"
+                            ? `/opinions/${item.attributes.slug}`
+                            : `/articles/${item.attributes.slug}`
+                        }
+                        className="text-[#B22234] hover:underline font-medium text-sm"
+                      >
+                        Read Full Article →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
