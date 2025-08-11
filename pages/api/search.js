@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     const allResults = []
 
     if (searchType === "articles") {
-      // Search articles
-      const articlesUrl = `${baseUrl}/api/articles?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][rich_body][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&filters[$or][4][category][name][$containsi]=${searchTerm}&filters[$or][5][secondary_category][name][$containsi]=${searchTerm}&populate=*`
+      // Search articles - using searchableContent instead of rich_body
+      const articlesUrl = `${baseUrl}/api/articles?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][searchableContent][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&filters[$or][4][category][name][$containsi]=${searchTerm}&filters[$or][5][secondary_category][name][$containsi]=${searchTerm}&populate=*`
 
       const articlesRes = await fetch(articlesUrl)
 
@@ -59,8 +59,8 @@ export default async function handler(req, res) {
         })
       }
 
-      // Search opinions
-      const opinionsUrl = `${baseUrl}/api/opinions?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][rich_body][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&populate=*`
+      // Search opinions - using searchableContent instead of rich_body
+      const opinionsUrl = `${baseUrl}/api/opinions?filters[$or][0][title][$containsi]=${searchTerm}&filters[$or][1][searchableContent][$containsi]=${searchTerm}&filters[$or][2][author][$containsi]=${searchTerm}&filters[$or][3][quote][$containsi]=${searchTerm}&populate=*`
       const opinionsRes = await fetch(opinionsUrl)
       let opinionsData = { data: [] }
       if (opinionsRes.ok) {
@@ -199,6 +199,10 @@ function calculateSearchScore(attributes, query, type) {
     // Also check quote field for articles
     const quote = (attributes.quote || "").toLowerCase()
     if (quote.includes(lowerQuery)) searchScore += 3
+
+    // Check searchableContent for full-text search
+    const searchableContent = (attributes.searchableContent || "").toLowerCase()
+    if (searchableContent.includes(lowerQuery)) searchScore += 6
   }
 
   return searchScore
