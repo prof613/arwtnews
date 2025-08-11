@@ -104,8 +104,7 @@
       "type": "string"
     },
     "searchableContent": {
-      "type": "text",
-      "private": true
+      "type": "text"
     },
     "searchPriority": {
       "type": "integer",

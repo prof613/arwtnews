@@ -424,7 +424,7 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       ['blocks.enhanced-text', 'blocks.enhanced-image']
     > &
       Attribute.Required;
-    searchableContent: Attribute.Text & Attribute.Private;
+    searchableContent: Attribute.Text;
     searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
     searchConfig: Attribute.JSON & Attribute.Private;
     searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
@@ -678,7 +678,7 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
       ['blocks.enhanced-text', 'blocks.enhanced-image']
     > &
       Attribute.Required;
-    searchableContent: Attribute.Text & Attribute.Private;
+    searchableContent: Attribute.Text;
     searchBoost: Attribute.Decimal & Attribute.DefaultTo<1>;
     searchConfig: Attribute.JSON & Attribute.Private;
     searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
