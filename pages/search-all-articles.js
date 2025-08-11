@@ -399,19 +399,27 @@ export default function SearchAllArticles() {
                               ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
                               : item.attributes.featured_image?.data?.attributes?.formats?.small?.url ||
                                 item.attributes.featured_image?.data?.attributes?.url
-                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${
-                                    item.attributes.featured_image.data.attributes.formats?.small?.url ||
-                                    item.attributes.featured_image.data.attributes.url
-                                  }`
+                                ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                   item.attributes.featured_image.data.attributes.url).startsWith('http')
+                                  ? (item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                     item.attributes.featured_image.data.attributes.url)
+                                  : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                      item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                      item.attributes.featured_image.data.attributes.url
+                                    }`
                                 : "/images/core/placeholder.jpg"
                             : item.attributes.image_path
                               ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
                               : item.attributes.image?.data?.attributes?.formats?.small?.url ||
                                 item.attributes.image?.data?.attributes?.url
-                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${
-                                    item.attributes.image.data.attributes.formats?.small?.url ||
-                                    item.attributes.image.data.attributes.url
-                                  }`
+                                ? (item.attributes.image.data.attributes.formats?.small?.url ||
+                                   item.attributes.image.data.attributes.url).startsWith('http')
+                                  ? (item.attributes.image.data.attributes.formats?.small?.url ||
+                                     item.attributes.image.data.attributes.url)
+                                  : `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                      item.attributes.image.data.attributes.formats?.small?.url ||
+                                      item.attributes.image.data.attributes.url
+                                    }`
                                 : "/images/core/placeholder.jpg"
                         }
                         alt={
