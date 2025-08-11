@@ -391,24 +391,34 @@ export default function SearchAllArticles() {
                     router.push(url)
                   }}
                 >
-                  <div className="flex gap-4">
-                    {/* Image */}
-                    <div className="w-1/4 flex-shrink-0">
+                  <div className="w-1/4 flex-shrink-0">
                       <img
                         src={
                           item.type === "opinion"
                             ? item.attributes.image_path
                               ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-                              : item.attributes.featured_image?.data?.attributes?.url
-                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.featured_image.data.attributes.url}`
+                              : item.attributes.featured_image?.data?.attributes?.formats?.small?.url ||
+                                item.attributes.featured_image?.data?.attributes?.url
+                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                    item.attributes.featured_image.data.attributes.formats?.small?.url ||
+                                    item.attributes.featured_image.data.attributes.url
+                                  }`
                                 : "/images/core/placeholder.jpg"
                             : item.attributes.image_path
                               ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image_path}`
-                              : item.attributes.image?.data?.attributes?.url
-                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image.data.attributes.url}`
+                              : item.attributes.image?.data?.attributes?.formats?.small?.url ||
+                                item.attributes.image?.data?.attributes?.url
+                                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+                                    item.attributes.image.data.attributes.formats?.small?.url ||
+                                    item.attributes.image.data.attributes.url
+                                  }`
                                 : "/images/core/placeholder.jpg"
                         }
-                        alt={item.attributes.title}
+                        alt={
+                          item.type === "opinion"
+                            ? item.attributes.featured_image?.data?.attributes?.alternativeText || item.attributes.title
+                            : item.attributes.image?.data?.attributes?.alternativeText || item.attributes.title
+                        }
                         className="w-full h-auto md:h-24 object-contain rounded bg-gray-50"
                       />
                     </div>
