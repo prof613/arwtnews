@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /articles/
+Allow: /categories/
+Allow: /memes/
+Allow: /opinions/
+Allow: /about
+Allow: /contact
+Allow: /support
+Allow: /terms
+Allow: /privacy
+Disallow: /api/
+Disallow: /search-all-articles
+Disallow: /search-web-articles
+Disallow: /contact-thank-you
+Disallow: /under-construction
+Sitemap: https://rwtnews.com/sitemap.xml
