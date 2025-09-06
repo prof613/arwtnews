@@ -23,3 +23,5 @@ strapi/.strapi/
 #TypeScript generated files
 types/generated/*
 /strapi/types/generated
+strapi/types/generated/contentTypes.d.ts
+strapi/types/generated/contentTypes.d.ts
