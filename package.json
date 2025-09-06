@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "start-all": "concurrently \"npm run dev\" \"cd strapi && npm run develop\""
+    "start-all": "concurrently \"npm run dev\" \"cd strapi && npm run develop\"",
     "generate:sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
