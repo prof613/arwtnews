@@ -28,4 +28,16 @@ module.exports = ({ env }) => ({
       }),
     },
   },
+  'sitemap': {
+    enabled: true,
+    config: {
+      autoGenerate: true, // Automatically generate sitemap on content changes
+      outDir: './public', // Output to public directory for web access
+      sitemapFileName: 'sitemap.xml',
+      hostname: 'https://rwtnews.com', // Live domain for Digital Ocean
+      contentTypes: ['article', 'opinion', 'meme'], // Include relevant content types
+      exclude: ['under-construction'], // Exclude specific pages if needed
+      lastmod: 'updatedAt', // Use updatedAt field for lastmod
+    },
+  },
 })
