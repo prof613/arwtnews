@@ -19,3 +19,6 @@ strapi/build/
 strapi/.cache/
 strapi/dist/
 strapi/.strapi/
+
+#TypeScript generated files
+types/generated/*
