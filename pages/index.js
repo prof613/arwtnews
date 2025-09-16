@@ -3,6 +3,7 @@
 // Folder: /rwtnews/pages
 import Head from "next/head"
 import Link from "next/link"
+import Script from "next/script" // Import Script from next/script
 import { useState, useEffect } from "react"
 import axios from "axios"
 import MainBanner from "../components/MainBanner"
@@ -279,6 +280,11 @@ export default function Home() {
         <meta name="twitter:url" content="RWTNews.com" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
+      {/* Avantlink Verification Script */}
+      <Script
+        src="http://classic.avantlink.com/affiliate_app_confirm.php?mode=js&authResponse=679cc53d924dac80554426324b337954c043e198"
+        strategy="afterInteractive" // Load after the page is interactive
+      />
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="w-full md:w-3/4">
@@ -318,9 +324,9 @@ export default function Home() {
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
                 No current known issues or bugs. If you come across a bug, broken link or other issue, please report it to us{" "}
-              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
-                here
-              </Link>. 
+                <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
+                  here
+                </Link>.
               </li>
             </ul>
             <br/>
@@ -444,7 +450,6 @@ export default function Home() {
             )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
-          {/* Inserted text starts here */}
           <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
             <p className="text-sm text-gray-600">
               Our Video Feature uses API calls to YouTube to call the latest videos from 6 channels. By default, the
@@ -453,7 +458,6 @@ export default function Home() {
               end of the day. If you see no videos below please check back later after our quota resets for the day.
             </p>
           </div>
-          {/* Inserted text ends here */}
           {renderComplianceNotice()}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {videosError ? (

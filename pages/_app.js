@@ -21,12 +21,6 @@ function MyApp({ Component, pageProps }) {
         strategy="afterInteractive" // Load after the page is interactive
       />
 
-      {/* Avantlink Verification Script */}
-      <Script
-        src="http://classic.avantlink.com/affiliate_app_confirm.php?mode=js&authResponse=679cc53d924dac80554426324b337954c043e198"
-        strategy="afterInteractive" // Load after the page is interactive
-      />
-
       <Component {...pageProps} />
     </>
   )
