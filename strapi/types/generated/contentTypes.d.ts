@@ -436,6 +436,9 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     >;
     seoConfig: Attribute.JSON & Attribute.Private;
     seoKeywords: Attribute.String;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     slug: Attribute.UID<'api::article.article', 'title'> & Attribute.Required;
     status: Attribute.Enumeration<['draft', 'published', 'archived']> &
       Attribute.DefaultTo<'draft'>;
@@ -489,6 +492,9 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
       'api::opinion.opinion'
     >;
     publishedAt: Attribute.DateTime;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     slug: Attribute.UID<'api::category.category', 'name'>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -535,6 +541,9 @@ export interface ApiExternalArticleExternalArticle
     searchableContent: Attribute.Text & Attribute.Private;
     searchPriority: Attribute.Integer & Attribute.DefaultTo<5>;
     searchTags: Attribute.String;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     slug: Attribute.String & Attribute.Unique;
     source: Attribute.String & Attribute.Required;
     source_url: Attribute.String & Attribute.Required;
@@ -617,6 +626,9 @@ export interface ApiMemeMeme extends Schema.CollectionType {
     ogTitle: Attribute.String;
     publishedAt: Attribute.DateTime;
     searchTags: Attribute.String;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     slug: Attribute.UID<'api::meme.meme', 'artist'> & Attribute.Required;
     status: Attribute.Enumeration<['draft', 'published', 'archived']> &
       Attribute.DefaultTo<'draft'>;
@@ -690,6 +702,9 @@ export interface ApiOpinionOpinion extends Schema.CollectionType {
     >;
     seoConfig: Attribute.JSON & Attribute.Private;
     seoKeywords: Attribute.String;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     slug: Attribute.UID<'api::opinion.opinion', 'title'>;
     status: Attribute.Enumeration<['draft', 'published', 'archived']> &
       Attribute.DefaultTo<'draft'>;
@@ -741,6 +756,9 @@ export interface PluginContentReleasesRelease extends Schema.CollectionType {
     name: Attribute.String & Attribute.Required;
     releasedAt: Attribute.DateTime;
     scheduledAt: Attribute.DateTime;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     status: Attribute.Enumeration<
       ['ready', 'blocked', 'failed', 'done', 'empty']
     > &
@@ -795,6 +813,9 @@ export interface PluginContentReleasesReleaseAction
       'manyToOne',
       'plugin::content-releases.release'
     >;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     type: Attribute.Enumeration<['publish', 'unpublish']> & Attribute.Required;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -853,6 +874,91 @@ export interface PluginI18NLocale extends Schema.CollectionType {
   };
 }
 
+export interface PluginSitemapSitemap extends Schema.CollectionType {
+  collectionName: 'sitemap';
+  info: {
+    displayName: 'sitemap';
+    pluralName: 'sitemaps';
+    singularName: 'sitemap';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'plugin::sitemap.sitemap',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    delta: Attribute.Integer & Attribute.DefaultTo<1>;
+    link_count: Attribute.Integer;
+    name: Attribute.String &
+      Attribute.Required &
+      Attribute.DefaultTo<'default'>;
+    sitemap_string: Attribute.Text & Attribute.Required;
+    type: Attribute.Enumeration<['default_hreflang', 'index']> &
+      Attribute.DefaultTo<'default_hreflang'>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'plugin::sitemap.sitemap',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface PluginSitemapSitemapCache extends Schema.CollectionType {
+  collectionName: 'sitemap_cache';
+  info: {
+    displayName: 'sitemap-cache';
+    pluralName: 'sitemap-caches';
+    singularName: 'sitemap-cache';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'plugin::sitemap.sitemap-cache',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    name: Attribute.String &
+      Attribute.Required &
+      Attribute.DefaultTo<'default'>;
+    sitemap_id: Attribute.Integer & Attribute.Required;
+    sitemap_json: Attribute.JSON & Attribute.Required;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'plugin::sitemap.sitemap-cache',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface PluginUploadFile extends Schema.CollectionType {
   collectionName: 'files';
   info: {
@@ -904,6 +1010,9 @@ export interface PluginUploadFile extends Schema.CollectionType {
     provider: Attribute.String & Attribute.Required;
     provider_metadata: Attribute.JSON;
     related: Attribute.Relation<'plugin::upload.file', 'morphToMany'>;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     size: Attribute.Decimal & Attribute.Required;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -1117,6 +1226,9 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'manyToOne',
       'plugin::users-permissions.role'
     >;
+    sitemap_exclude: Attribute.Boolean &
+      Attribute.Private &
+      Attribute.DefaultTo<false>;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
       'plugin::users-permissions.user',
@@ -1151,6 +1263,8 @@ declare module '@strapi/types' {
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::sitemap.sitemap': PluginSitemapSitemap;
+      'plugin::sitemap.sitemap-cache': PluginSitemapSitemapCache;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;
       'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
