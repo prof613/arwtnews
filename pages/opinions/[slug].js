@@ -9,7 +9,6 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
-import RelatedArticles from "../../components/RelatedArticles" // Added import for RelatedArticles
 import { getStrapiMedia } from "../../utils/media"
 
 // The component now receives the full opinion data from getServerSideProps
@@ -292,9 +291,6 @@ export default function Opinion({ opinion, pageUrl }) {
 
             {/* Comments Section */}
             <DisqusComments title={opinion.title} slug={opinion.slug} url={canonicalUrl} type="opinion" />
-
-            {/* Related Articles Section */}
-            <RelatedArticles opinion={opinion} />
           </article>
         </section>
         <Sidebar />

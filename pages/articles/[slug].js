@@ -9,7 +9,6 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
-import RelatedArticles from "../../components/RelatedArticles" // Import RelatedArticles component
 import { getStrapiMedia } from "../../utils/media"
 import { renderToStaticMarkup } from "react-dom/server"
 
@@ -290,9 +289,6 @@ export default function Article({ article, pageUrl }) {
 
             {/* Comments Section */}
             <DisqusComments title={article.title} slug={article.slug} url={canonicalUrl} type="article" />
-
-            {/* Related Articles Section */}
-            <RelatedArticles article={article} />
           </article>
         </section>
         <Sidebar />
