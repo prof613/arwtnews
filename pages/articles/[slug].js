@@ -1,9 +1,7 @@
 "use client"
 
 import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
 import Head from "next/head" // Import Head for meta tags
-import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -11,122 +9,15 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
+import RelatedArticles from "../../components/RelatedArticles" // Import RelatedArticles component
 import { getStrapiMedia } from "../../utils/media"
 import { renderToStaticMarkup } from "react-dom/server"
-import Link from "next/link"
-
-// Related Articles Component
-function RelatedArticles({ article }) {
-  const [relatedArticles, setRelatedArticles] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [isFallback, setIsFallback] = useState(false)
-
-  useEffect(() => {
-    if (article?.relatedTags && article?.id) {
-      fetchRelatedArticles()
-    } else if (article?.id) {
-      // Even if no tags, try to get featured articles as fallback
-      fetchRelatedArticles()
-    }
-  }, [article])
-
-  const fetchRelatedArticles = async () => {
-    try {
-      setLoading(true)
-      const tags = article.relatedTags || ""
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles/related?tags=${encodeURIComponent(
-          tags,
-        )}&type=article&currentId=${article.id}`,
-      )
-
-      if (response.data) {
-        setRelatedArticles(response.data.items || [])
-        setIsFallback(response.data.isFallback || false)
-      }
-    } catch (error) {
-      console.error("Error fetching related articles:", error)
-      setRelatedArticles([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <section className="mt-12 border-t pt-8">
-        <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">Related Articles</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border border-gray-200 rounded-lg overflow-hidden animate-pulse">
-              <div className="w-full h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (relatedArticles.length === 0) {
-    return null // Don't show section if no related articles
-  }
-
-  return (
-    <section className="mt-12 border-t pt-8">
-      <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">
-        {isFallback ? "Suggested Articles" : "Related Articles"}
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {relatedArticles.map((item) => (
-          <Link
-            key={item.id}
-            href={item._type === "opinion" ? `/opinions/${item.slug}` : `/articles/${item.slug}`}
-            className="block group"
-          >
-            <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <img
-                src={
-                  getStrapiMedia(item._type === "opinion" ? item.featured_image : item.image) ||
-                  "/placeholder.svg?height=200&width=300&query=article"
-                }
-                alt={item.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  {item._type === "opinion" ? "Opinion" : "Article"} •{" "}
-                  {new Date(item.date).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-                <h4 className="font-bold text-[#3C3B6E] group-hover:text-[#B22234] transition-colors line-clamp-2">
-                  {item.title}
-                </h4>
-                {item.quote && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{item.quote}</p>}
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 export default function Article({ article, pageUrl }) {
   const router = useRouter()
   const { slug } = router.query // Get the dynamic slug from the URL
 
-  // Construct the canonical URL for the current article
-  const canonicalUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/articles/${slug}`
-      : `https://yourwebsite.com/articles/${slug}` // Fallback for server-side rendering
+  const canonicalUrl = `https://rwtnews.com/articles/${slug}`
 
   // If article is null (e.g., not found by getServerSideProps), render a not found state
   if (!article) {
@@ -134,12 +25,22 @@ export default function Article({ article, pageUrl }) {
       <>
         <Head>
           <title>Article Not Found | Red, White and True News</title>
+          <meta
+            name="description"
+            content="The requested article could not be found. Browse our latest conservative news and political analysis."
+          />
+          <meta name="robots" content="noindex, follow" />
+          <link rel="canonical" href={canonicalUrl} />
           <meta property="og:title" content="Article Not Found" />
           <meta property="og:description" content="The requested article could not be found." />
           <meta property="og:type" content="website" />
           <meta property="og:url" content={pageUrl} />
-          <meta property="og:image" content="/placeholder.svg" />
+          <meta property="og:image" content="https://rwtnews.com/images/core/og-image.jpg" />
+          <meta property="og:site_name" content="Red, White and True News" />
           <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="Article Not Found" />
+          <meta name="twitter:description" content="The requested article could not be found." />
+          <meta name="twitter:image" content="https://rwtnews.com/images/core/og-image.jpg" />
         </Head>
         <Header />
         <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -175,22 +76,171 @@ export default function Article({ article, pageUrl }) {
   )
   const datePrefixString = renderToStaticMarkup(dateComponent)
 
+  const getMetaDescription = () => {
+    if (article.ogDescription) return article.ogDescription
+    if (article.quote) return article.quote
+    // Extract text from rich_body for description
+    const bodyText = article.rich_body
+      ?.map((block) => {
+        if (block.type === "paragraph" && block.children) {
+          return block.children.map((child) => child.text).join(" ")
+        }
+        return ""
+      })
+      .join(" ")
+      .substring(0, 160)
+    return bodyText || `${article.title} - Conservative news and political analysis from Red, White and True News.`
+  }
+
+  const generateArticleSchema = () => {
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      headline: article.title,
+      description: getMetaDescription(),
+      image: getStrapiMedia(article.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg",
+      datePublished: new Date(article.date).toISOString(),
+      dateModified: new Date(article.updatedAt || article.date).toISOString(),
+      author: {
+        "@type": "Person",
+        name: article.author || "Red, White and True News",
+        image: authorImageUrl || "https://rwtnews.com/images/staff/authors/placeholder-author.jpg",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Red, White and True News",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://rwtnews.com/images/core/logo.png",
+          width: 300,
+          height: 60,
+        },
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
+      url: canonicalUrl,
+      articleSection: article.category?.data?.attributes?.name || "News",
+      keywords: article.relatedTags || "",
+      inLanguage: "en-US",
+    }
+
+    // Add word count if available
+    if (article.rich_body) {
+      const wordCount = article.rich_body
+        .map((block) => {
+          if (block.type === "paragraph" && block.children) {
+            return block.children.map((child) => child.text).join(" ")
+          }
+          return ""
+        })
+        .join(" ")
+        .split(" ")
+        .filter((word) => word.length > 0).length
+
+      if (wordCount > 0) {
+        schema.wordCount = wordCount
+      }
+    }
+
+    return schema
+  }
+
+  const generateBreadcrumbSchema = () => {
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://rwtnews.com",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Articles",
+          item: "https://rwtnews.com/articles",
+        },
+      ],
+    }
+
+    // Add category if available
+    if (article.category?.data?.attributes?.name) {
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 3,
+        name: article.category.data.attributes.name,
+        item: `https://rwtnews.com/categories/${article.category.data.attributes.slug || article.category.data.attributes.name.toLowerCase().replace(/\s+/g, "-")}`,
+      })
+
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 4,
+        name: article.title,
+        item: canonicalUrl,
+      })
+    } else {
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: canonicalUrl,
+      })
+    }
+
+    return breadcrumbSchema
+  }
+
   return (
     <>
       <Head>
         <title>{`${article.title} | Red, White and True News`}</title>
+        <meta name="description" content={getMetaDescription()} />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="author" content={article.author || "Red, White and True News"} />
+        <meta name="article:published_time" content={new Date(article.date).toISOString()} />
+        <meta name="article:author" content={article.author || "Red, White and True News"} />
+        <meta name="article:section" content={article.category?.data?.attributes?.name || "News"} />
         <meta property="og:title" content={article.ogTitle || article.title} />
-        <meta property="og:description" content={article.ogDescription || article.quote || ""} />
-        <meta property="og:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
-        <meta property="og:url" content={pageUrl} />
+        <meta property="og:description" content={getMetaDescription()} />
+        <meta
+          property="og:image"
+          content={getStrapiMedia(article.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg"}
+        />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Red, White and True News" />
+        <meta property="article:published_time" content={new Date(article.date).toISOString()} />
+        <meta property="article:author" content={article.author || "Red, White and True News"} />
+        <meta property="article:section" content={article.category?.data?.attributes?.name || "News"} />
         <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.ogTitle || article.title} />
-        <meta name="twitter:description" content={article.ogDescription || article.quote || ""} />
-        <meta name="twitter:image" content={getStrapiMedia(article.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta name="twitter:description" content={getMetaDescription()} />
+        <meta
+          name="twitter:image"
+          content={getStrapiMedia(article.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg"}
+        />
         <meta name="twitter:site" content="@RWTNews" />
+        <meta name="twitter:creator" content="@RWTNews" />
+
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateArticleSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateBreadcrumbSchema()),
+          }}
+        />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -235,11 +285,11 @@ export default function Article({ article, pageUrl }) {
             </div>
 
             {article.enable_share_buttons && (
-              <ShareButtons shareUrl={pageUrl} title={article.title} summary={article.quote} />
+              <ShareButtons shareUrl={canonicalUrl} title={article.title} summary={article.quote} />
             )}
 
             {/* Comments Section */}
-            <DisqusComments title={article.title} slug={article.slug} url={pageUrl} type="article" />
+            <DisqusComments title={article.title} slug={article.slug} url={canonicalUrl} type="article" />
 
             {/* Related Articles Section */}
             <RelatedArticles article={article} />
@@ -250,55 +300,4 @@ export default function Article({ article, pageUrl }) {
       <Footer />
     </>
   )
-}
-
-// This function runs on the server for every request
-export async function getServerSideProps(context) {
-  const { slug } = context.params
-
-  // Construct the full page URL for OG tags
-  const protocol = context.req.headers["x-forwarded-proto"] || "http"
-  const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}${context.req.url}`
-
-  try {
-    // Fetch all necessary article data with proper populate parameters
-    const articleRes = await axios.get(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${slug}&populate[image]=*&populate[author_image]=*&populate[category]=*&populate[secondary_category]=*&populate[rich_body][populate]=*&populate[ogImage]=*`,
-    )
-
-    const article = articleRes.data.data[0]?.attributes
-
-    if (!article) {
-      // If article not found, return props with null article to trigger not found UI
-      return {
-        props: {
-          article: null,
-          pageUrl: pageUrl, // Still provide pageUrl for the not found page's OG tags
-        },
-      }
-    }
-
-    // Add the ID to the article object for related articles
-    const articleWithId = {
-      ...article,
-      id: articleRes.data.data[0].id,
-    }
-
-    return {
-      props: {
-        article: articleWithId,
-        pageUrl: pageUrl,
-      },
-    }
-  } catch (error) {
-    console.error("Error fetching article in getServerSideProps:", error)
-    // In case of an error during fetch, return null article to show not found UI
-    return {
-      props: {
-        article: null,
-        pageUrl: pageUrl,
-      },
-    }
-  }
 }

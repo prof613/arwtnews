@@ -58,6 +58,29 @@ export default function OpinionsArchive({ initialOpinions, initialPage, initialT
     <>
       <Head>
         <title>Opinion Archive | Red, White and True News</title>
+        <meta
+          name="description"
+          content="Opinion archive from Red, White and True News. Conservative commentary, political analysis, and editorial perspectives on current events and American politics."
+        />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={`https://rwtnews.com/opinions${currentPage > 1 ? `?page=${currentPage}` : ""}`} />
+        <meta property="og:title" content="Opinion Archive | Red, White and True News" />
+        <meta
+          property="og:description"
+          content="Conservative commentary, political analysis, and editorial perspectives on current events and American politics."
+        />
+        <meta
+          property="og:url"
+          content={`https://rwtnews.com/opinions${currentPage > 1 ? `?page=${currentPage}` : ""}`}
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Red, White and True News" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Opinion Archive | Red, White and True News" />
+        <meta
+          name="twitter:description"
+          content="Conservative commentary, political analysis, and editorial perspectives on current events and American politics."
+        />
         <link rel="icon" href="/images/core/rwtn_favicon.jpg" />
       </Head>
       <Header />
@@ -84,7 +107,9 @@ export default function OpinionsArchive({ initialOpinions, initialPage, initialT
                         className="w-full h-auto md:h-32 object-contain rounded bg-gray-50"
                       />
                       <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
-                        {opinion.attributes.featured_image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                        {opinion.attributes.featured_image?.data?.attributes?.caption || (
+                          <span className="text-transparent"> </span>
+                        )}
                       </figcaption>
                     </div>
                     <div className="flex-1">

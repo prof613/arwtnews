@@ -1,9 +1,7 @@
 "use client"
 
 import Head from "next/head"
-import { useState, useEffect } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import axios from "axios"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Footer from "../../components/Footer"
@@ -11,127 +9,36 @@ import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
+import RelatedArticles from "../../components/RelatedArticles" // Added import for RelatedArticles
 import { getStrapiMedia } from "../../utils/media"
-import Link from "next/link"
-
-// Related Articles Component
-function RelatedArticles({ opinion }) {
-  const [relatedArticles, setRelatedArticles] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [isFallback, setIsFallback] = useState(false)
-
-  useEffect(() => {
-    if (opinion?.relatedTags && opinion?.id) {
-      fetchRelatedArticles()
-    } else if (opinion?.id) {
-      // Even if no tags, try to get featured articles as fallback
-      fetchRelatedArticles()
-    }
-  }, [opinion])
-
-  const fetchRelatedArticles = async () => {
-    try {
-      setLoading(true)
-      const tags = opinion.relatedTags || ""
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions/related?tags=${encodeURIComponent(
-          tags,
-        )}&type=opinion&currentId=${opinion.id}`,
-      )
-
-      if (response.data) {
-        setRelatedArticles(response.data.items || [])
-        setIsFallback(response.data.isFallback || false)
-      }
-    } catch (error) {
-      console.error("Error fetching related articles:", error)
-      setRelatedArticles([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <section className="mt-12 border-t pt-8">
-        <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">Related Articles</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border border-gray-200 rounded-lg overflow-hidden animate-pulse">
-              <div className="w-full h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (relatedArticles.length === 0) {
-    return null // Don't show section if no related articles
-  }
-
-  return (
-    <section className="mt-12 border-t pt-8">
-      <h3 className="text-2xl font-bold text-[#3C3B6E] mb-6">
-        {isFallback ? "Suggested Articles" : "Related Articles"}
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {relatedArticles.map((item) => (
-          <Link
-            key={item.id}
-            href={item._type === "opinion" ? `/opinions/${item.slug}` : `/articles/${item.slug}`}
-            className="block group"
-          >
-            <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <img
-                src={
-                  getStrapiMedia(item._type === "opinion" ? item.featured_image : item.image) ||
-                  "/placeholder.svg?height=200&width=300&query=article"
-                }
-                alt={item.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  {item._type === "opinion" ? "Opinion" : "Article"} •{" "}
-                  {new Date(item.date).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-                <h4 className="font-bold text-[#3C3B6E] group-hover:text-[#B22234] transition-colors line-clamp-2">
-                  {item.title}
-                </h4>
-                {item.quote && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{item.quote}</p>}
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 // The component now receives the full opinion data from getServerSideProps
 export default function Opinion({ opinion, pageUrl }) {
   // No need for useRouter or useState/useEffect for opinion data anymore
+
+  const canonicalUrl = opinion ? `https://rwtnews.com/opinions/${opinion.slug}` : pageUrl
 
   if (!opinion) {
     return (
       <>
         <Head>
           <title>Opinion Not Found | Red, White and True News</title>
+          <meta
+            name="description"
+            content="The requested opinion piece could not be found. Browse our latest conservative commentary and political analysis."
+          />
+          <meta name="robots" content="noindex, follow" />
+          <link rel="canonical" href={canonicalUrl} />
           <meta property="og:title" content="Opinion Not Found" />
           <meta property="og:description" content="The requested opinion piece could not be found." />
           <meta property="og:type" content="website" />
           <meta property="og:url" content={pageUrl} />
-          <meta property="og:image" content="/placeholder.svg" />
+          <meta property="og:image" content="https://rwtnews.com/images/core/og-image.jpg" />
+          <meta property="og:site_name" content="Red, White and True News" />
           <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="Opinion Not Found" />
+          <meta name="twitter:description" content="The requested opinion piece could not be found." />
+          <meta name="twitter:image" content="https://rwtnews.com/images/core/og-image.jpg" />
         </Head>
         <Header />
         <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -169,22 +76,171 @@ export default function Opinion({ opinion, pageUrl }) {
   const datePrefixString = renderToStaticMarkup(dateComponent)
   // --- END OF NEW LOGIC ---
 
+  const getMetaDescription = () => {
+    if (opinion.ogDescription) return opinion.ogDescription
+    if (opinion.quote) return opinion.quote
+    // Extract text from rich_body for description
+    const bodyText = opinion.rich_body
+      ?.map((block) => {
+        if (block.type === "paragraph" && block.children) {
+          return block.children.map((child) => child.text).join(" ")
+        }
+        return ""
+      })
+      .join(" ")
+      .substring(0, 160)
+    return bodyText || `${opinion.title} - Conservative opinion and political commentary from Red, White and True News.`
+  }
+
+  const generateOpinionSchema = () => {
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "OpinionNewsArticle",
+      headline: opinion.title,
+      description: getMetaDescription(),
+      image: getStrapiMedia(opinion.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg",
+      datePublished: new Date(opinion.date).toISOString(),
+      dateModified: new Date(opinion.updatedAt || opinion.date).toISOString(),
+      author: {
+        "@type": "Person",
+        name: opinion.author || "Red, White and True News",
+        image: authorImageUrl || "https://rwtnews.com/images/staff/authors/placeholder-author.jpg",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Red, White and True News",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://rwtnews.com/images/core/logo.png",
+          width: 300,
+          height: 60,
+        },
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
+      url: canonicalUrl,
+      articleSection: "Opinion",
+      keywords: opinion.relatedTags || "",
+      inLanguage: "en-US",
+      genre: "opinion",
+    }
+
+    // Add word count if available
+    if (opinion.rich_body) {
+      const wordCount = opinion.rich_body
+        .map((block) => {
+          if (block.type === "paragraph" && block.children) {
+            return block.children.map((child) => child.text).join(" ")
+          }
+          return ""
+        })
+        .join(" ")
+        .split(" ")
+        .filter((word) => word.length > 0).length
+
+      if (wordCount > 0) {
+        schema.wordCount = wordCount
+      }
+    }
+
+    return schema
+  }
+
+  const generateBreadcrumbSchema = () => {
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://rwtnews.com",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Opinions",
+          item: "https://rwtnews.com/opinions",
+        },
+      ],
+    }
+
+    // Add secondary category if available
+    if (opinion.secondary_category?.data?.attributes?.name) {
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 3,
+        name: opinion.secondary_category.data.attributes.name,
+        item: `https://rwtnews.com/categories/${opinion.secondary_category.data.attributes.slug || opinion.secondary_category.data.attributes.name.toLowerCase().replace(/\s+/g, "-")}`,
+      })
+
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 4,
+        name: opinion.title,
+        item: canonicalUrl,
+      })
+    } else {
+      breadcrumbSchema.itemListElement.push({
+        "@type": "ListItem",
+        position: 3,
+        name: opinion.title,
+        item: canonicalUrl,
+      })
+    }
+
+    return breadcrumbSchema
+  }
+
   return (
     <>
       <Head>
         <title>{`${opinion.title} | Red, White and True News`}</title>
+        <meta name="description" content={getMetaDescription()} />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="author" content={opinion.author || "Red, White and True News"} />
+        <meta name="article:published_time" content={new Date(opinion.date).toISOString()} />
+        <meta name="article:author" content={opinion.author || "Red, White and True News"} />
+        <meta name="article:section" content="Opinion" />
         <meta property="og:title" content={opinion.ogTitle || opinion.title} />
-        <meta property="og:description" content={opinion.ogDescription || opinion.quote || ""} />
-        <meta property="og:image" content={getStrapiMedia(opinion.ogImage) || imageUrl || "/placeholder.svg"} />
-        <meta property="og:url" content={pageUrl} />
+        <meta property="og:description" content={getMetaDescription()} />
+        <meta
+          property="og:image"
+          content={getStrapiMedia(opinion.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg"}
+        />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Red, White and True News" />
+        <meta property="article:published_time" content={new Date(opinion.date).toISOString()} />
+        <meta property="article:author" content={opinion.author || "Red, White and True News"} />
+        <meta property="article:section" content="Opinion" />
         <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={opinion.ogTitle || opinion.title} />
-        <meta name="twitter:description" content={opinion.ogDescription || opinion.quote || ""} />
-        <meta name="twitter:image" content={getStrapiMedia(opinion.ogImage) || imageUrl || "/placeholder.svg"} />
+        <meta name="twitter:description" content={getMetaDescription()} />
+        <meta
+          name="twitter:image"
+          content={getStrapiMedia(opinion.ogImage) || imageUrl || "https://rwtnews.com/images/core/og-image.jpg"}
+        />
         <meta name="twitter:site" content="@RWTNews" />
+        <meta name="twitter:creator" content="@RWTNews" />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateOpinionSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateBreadcrumbSchema()),
+          }}
+        />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
@@ -231,11 +287,11 @@ export default function Opinion({ opinion, pageUrl }) {
             </div>
 
             {opinion.enable_share_buttons && (
-              <ShareButtons shareUrl={pageUrl} title={opinion.title} summary={opinion.quote} />
+              <ShareButtons shareUrl={canonicalUrl} title={opinion.title} summary={opinion.quote} />
             )}
 
             {/* Comments Section */}
-            <DisqusComments title={opinion.title} slug={opinion.slug} url={pageUrl} type="opinion" />
+            <DisqusComments title={opinion.title} slug={opinion.slug} url={canonicalUrl} type="opinion" />
 
             {/* Related Articles Section */}
             <RelatedArticles opinion={opinion} />
@@ -246,49 +302,4 @@ export default function Opinion({ opinion, pageUrl }) {
       <Footer />
     </>
   )
-}
-
-export async function getServerSideProps(context) {
-  const { slug } = context.params
-
-  const protocol = context.req.headers["x-forwarded-proto"] || "http"
-  const host = context.req.headers["x-forwarded-host"] || context.req.headers.host
-  const pageUrl = `${protocol}://${host}${context.req.url}`
-
-  try {
-    const opinionRes = await axios.get(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${slug}&populate[featured_image]=*&populate[author_image]=*&populate[secondary_category]=*&populate[rich_body][populate]=*&populate[ogImage]=*&publicationState=live`,
-    )
-    const opinion = opinionRes.data.data[0]?.attributes
-
-    if (!opinion) {
-      return {
-        props: {
-          opinion: null,
-          pageUrl: pageUrl,
-        },
-      }
-    }
-
-    // Add the ID to the opinion object for related articles
-    const opinionWithId = {
-      ...opinion,
-      id: opinionRes.data.data[0].id,
-    }
-
-    return {
-      props: {
-        opinion: opinionWithId,
-        pageUrl: pageUrl,
-      },
-    }
-  } catch (error) {
-    console.error("Error fetching opinion in getServerSideProps:", error)
-    return {
-      props: {
-        opinion: null,
-        pageUrl: pageUrl,
-      },
-    }
-  }
 }
