@@ -1,5 +1,3 @@
-"use client"
-
 import Head from "next/head"
 import { renderToStaticMarkup } from "react-dom/server"
 import Header from "../../components/Header"
@@ -10,6 +8,7 @@ import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
+import axios from "axios"
 
 // The component now receives the full opinion data from getServerSideProps
 export default function Opinion({ opinion, pageUrl }) {
@@ -298,4 +297,29 @@ export default function Opinion({ opinion, pageUrl }) {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps({ params }) {
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[slug][$eq]=${params.slug}&populate=*`,
+    )
+
+    const opinion = response.data.data[0] || null
+
+    return {
+      props: {
+        opinion: opinion ? opinion.attributes : null,
+        pageUrl: `https://rwtnews.com/opinions/${params.slug}`,
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching opinion:", error)
+    return {
+      props: {
+        opinion: null,
+        pageUrl: `https://rwtnews.com/opinions/${params.slug}`,
+      },
+    }
+  }
 }

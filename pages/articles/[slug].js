@@ -11,6 +11,7 @@ import DisqusComments from "../../components/DisqusComments"
 import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 import { renderToStaticMarkup } from "react-dom/server"
+import axios from "axios"
 
 export default function Article({ article, pageUrl }) {
   const router = useRouter()
@@ -296,4 +297,29 @@ export default function Article({ article, pageUrl }) {
       <Footer />
     </>
   )
+}
+
+export async function getServerSideProps({ params }) {
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[slug][$eq]=${params.slug}&populate=*`,
+    )
+
+    const article = response.data.data[0] || null
+
+    return {
+      props: {
+        article: article ? article.attributes : null,
+        pageUrl: `https://rwtnews.com/articles/${params.slug}`,
+      },
+    }
+  } catch (error) {
+    console.error("Error fetching article:", error)
+    return {
+      props: {
+        article: null,
+        pageUrl: `https://rwtnews.com/articles/${params.slug}`,
+      },
+    }
+  }
 }
