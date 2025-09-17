@@ -6,9 +6,63 @@ import Footer from "../../components/Footer"
 import MainBanner from "../../components/MainBanner"
 import ShareButtons from "../../components/ShareButtons"
 import DisqusComments from "../../components/DisqusComments"
-import BlockRenderer from "../../components/BlockRenderer"
 import { getStrapiMedia } from "../../utils/media"
 import axios from "axios"
+
+const renderRichText = (blocks, datePrefix) => {
+  if (!blocks || !Array.isArray(blocks)) return null
+
+  return blocks.map((block, index) => {
+    switch (block.type) {
+      case "paragraph":
+        return (
+          <p key={index} className="mb-4">
+            {index === 0 && datePrefix && <span dangerouslySetInnerHTML={{ __html: datePrefix }} />}
+            {block.children?.map((child, childIndex) => {
+              if (child.bold) {
+                return <strong key={childIndex}>{child.text}</strong>
+              }
+              if (child.italic) {
+                return <em key={childIndex}>{child.text}</em>
+              }
+              return child.text
+            })}
+          </p>
+        )
+      case "heading":
+        const HeadingTag = `h${block.level || 2}`
+        return (
+          <HeadingTag key={index} className="font-bold mb-3 text-[#3C3B6E]">
+            {block.children?.map((child) => child.text).join("")}
+          </HeadingTag>
+        )
+      case "image":
+        const imageUrl = getStrapiMedia(block.image)
+        return (
+          <div key={index} className="my-6">
+            {imageUrl ? (
+              <img
+                src={imageUrl || "/placeholder.svg"}
+                alt={block.image?.data?.attributes?.alternativeText || ""}
+                className="w-full max-w-full h-auto rounded"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-200 rounded flex items-center justify-center">
+                <p className="text-gray-500">Image not available</p>
+              </div>
+            )}
+            {block.image?.data?.attributes?.caption && (
+              <figcaption className="text-sm text-gray-600 italic mt-2">
+                {block.image.data.attributes.caption}
+              </figcaption>
+            )}
+          </div>
+        )
+      default:
+        return null
+    }
+  })
+}
 
 // The component now receives the full opinion data from getServerSideProps
 export default function Opinion({ opinion, pageUrl }) {
@@ -253,7 +307,7 @@ export default function Opinion({ opinion, pageUrl }) {
               />
             ) : (
               <div className="w-full h-48 bg-gray-200 rounded mb-4 flex items-center justify-center">
-                <p>No image available</p>
+                <p className="text-gray-500">No image available</p>
               </div>
             )}
             <figcaption className="text-sm text-gray-600 italic text-left mb-4">
@@ -280,9 +334,7 @@ export default function Opinion({ opinion, pageUrl }) {
                 <p className="text-sm font-bold text-gray-600">{opinion.author || "Unknown"}</p>
               </div>
             </div>
-            <div className="text-gray-600 mb-4">
-              <BlockRenderer blocks={opinion.rich_body} datePrefix={datePrefixString} />
-            </div>
+            <div className="text-gray-600 mb-4">{renderRichText(opinion.rich_body, datePrefixString)}</div>
 
             {opinion.enable_share_buttons && (
               <ShareButtons shareUrl={canonicalUrl} title={opinion.title} summary={opinion.quote} />
