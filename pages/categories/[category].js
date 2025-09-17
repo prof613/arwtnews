@@ -42,101 +42,101 @@ export default function Category() {
   }, [router.query])
 
   useEffect(() => {
-    if (!category) return
+    if (!category) return;
 
-    let isCurrent = true
+    let isCurrent = true;
 
     const fetchItems = async () => {
-      setLoading(true)
-      setItems([])
+      setLoading(true);
+      setItems([]);
 
       try {
-        let combinedItems = []
-        let fetchedTotalPages = 1
+        let combinedItems = [];
+        let fetchedTotalPages = 1;
 
         if (category === "Meme-Cartoons") {
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`,
-          )
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`
+          );
           if (isCurrent) {
-            combinedItems = res.data.data
-            fetchedTotalPages = res.data.meta.pagination.pageCount
+            combinedItems = res.data.data;
+            fetchedTotalPages = res.data.meta.pagination.pageCount;
           }
         } else if (category === "All") {
           const [articlesRes, opinionsRes] = await Promise.all([
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`
             ),
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true`
             ),
-          ])
+          ]);
           if (isCurrent) {
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
             const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
-            )
-            const startIndex = (page - 1) * 10
-            const endIndex = startIndex + 10
-            combinedItems = allItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allItems.length / 10)
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
+            );
+            const startIndex = (page - 1) * 10;
+            const endIndex = startIndex + 10;
+            combinedItems = allItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allItems.length / 10);
           }
         } else if (category === "news-from-web") {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`)
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`);
           if (isCurrent) {
-            const oneYearAgo = new Date()
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
             const allExternalItems = res.data.data
               .filter((item) => new Date(item.attributes.createdAt) >= oneYearAgo)
               .map((item) => ({ ...item, type: "external" }))
-              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt))
-            const startIndex = (page - 1) * 20
-            const endIndex = startIndex + 20
-            combinedItems = allExternalItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allExternalItems.length / 20)
+              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt));
+            const startIndex = (page - 1) * 20;
+            const endIndex = startIndex + 20;
+            combinedItems = allExternalItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allExternalItems.length / 20);
           }
         } else {
-          const encodedCategory = encodeURIComponent(category)
+          const encodedCategory = encodeURIComponent(category);
           const [articlesRes, opinionsRes] = await Promise.all([
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
             ),
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
             ),
-          ])
+          ]);
           if (isCurrent) {
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
             const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
-            )
-            const startIndex = (page - 1) * 10
-            const endIndex = startIndex + 10
-            combinedItems = allItems.slice(startIndex, endIndex)
-            fetchedTotalPages = Math.ceil(allItems.length / 10)
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
+            );
+            const startIndex = (page - 1) * 10;
+            const endIndex = startIndex + 10;
+            combinedItems = allItems.slice(startIndex, endIndex);
+            fetchedTotalPages = Math.ceil(allItems.length / 10);
           }
         }
         if (isCurrent) {
-          setItems(combinedItems)
-          setTotalPages(fetchedTotalPages)
+          setItems(combinedItems);
+          setTotalPages(fetchedTotalPages);
         }
       } catch (error) {
-        console.error("Error fetching items:", error)
+        console.error("Error fetching items:", error);
       } finally {
         if (isCurrent) {
-          setLoading(false)
+          setLoading(false);
         }
       }
-    }
+    };
 
-    fetchItems()
+    fetchItems();
 
     return () => {
-      isCurrent = false
-    }
-  }, [category, page])
+      isCurrent = false;
+    };
+  }, [category, page]);
 
   useEffect(() => {
     if (category === "Meme-Cartoons" && slug && items.length > 0) {
@@ -150,22 +150,22 @@ export default function Category() {
 
   useEffect(() => {
     const handleRouteChangeStart = () => {
-      setLoading(true)
-      setItems([])
-    }
+      setLoading(true);
+      setItems([]);
+    };
 
-    const handleRouteChangeComplete = () => {}
+    const handleRouteChangeComplete = () => {};
 
-    router.events.on("routeChangeStart", handleRouteChangeStart)
-    router.events.on("routeChangeComplete", handleRouteChangeComplete)
-    router.events.on("routeChangeError", (err) => console.error("Route change error:", err))
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    router.events.on('routeChangeError', (err) => console.error('Route change error:', err));
 
     return () => {
-      router.events.off("routeChangeStart", handleRouteChangeStart)
-      router.events.off("routeChangeComplete", handleRouteChangeComplete)
-      router.events.off("routeChangeError")
-    }
-  }, [router.events])
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+      router.events.off('routeChangeError');
+    };
+  }, [router.events]);
 
   const openLightbox = (indexOnPage) => {
     const meme = items[indexOnPage]
@@ -429,54 +429,10 @@ export default function Category() {
     return `${categoryName} | Red, White and True News`
   }
 
-  const getMetaDescription = () => {
-    let categoryName = "Category"
-    if (category) {
-      if (Array.isArray(category)) {
-        categoryName = category[0] || "Category"
-      } else {
-        categoryName = String(category).split(",")[0]
-      }
-    }
-
-    if (category === "All") {
-      return "Browse all articles and opinions from Red, White and True News. Conservative news, political analysis, and commentary on current events."
-    } else if (category === "news-from-web") {
-      return "Curated news from across the web. External articles and stories that matter to conservative readers and patriots."
-    } else if (category === "Meme-Cartoons") {
-      return "Political memes and editorial cartoons. Conservative humor and satirical commentary on current events and politics."
-    } else {
-      return `${categoryName} news and articles from Red, White and True News. Conservative perspective on ${categoryName.toLowerCase()} topics and current events.`
-    }
-  }
-
-  const getCanonicalUrl = () => {
-    let categoryName = "Category"
-    if (category) {
-      if (Array.isArray(category)) {
-        categoryName = category[0] || "Category"
-      } else {
-        categoryName = String(category).split(",")[0]
-      }
-    }
-    return `https://rwtnews.com/categories/${encodeURIComponent(categoryName)}${page > 1 ? `?page=${page}` : ""}`
-  }
-
   return (
     <>
       <Head>
         <title>{getPageTitle()}</title>
-        <meta name="description" content={getMetaDescription()} />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link rel="canonical" href={getCanonicalUrl()} />
-        <meta property="og:title" content={getPageTitle()} />
-        <meta property="og:description" content={getMetaDescription()} />
-        <meta property="og:url" content={getCanonicalUrl()} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Red, White and True News" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={getPageTitle()} />
-        <meta name="twitter:description" content={getMetaDescription()} />
         <link rel="icon" href="/images/core/rwtn_favicon.jpg" />
       </Head>
       <Header />

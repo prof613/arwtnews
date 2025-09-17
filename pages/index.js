@@ -266,29 +266,17 @@ export default function Home() {
     <>
       <Head>
         <title>Red, White and True News</title>
-        <meta
-          name="description"
-          content="Red, White and True News - Conservative news, political analysis, and opinion pieces. Stay informed with the RIGHT perspective on current events, politics, and American values."
-        />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link rel="canonical" href="https://rwtnews.com" />
-        <meta property="og:title" content="Red, White and True News - Conservative News & Political Analysis" />
-        <meta
-          property="og:description"
-          content="Conservative news, political analysis, and opinion pieces. Stay informed with the RIGHT perspective on current events, politics, and American values."
-        />
-        <meta property="og:image" content="https://rwtnews.com/images/core/og-image.jpg" />
-        <meta property="og:url" content="https://rwtnews.com" />
+        <meta name="description" content="The RIGHT News For America" />
+        <meta property="og:title" content="Red, White and True News" />
+        <meta property="og:description" content="The RIGHT News For America" />
+        <meta property="og:image" content="images\core\og-image.jpg" />
+        <meta property="og:url" content="RWTNews.com" />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Red, White and True News" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Red, White and True News - Conservative News & Political Analysis" />
-        <meta
-          name="twitter:description"
-          content="Conservative news, political analysis, and opinion pieces. Stay informed with the RIGHT perspective on current events, politics, and American values."
-        />
-        <meta name="twitter:image" content="https://rwtnews.com/images/core/og-image.jpg" />
-        <meta name="twitter:site" content="@rwtnews" />
+        <meta name="twitter:title" content="Red, White and True News" />
+        <meta name="twitter:description" content="The RIGHT News For America" />
+        <meta name="twitter:image" content="images\core\og-image.jpg" />
+        <meta name="twitter:url" content="RWTNews.com" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
       <Header />
@@ -329,15 +317,13 @@ export default function Home() {
             <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
-                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it
-                to us{" "}
-                <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
-                  here
-                </Link>
-                .
+                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it to us{" "}
+              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
+                here
+              </Link>. 
               </li>
             </ul>
-            <br />
+            <br/>
             <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Features under development:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
@@ -346,7 +332,9 @@ export default function Home() {
               <li>
                 <s>Add "Commenting" to individual Article pages.</s>
               </li>
-              <li>Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.</li>
+              <li>
+                Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.
+              </li>
               <li>
                 We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
                 now so you do receive it once we do have it up and running.
