@@ -1,6 +1,3 @@
-// File: support.js
-// Folder: /rwtnews/pages
-
 import Head from "next/head"
 import MainBanner from "../components/MainBanner"
 import Header from "../components/Header"
@@ -29,48 +26,25 @@ export default function Support() {
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
         <section className="flex-1">
           <MainBanner />
-          <h1 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Support Our Mission</h1>
+          <h1 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Our Mission and Future Plans</h1>
           <p className="text-gray-600 mb-4 text-lg">
-           Red, White and True News is dedicated to delivering honest, hard-hitting journalism that upholds traditional American values. Through our original content and by amplifying the voices of other independent outlets and individuals, we strive to provide a platform for truth in a world clouded by misinformation. As an independent news organization, we rely on the support of patriots like you to fuel our fight against the propaganda spread by corporate media.
+            At Red, White and True News, our mission is to amplify the stories that are marginalized, or outright buried by the Corporate Media, as well as fact check to debunk the propaganda that is so prolific today. We aim to accomplish this not just through our original content, but also by sharing articles by other Conservative media that many might not otherwise see. We don't view other Conservative media as competition but rather allies.
           </p>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Why Your Support Matters</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            In today’s media landscape, corporate outlets dominate, often distorting the truth to serve their own interests. These mainstream giants flood the airwaves with narratives designed to manipulate, mislead, and control the public’s perception. At Red, White and True News, we stand as a counterforce, committed to exposing the facts they bury and amplifying the stories they ignore. Your support empowers us to maintain our independence, reject corporate influence, and deliver unfiltered truth to the American people. With your help, we can continue to challenge the media machine, hold the powerful accountable, and provide a voice for those who value integrity over agenda-driven reporting.
+            With so much of today's media and big tech owned by Liberal organizations with Leftist agendas, it can often be difficult to weed through the spin and propaganda to get at the truth. While we certainly present News and Commentary from a Conservative point of view, we aim for Truth and accuracy in all our reporting. If you ever think we got something wrong, missed an important detail or aren't covering something you think we should be reporting on, you can reach out to us through our 
+<a href="/contact" class="text-[#B22234] hover:underline font-semibold"> contact page</a>.
           </p>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">How You Can Help</h2>
-          <ul className="text-gray-600 mb-4 text-lg list-disc list-inside space-y-2">
-            <li>
-              <strong>Share Our Articles:</strong> Help spread the truth by sharing our content on social media
-            </li>
-            <li>
-              <strong>Subscribe to Our Newsletter:</strong> Stay informed with our weekly updates
-            </li>
-            <li>
-              <strong>Submit Story Tips:</strong> Help us uncover stories that matter to Americans
-            </li>
-            <li>
-              <strong>Engage with Our Content:</strong> Leave comments and participate in discussions
-            </li>
-            <li>
-              <strong>Financial Support:</strong> Consider making a donation to support our operations
-            </li>
-          </ul>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Our Commitment to You</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            We promise to use your support responsibly and transparently. Every dollar goes toward maintaining our
-            website, supporting our journalists, and expanding our reach to bring the truth to more Americans.
+            Currently our mediums for getting you the True News are through the Webpage and Social Media. Eventually, we will be expanding into more video. Hopefully, a weekly podcast with other short videos on specific stories in between. While we are equipped for the video aspect, time is the main constraint right now. As of this moment, the entire team is just one person doing most of the writing, the Website development, content, Social Media and nearly every aspect solo. We hope to be rolling out the podcast and other video over the course of the next 6 months as we expand the team.
           </p>
-          <h2 className="text-2xl font-bold text-[#3C3B6E] mb-3">Contact Us</h2>
           <p className="text-gray-600 mb-4 text-lg">
-            Questions about supporting our mission? Reach out to us from our{" "}
-            <a href="/contact" className="text-[#B22234] hover:underline font-semibold">Contact Page</a>
-            .
+            Long-term, we aim to build RWT News into a lasting brand delivering the news and commentary Conservatives are hungry for, far into the future. If you are a staunch Conservative looking for a way to get involved and make a difference in today's political world, you should consider joining the RWT News team. If you just have one story you would like to share, would like to write for us on a regular basis, or want to be more involved in anything from website design, graphics or the video aspect, let us know by sending an email from the 
+<a href="/contact" class="text-[#B22234] hover:underline font-semibold"> contact page</a>.
+ If you appreciate what we do but don't have the time or skills to get directly involved, sharing our page and stories on Social Media is also a great way you can help us expand our reach.
           </p>
           <div className="bg-gray-100 p-6 rounded-lg mt-6">
-            <h3 className="text-xl font-bold text-[#3C3B6E] mb-3">Thank You</h3>
             <p className="text-gray-600 text-lg">
-              Thank you for being part of the Red, White and True News community. Together, we can ensure that the truth
-              prevails and American values are preserved for future generations.
+             <b> Thank you,<br /> Tommy Flynn</b>
             </p>
           </div>
         </section>
