@@ -9,18 +9,24 @@ export default function Support() {
     <>
       <Head>
         <title>Support Our Mission | Red, White and True News</title>
-        <meta name="description" content="The RIGHT News For America" />
-        <meta property="og:title" content="Red, White and True News" />
-        <meta property="og:description" content="The RIGHT News For America" />
-        <meta property="og:image" content="images\core\og-image.jpg" />
-        <meta property="og:url" content="RWTNews.com" />
+        <meta name="description" content="Support Red, White and True News in our mission to deliver truthful conservative news, fact-check propaganda, and amplify marginalized stories." />
+        <meta name="keywords" content="conservative news, Red White and True News, support mission, truth in media, fact-checking" />
+        <meta name="author" content="Tommy Flynn" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta property="og:title" content="Support Our Mission | Red, White and True News" />
+        <meta property="og:description" content="Join Red, White and True News in our mission to provide accurate conservative news and combat media bias." />
+        <meta property="og:image" content="https://rwtnews.com/images/core/og-image.jpg" />
+        <meta property="og:url" content="https://rwtnews.com/support" />
         <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Red, White and True News" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Red, White and True News" />
-        <meta name="twitter:description" content="The RIGHT News For America" />
-        <meta name="twitter:image" content="images\core\og-image.jpg" />
-        <meta name="twitter:url" content="RWTNews.com" />
+        <meta name="twitter:title" content="Support Our Mission | Red, White and True News" />
+        <meta name="twitter:description" content="Join Red, White and True News in our mission to provide accurate conservative news and combat media bias." />
+        <meta name="twitter:image" content="https://rwtnews.com/images/core/og-image.jpg" />
+        <meta name="twitter:site" content="@RWTNews" />
+        <meta name="robots" content="index, follow" />
         <link rel="icon" href="/images/core/rwtn_favicon.jpg" />
+        <link rel="canonical" href="https://rwtnews.com/support" />
       </Head>
       <Header />
       <main className="max-w-7xl mx-auto p-4 flex flex-col md:flex-row gap-4 bg-white">
