@@ -29,7 +29,7 @@ export default function Header() {
     { name: "In the Courts", slug: "In-the-Courts" },
     { name: "Immigration", slug: "Immigration" },
     { name: "Economy", slug: "Economy" },
-    { name: "Science and Technology", slug: "Science-and-Technology" },
+    { name: "Science & Technology", slug: "Science-and-Technology" },
     { name: "Health", slug: "Health" },
   ]
 
@@ -234,7 +234,7 @@ export default function Header() {
           </button>
         </div>
         {isMenuOpen && (
-          <div className="bg-[#001a4d]">
+          <div className="bg-[#001a4d] max-h-[calc(100vh-56px)] overflow-y-auto">
             <Link
               href="/"
               className="block px-6 py-4 hover:bg-[#B22234] border-t border-white/10"
