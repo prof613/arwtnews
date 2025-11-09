@@ -29,7 +29,7 @@ export default function Header() {
     "In the Courts",
     "Immigration",
     "Economy",
-    "Science and Technology",
+    "Science & Technology",
     "Health",
   ]
 
@@ -124,7 +124,7 @@ export default function Header() {
                   </Link>
                 ))}
                 <Link
-                  href="/categories/Opinion"
+                  href="/opinions"
                   className="block px-6 py-3 hover:bg-[#B22234] border-b border-white/10"
                   onClick={() => {
                     setIsCategoriesOpen(false)
@@ -318,7 +318,7 @@ export default function Header() {
                     </Link>
                   ))}
                   <Link
-                    href="/categories/Opinion"
+                    href="/opinions"
                     className="block px-6 py-3 hover:bg-[#B22234] border-t border-white/10"
                     onClick={() => {
                       setIsCategoriesOpen(false)
