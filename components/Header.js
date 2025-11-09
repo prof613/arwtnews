@@ -53,7 +53,7 @@ export default function Header() {
   }, [router.events])
 
   return (
-    <>
+    <div className="sticky top-0 z-50">
       <div className="hidden lg:flex bg-[#002868] text-white h-12 items-center justify-center">
         <div className="flex h-full w-full max-w-7xl">
           <Link
@@ -226,11 +226,15 @@ export default function Header() {
 
       {/* Mobile Menu */}
       <div className="lg:hidden bg-[#002868] text-white">
-        <button onClick={toggleMenu} className="w-full px-6 py-4 text-lg font-medium hover:bg-[#B22234]">
-          MENU
-        </button>
+        <div className="flex items-center justify-start px-6 py-4">
+          <button onClick={toggleMenu} className="flex flex-col space-y-1">
+            <span className="w-6 h-0.5 bg-white"></span>
+            <span className="w-6 h-0.5 bg-white"></span>
+            <span className="w-6 h-0.5 bg-white"></span>
+          </button>
+        </div>
         {isMenuOpen && (
-          <div className="bg-[#002868]">
+          <div className="bg-[#001a4d]">
             <Link
               href="/"
               className="block px-6 py-4 hover:bg-[#B22234] border-t border-white/10"
@@ -414,6 +418,6 @@ export default function Header() {
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }
