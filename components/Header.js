@@ -23,14 +23,14 @@ export default function Header() {
   }
 
   const categories = [
-    { name: "US News", slug: "US-News" },
-    { name: "World News", slug: "World-News" },
-    { name: "Politics", slug: "Politics" },
-    { name: "In the Courts", slug: "In-the-Courts" },
-    { name: "Immigration", slug: "Immigration" },
-    { name: "Economy", slug: "Economy" },
-    { name: "Science & Technology", slug: "Science-and-Technology" },
-    { name: "Health", slug: "Health" },
+    "US News",
+    "World News",
+    "Politics",
+    "In the Courts",
+    "Immigration",
+    "Economy",
+    "Science and Technology",
+    "Health",
   ]
 
   // Close all menus on route change
@@ -112,15 +112,15 @@ export default function Header() {
                 </Link>
                 {categories.map((category) => (
                   <Link
-                    key={category.slug}
-                    href={`/categories/${category.slug}`}
+                    key={category}
+                    href={`/categories/${category}`}
                     className="block px-6 py-3 hover:bg-[#B22234] border-b border-white/10"
                     onClick={() => {
                       setIsCategoriesOpen(false)
                       setIsMenuOpen(false)
                     }}
                   >
-                    {category.name}
+                    {category}
                   </Link>
                 ))}
                 <Link
@@ -306,15 +306,15 @@ export default function Header() {
                   </Link>
                   {categories.map((category) => (
                     <Link
-                      key={category.slug}
-                      href={`/categories/${category.slug}`}
+                      key={category}
+                      href={`/categories/${category}`}
                       className="block px-6 py-3 hover:bg-[#B22234] border-t border-white/10"
                       onClick={() => {
                         setIsCategoriesOpen(false)
                         setIsMenuOpen(false)
                       }}
                     >
-                      {category.name}
+                      {category}
                     </Link>
                   ))}
                   <Link
