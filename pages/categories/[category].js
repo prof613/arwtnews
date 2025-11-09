@@ -42,101 +42,101 @@ export default function Category() {
   }, [router.query])
 
   useEffect(() => {
-    if (!category) return;
+    if (!category) return
 
-    let isCurrent = true;
+    let isCurrent = true
 
     const fetchItems = async () => {
-      setLoading(true);
-      setItems([]);
+      setLoading(true)
+      setItems([])
 
       try {
-        let combinedItems = [];
-        let fetchedTotalPages = 1;
+        let combinedItems = []
+        let fetchedTotalPages = 1
 
         if (category === "Meme-Cartoons") {
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`
-          );
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/memes?populate=*&sort[0]=date:desc&pagination[page]=${page}&pagination[pageSize]=10&filters[publishedAt][$notNull]=true`,
+          )
           if (isCurrent) {
-            combinedItems = res.data.data;
-            fetchedTotalPages = res.data.meta.pagination.pageCount;
+            combinedItems = res.data.data
+            fetchedTotalPages = res.data.meta.pagination.pageCount
           }
         } else if (category === "All") {
           const [articlesRes, opinionsRes] = await Promise.all([
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&pagination[pageSize]=10000&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=archived`,
             ),
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=50&filters[publishedAt][$notNull]=true`
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&pagination[pageSize]=10000&filters[publishedAt][$notNull]=true`,
             ),
-          ]);
+          ])
           if (isCurrent) {
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
             const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
-            );
-            const startIndex = (page - 1) * 10;
-            const endIndex = startIndex + 10;
-            combinedItems = allItems.slice(startIndex, endIndex);
-            fetchedTotalPages = Math.ceil(allItems.length / 10);
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
+            )
+            const startIndex = (page - 1) * 10
+            const endIndex = startIndex + 10
+            combinedItems = allItems.slice(startIndex, endIndex)
+            fetchedTotalPages = Math.ceil(allItems.length / 10)
           }
         } else if (category === "news-from-web") {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`);
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`)
           if (isCurrent) {
-            const oneYearAgo = new Date();
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const oneYearAgo = new Date()
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
             const allExternalItems = res.data.data
               .filter((item) => new Date(item.attributes.createdAt) >= oneYearAgo)
               .map((item) => ({ ...item, type: "external" }))
-              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt));
-            const startIndex = (page - 1) * 20;
-            const endIndex = startIndex + 20;
-            combinedItems = allExternalItems.slice(startIndex, endIndex);
-            fetchedTotalPages = Math.ceil(allExternalItems.length / 20);
+              .sort((a, b) => new Date(b.attributes.createdAt) - new Date(a.attributes.createdAt))
+            const startIndex = (page - 1) * 20
+            const endIndex = startIndex + 20
+            combinedItems = allExternalItems.slice(startIndex, endIndex)
+            fetchedTotalPages = Math.ceil(allExternalItems.length / 20)
           }
         } else {
-          const encodedCategory = encodeURIComponent(category);
+          const encodedCategory = encodeURIComponent(category)
           const [articlesRes, opinionsRes] = await Promise.all([
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?filters[$or][0][category][name][$eq]=${encodedCategory}&filters[$or][1][secondary_category][name][$eq]=${encodedCategory}&filters[homepage_status][$eq]=archived&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=10000`,
             ),
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=50`
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?filters[secondary_category][name][$eq]=${encodedCategory}&filters[publishedAt][$notNull]=true&populate=*&sort[0]=date:desc&pagination[pageSize]=10000`,
             ),
-          ]);
+          ])
           if (isCurrent) {
-            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }));
-            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }));
+            const articles = articlesRes.data.data.map((item) => ({ ...item, type: "article" }))
+            const opinions = opinionsRes.data.data.map((item) => ({ ...item, type: "opinion" }))
             const allItems = [...articles, ...opinions].sort(
-              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date)
-            );
-            const startIndex = (page - 1) * 10;
-            const endIndex = startIndex + 10;
-            combinedItems = allItems.slice(startIndex, endIndex);
-            fetchedTotalPages = Math.ceil(allItems.length / 10);
+              (a, b) => new Date(b.attributes.date) - new Date(a.attributes.date),
+            )
+            const startIndex = (page - 1) * 10
+            const endIndex = startIndex + 10
+            combinedItems = allItems.slice(startIndex, endIndex)
+            fetchedTotalPages = Math.ceil(allItems.length / 10)
           }
         }
         if (isCurrent) {
-          setItems(combinedItems);
-          setTotalPages(fetchedTotalPages);
+          setItems(combinedItems)
+          setTotalPages(fetchedTotalPages)
         }
       } catch (error) {
-        console.error("Error fetching items:", error);
+        console.error("Error fetching items:", error)
       } finally {
         if (isCurrent) {
-          setLoading(false);
+          setLoading(false)
         }
       }
-    };
+    }
 
-    fetchItems();
+    fetchItems()
 
     return () => {
-      isCurrent = false;
-    };
-  }, [category, page]);
+      isCurrent = false
+    }
+  }, [category, page])
 
   useEffect(() => {
     if (category === "Meme-Cartoons" && slug && items.length > 0) {
@@ -150,22 +150,22 @@ export default function Category() {
 
   useEffect(() => {
     const handleRouteChangeStart = () => {
-      setLoading(true);
-      setItems([]);
-    };
+      setLoading(true)
+      setItems([])
+    }
 
-    const handleRouteChangeComplete = () => {};
+    const handleRouteChangeComplete = () => {}
 
-    router.events.on('routeChangeStart', handleRouteChangeStart);
-    router.events.on('routeChangeComplete', handleRouteChangeComplete);
-    router.events.on('routeChangeError', (err) => console.error('Route change error:', err));
+    router.events.on("routeChangeStart", handleRouteChangeStart)
+    router.events.on("routeChangeComplete", handleRouteChangeComplete)
+    router.events.on("routeChangeError", (err) => console.error("Route change error:", err))
 
     return () => {
-      router.events.off('routeChangeStart', handleRouteChangeStart);
-      router.events.off('routeChangeComplete', handleRouteChangeComplete);
-      router.events.off('routeChangeError');
-    };
-  }, [router.events]);
+      router.events.off("routeChangeStart", handleRouteChangeStart)
+      router.events.off("routeChangeComplete", handleRouteChangeComplete)
+      router.events.off("routeChangeError")
+    }
+  }, [router.events])
 
   const openLightbox = (indexOnPage) => {
     const meme = items[indexOnPage]
@@ -357,9 +357,9 @@ export default function Category() {
                 <figcaption className="text-sm text-gray-600 italic text-left line-clamp-2 min-h-[2.5rem]">
                   {item.type === "opinion"
                     ? item.attributes.featured_image?.data?.attributes?.caption || (
-                        <span className="text-transparent"> </span>
+                        <span className="text-transparent"> </span>
                       )
-                    : item.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
+                    : item.attributes.image?.data?.attributes?.caption || <span className="text-transparent"> </span>}
                 </figcaption>
               </div>
               <div className="flex-1">
@@ -451,7 +451,7 @@ export default function Category() {
               <Link href="/contact" className="text-blue-600 hover:underline">
                 contact us
               </Link>
-              , and we’ll address it promptly.
+              , and we'll address it promptly.
             </div>
           )}
           {renderContent()}

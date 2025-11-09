@@ -65,11 +65,11 @@ export default function Home() {
         try {
           const [articleRes, opinionRes] = await Promise.all([
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/articles?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&filters[homepage_status][$eq]=active&pagination[pageSize]=10000`,
               { signal: controller.signal },
             ),
             axios.get(
-              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true`,
+              `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/opinions?populate=*&sort[0]=date:desc&filters[publishedAt][$notNull]=true&pagination[pageSize]=10000`,
               { signal: controller.signal },
             ),
           ])
@@ -317,13 +317,15 @@ export default function Home() {
             <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
-                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it to us{" "}
-              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
-                here
-              </Link>. 
+                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it
+                to us{" "}
+                <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
+                  here
+                </Link>
+                .
               </li>
             </ul>
-            <br/>
+            <br />
             <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Features under development:</h3>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
               <li>
@@ -332,9 +334,7 @@ export default function Home() {
               <li>
                 <s>Add "Commenting" to individual Article pages.</s>
               </li>
-              <li>
-                Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.
-              </li>
+              <li>Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.</li>
               <li>
                 We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
                 now so you do receive it once we do have it up and running.
