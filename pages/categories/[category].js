@@ -83,7 +83,9 @@ export default function Category() {
             fetchedTotalPages = Math.ceil(allItems.length / 10)
           }
         } else if (category === "news-from-web") {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*`)
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/external-articles?populate=*&pagination[pageSize]=300`,
+          )
           if (isCurrent) {
             const oneYearAgo = new Date()
             oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
