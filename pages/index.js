@@ -398,14 +398,6 @@ export default function Home() {
             )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-            <p className="text-sm text-gray-600">
-              Our Video Feature uses API calls to YouTube to call the latest videos from 6 channels. By default, the
-              "quota" that limits how many API calls can be made per day is fairly low. We have a request in to raise
-              our quota but unless and until we get that quota raised the video feature may run out of quota before the
-              end of the day. If you see no videos below please check back later after our quota resets for the day.
-            </p>
-          </div>
           {renderComplianceNotice()}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {videosError ? (
