@@ -24,6 +24,8 @@ const formatDate = (dateString) => {
     year: "numeric",
   })
 }
+}
+}
 
 // Clean video titles - remove HTML entities and hashtags
 const cleanTitle = (title) => {
