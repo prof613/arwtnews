@@ -301,53 +301,6 @@ export default function Home() {
             )}
           </section>
 
-          {/* New Beta Section */}
-          <section className="my-8 p-4 bg-gray-50 rounded-lg shadow-sm">
-            <p className="text-xl text-[#3C3B6E] mb-4 leading-relaxed">
-              Welcome to Red, White and True News! This page is currently in "Beta" while we search for any remaining
-              bugs, continue to develop content and add features. Please help us out and click everything on the page to
-              try and find things that are broken or not visually displaying properly. If you find any bugs, have a
-              suggestion or just want to say Hi, you can do so through our{" "}
-              <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
-                contact page
-              </Link>
-              . Please use the subjects "Bug Report" or "Suggestion" as appropriate. Thank you for dropping by!
-            </p>
-
-            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Current known issues:</h3>
-            <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
-              <li>
-                No current known issues or bugs. If you come across a bug, broken link or other issue, please report it
-                to us{" "}
-                <Link href="/contact" className="text-[#B22234] hover:underline font-semibold">
-                  here
-                </Link>
-                .
-              </li>
-            </ul>
-            <br />
-            <h3 className="text-lg font-bold text-[#3C3B6E] mb-2">Features under development:</h3>
-            <ul className="list-disc list-inside text-base text-gray-700 space-y-2">
-              <li>
-                <s>Add "Related Articles" to individual Article pages.</s>
-              </li>
-              <li>
-                <s>Add "Commenting" to individual Article pages.</s>
-              </li>
-              <li>Add a "Staff" page for bios of RWT News Staff, Authors and Contributing Authors.</li>
-              <li>
-                We don't have our newsletter set up yet but the sign up feature is working if you would like to sign up
-                now so you do receive it once we do have it up and running.
-              </li>
-              <li>
-                Community page currently connects to our Facebook page followers group. Over time we will be developing
-                our own stand alone community where you can engage with like minded people (and I'm sure some trolls)
-                about the issues of the day. Stay tuned.
-              </li>
-            </ul>
-          </section>
-          {/* End New Beta Section */}
-
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">The RIGHT News</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {articlesError ? (
@@ -428,7 +381,7 @@ export default function Home() {
                       {link.attributes.quote ? (
                         <p className="line-clamp-2">{link.attributes.quote.substring(0, 100)}...</p>
                       ) : (
-                        <span className="text-transparent">.</span> // Placeholder to maintain height
+                        <span className="text-transparent">.</span>
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
@@ -438,13 +391,13 @@ export default function Home() {
                     <p className="text-sm text-[#B22234]">
                       Read full article at {new URL(link.attributes.link).hostname}
                     </p>
+                    <hr className="border-[#3C3B6E] border-opacity-50 mt-auto" />
                   </div>
                 </a>
               ))
             )}
           </div>
           <h2 className="text-3xl font-bold text-[#3C3B6E] text-center my-4">Latest Videos</h2>
-          {/* Inserted text starts here */}
           <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
             <p className="text-sm text-gray-600">
               Our Video Feature uses API calls to YouTube to call the latest videos from 6 channels. By default, the
@@ -453,7 +406,6 @@ export default function Home() {
               end of the day. If you see no videos below please check back later after our quota resets for the day.
             </p>
           </div>
-          {/* Inserted text ends here */}
           {renderComplianceNotice()}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {videosError ? (
